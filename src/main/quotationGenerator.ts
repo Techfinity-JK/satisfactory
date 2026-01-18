@@ -1,5 +1,6 @@
 import {
   Document,
+  ImageRun,
   Packer,
   Paragraph,
   Table,
@@ -14,6 +15,7 @@ import {
   UnderlineType,
 } from "docx";
 import * as fs from "fs";
+import * as path from "path";
 
 // Dark teal/blue color from the template
 const HEADER_COLOR = "1F4E79";
@@ -29,6 +31,7 @@ export interface QuotationItem {
   brand: string;
   description?: string;
   specs?: string[];
+  imagePath?: string;
   quantity: number;
   unit: string;
   unitPrice: number;
@@ -43,6 +46,7 @@ export interface QuotationData {
   contactPerson?: string;
   contactNumber?: string;
   emailAddress?: string;
+  brochureOnly?: boolean;
   items: QuotationItem[];
   notes?: string;
 }
@@ -75,14 +79,14 @@ export async function generateQuotation(
           },
         },
         children: [
-          // Space for logo header (user will add manually)
           new Paragraph({
             children: [
-              new TextRun({
-                text: "[Company Logo Header Area]",
-                font: FONT_FAMILY,
-                color: "999999",
-                size: FONT_SIZE,
+              new ImageRun({
+                data: fs.readFileSync("src/assets/header/header.PNG"),
+                transformation: {
+                  width: 690,
+                  height: 220,
+                },
               }),
             ],
             spacing: { after: 400 },
@@ -117,7 +121,7 @@ export async function generateQuotation(
           }),
 
           // Products
-          ...createProductSections(data.items),
+          ...createProductSections(data.items, data.brochureOnly),
 
           // Notes
           ...(data.notes
@@ -249,7 +253,7 @@ function createInfoValueCell(text: string, cellWidth: number, borders: object): 
   });
 }
 
-function createProductSections(items: QuotationItem[]): (Paragraph | Table)[] {
+function createProductSections(items: QuotationItem[], brochureOnly?: boolean): (Paragraph | Table)[] {
   const sections: (Paragraph | Table)[] = [];
 
   items.forEach((item) => {
@@ -272,22 +276,24 @@ function createProductSections(items: QuotationItem[]): (Paragraph | Table)[] {
     sections.push(createProductTable(item));
   });
 
-  // Grand total
-  const grandTotal = items.reduce((sum, item) => sum + item.totalPrice, 0);
-  sections.push(
-    new Paragraph({
-      children: [
-        new TextRun({
-          text: `GRAND TOTAL: ₱${grandTotal.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
-          font: FONT_FAMILY,
-          bold: true,
-          size: 20,
-        }),
-      ],
-      alignment: AlignmentType.RIGHT,
-      spacing: { before: 300, after: 200 },
-    })
-  );
+  // Grand total (only show if not brochure only mode)
+  if (!brochureOnly) {
+    const grandTotal = items.reduce((sum, item) => sum + item.totalPrice, 0);
+    sections.push(
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: `GRAND TOTAL: ₱${grandTotal.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
+            font: FONT_FAMILY,
+            bold: true,
+            size: 20,
+          }),
+        ],
+        alignment: AlignmentType.RIGHT,
+        spacing: { before: 300, after: 200 },
+      })
+    );
+  }
 
   return sections;
 }
@@ -337,36 +343,53 @@ function createProductTable(item: QuotationItem): Table {
     });
   }
 
+  // Build model cell content with image
+  const modelCellChildren: Paragraph[] = [];
+
+  // Add image if path exists
+  if (item.imagePath) {
+    const absoluteImagePath = path.resolve(process.cwd(), item.imagePath);
+    if (fs.existsSync(absoluteImagePath)) {
+      modelCellChildren.push(
+        new Paragraph({
+          children: [
+            new ImageRun({
+              data: fs.readFileSync(absoluteImagePath),
+              transformation: {
+                width: 80,
+                height: 80,
+              },
+              //type: "png",
+            }),
+          ],
+          alignment: AlignmentType.CENTER,
+        })
+      );
+    }
+  }
+
+  // Add model name
+  modelCellChildren.push(
+    new Paragraph({
+      children: [
+        new TextRun({
+          text: item.name,
+          font: FONT_FAMILY,
+          bold: true,
+          size: FONT_SIZE,
+        }),
+      ],
+      alignment: AlignmentType.CENTER,
+      spacing: { before: 100 },
+    })
+  );
+
   // Data row
   const dataRow = new TableRow({
     children: [
-      // Model cell (will contain image placeholder + model name)
+      // Model cell with image and name
       new TableCell({
-        children: [
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: "[Image]",
-                font: FONT_FAMILY,
-                color: "999999",
-                size: 16,
-              }),
-            ],
-            alignment: AlignmentType.CENTER,
-          }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: item.name,
-                font: FONT_FAMILY,
-                bold: true,
-                size: FONT_SIZE,
-              }),
-            ],
-            alignment: AlignmentType.CENTER,
-            spacing: { before: 100 },
-          }),
-        ],
+        children: modelCellChildren,
         borders,
         verticalAlign: VerticalAlign.CENTER,
       }),
@@ -472,9 +495,258 @@ function createProductTable(item: QuotationItem): Table {
     ],
   });
 
+  // Freebie row 1: Software
+  const softwareRow = new TableRow({
+    children: [
+      // Model cell - "Software"
+      new TableCell({
+        children: [
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Software",
+                font: FONT_FAMILY,
+                size: FONT_SIZE,
+              }),
+            ],
+            alignment: AlignmentType.CENTER,
+          }),
+        ],
+        borders,
+        verticalAlign: VerticalAlign.CENTER,
+      }),
+      // Item Description - "ZkTeco Attendance Management"
+      new TableCell({
+        children: [
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "ZkTeco Attendance Management",
+                font: FONT_FAMILY,
+                size: FONT_SIZE,
+              }),
+            ],
+          }),
+        ],
+        borders,
+        verticalAlign: VerticalAlign.CENTER,
+      }),
+      // Qty - same as device quantity
+      new TableCell({
+        children: [
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: item.quantity.toString(),
+                font: FONT_FAMILY,
+                size: FONT_SIZE,
+              }),
+            ],
+            alignment: AlignmentType.CENTER,
+          }),
+        ],
+        borders,
+        verticalAlign: VerticalAlign.CENTER,
+      }),
+      // Unit - "License"
+      new TableCell({
+        children: [
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "License",
+                font: FONT_FAMILY,
+                size: FONT_SIZE,
+              }),
+            ],
+            alignment: AlignmentType.CENTER,
+          }),
+        ],
+        borders,
+        verticalAlign: VerticalAlign.CENTER,
+      }),
+      // Unit Price - "Free"
+      new TableCell({
+        children: [
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Free",
+                font: FONT_FAMILY,
+                size: FONT_SIZE,
+              }),
+            ],
+            alignment: AlignmentType.CENTER,
+          }),
+        ],
+        borders,
+        verticalAlign: VerticalAlign.CENTER,
+      }),
+      // Promo Amount - "Free"
+      new TableCell({
+        children: [
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Free",
+                font: FONT_FAMILY,
+                size: FONT_SIZE,
+              }),
+            ],
+            alignment: AlignmentType.CENTER,
+          }),
+        ],
+        borders,
+        verticalAlign: VerticalAlign.CENTER,
+      }),
+      // Total Amount - "Free"
+      new TableCell({
+        children: [
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Free",
+                font: FONT_FAMILY,
+                bold: true,
+                size: FONT_SIZE,
+              }),
+            ],
+            alignment: AlignmentType.CENTER,
+          }),
+        ],
+        borders,
+        verticalAlign: VerticalAlign.CENTER,
+      }),
+    ],
+  });
+
+  // Freebie row 2: USB Flash Drive
+  const usbRow = new TableRow({
+    children: [
+      // Model cell - empty
+      new TableCell({
+        children: [
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "",
+                font: FONT_FAMILY,
+                size: FONT_SIZE,
+              }),
+            ],
+          }),
+        ],
+        borders,
+        verticalAlign: VerticalAlign.CENTER,
+      }),
+      // Item Description - "16GB USB FLASH DISK DRIVE"
+      new TableCell({
+        children: [
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "16GB USB FLASH DISK DRIVE",
+                font: FONT_FAMILY,
+                size: FONT_SIZE,
+              }),
+            ],
+          }),
+        ],
+        borders,
+        verticalAlign: VerticalAlign.CENTER,
+      }),
+      // Qty - same as device quantity
+      new TableCell({
+        children: [
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: item.quantity.toString(),
+                font: FONT_FAMILY,
+                size: FONT_SIZE,
+              }),
+            ],
+            alignment: AlignmentType.CENTER,
+          }),
+        ],
+        borders,
+        verticalAlign: VerticalAlign.CENTER,
+      }),
+      // Unit - "pc"
+      new TableCell({
+        children: [
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "pc",
+                font: FONT_FAMILY,
+                size: FONT_SIZE,
+              }),
+            ],
+            alignment: AlignmentType.CENTER,
+          }),
+        ],
+        borders,
+        verticalAlign: VerticalAlign.CENTER,
+      }),
+      // Unit Price - "Free"
+      new TableCell({
+        children: [
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Free",
+                font: FONT_FAMILY,
+                size: FONT_SIZE,
+              }),
+            ],
+            alignment: AlignmentType.CENTER,
+          }),
+        ],
+        borders,
+        verticalAlign: VerticalAlign.CENTER,
+      }),
+      // Promo Amount - "Free"
+      new TableCell({
+        children: [
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Free",
+                font: FONT_FAMILY,
+                size: FONT_SIZE,
+              }),
+            ],
+            alignment: AlignmentType.CENTER,
+          }),
+        ],
+        borders,
+        verticalAlign: VerticalAlign.CENTER,
+      }),
+      // Total Amount - "Free"
+      new TableCell({
+        children: [
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: "Free",
+                font: FONT_FAMILY,
+                bold: true,
+                size: FONT_SIZE,
+              }),
+            ],
+            alignment: AlignmentType.CENTER,
+          }),
+        ],
+        borders,
+        verticalAlign: VerticalAlign.CENTER,
+      }),
+    ],
+  });
+
   return new Table({
     width: { size: 100, type: WidthType.PERCENTAGE },
-    rows: [headerRow, dataRow],
+    rows: [headerRow, dataRow, softwareRow, usbRow],
   });
 }
 

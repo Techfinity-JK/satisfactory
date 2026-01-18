@@ -11,7 +11,36 @@
   <div class="container">
     <header>
       <h1>Quotation Generator</h1>
+      <button id="settingsBtn" class="settings-btn" title="Settings">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </button>
     </header>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal-overlay hidden">
+      <div class="modal">
+        <div class="modal-header">
+          <h2>Settings</h2>
+          <button id="closeSettingsBtn" class="close-btn">&times;</button>
+        </div>
+        <div class="modal-body">
+          <h3>Color Theme</h3>
+          <div class="theme-options">
+            <button class="theme-circle" data-theme="night" title="Night Mode" style="background: linear-gradient(135deg, #1a1a2e, #16213e);"></button>
+            <button class="theme-circle" data-theme="light" title="Light Mode" style="background: linear-gradient(135deg, #ffffff, #f5f5f5);"></button>
+            <button class="theme-circle" data-theme="ocean" title="Ocean Blue" style="background: linear-gradient(135deg, #1e3a5f, #2196F3);"></button>
+            <button class="theme-circle" data-theme="forest" title="Forest Green" style="background: linear-gradient(135deg, #1b4332, #40916c);"></button>
+            <button class="theme-circle" data-theme="purple" title="Royal Purple" style="background: linear-gradient(135deg, #2d1b69, #7c3aed);"></button>
+            <button class="theme-circle" data-theme="sunset" title="Sunset Orange" style="background: linear-gradient(135deg, #7c2d12, #f97316);"></button>
+            <button class="theme-circle" data-theme="teal" title="Teal" style="background: linear-gradient(135deg, #134e4a, #14b8a6);"></button>
+            <button class="theme-circle" data-theme="rose" title="Rose" style="background: linear-gradient(135deg, #4c0519, #e11d48);"></button>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <main>
       <section class="customer-info">
@@ -50,6 +79,13 @@
 
       <section class="product-selection">
         <h2>Select Products</h2>
+        <div class="brochure-option">
+          <label class="checkbox-label">
+            <input type="checkbox" id="brochureOnly">
+            <span>Brochure Only</span>
+            <span class="checkbox-hint">(Hides Grand Total - for clients viewing prices only)</span>
+          </label>
+        </div>
         <div id="productList" class="product-grid">
           <!-- Products will be rendered here -->
         </div>

@@ -41,12 +41,14 @@ interface QuotationData {
   contactPerson?: string;
   contactNumber?: string;
   emailAddress?: string;
+  brochureOnly?: boolean;
   items: {
     productId: string;
     name: string;
     brand: string;
     description?: string;
     specs?: string[];
+    imagePath?: string;
     quantity: number;
     unit: string;
     unitPrice: number;
@@ -54,6 +56,36 @@ interface QuotationData {
     totalPrice: number;
   }[];
   notes?: string;
+}
+
+// Map product names to icon filenames
+const productIconMap: { [key: string]: string } = {
+  "LX50": "lx50.png",
+  "TX628": "tx628.png",
+  "SC700": "sc700.png",
+  "T8": "t8.png",
+  "FA1000": "fa1000.png",
+  "BK100": "bk100.png",
+  "MB10": "mb10.png",
+  "FA110": "fa110.png",
+  "F22": "f22.png",
+  "SF200": "sf200.png",
+  "IFACE3": "iface3.png",
+  "MB460": "mb460.png",
+  "FA210": "fa210.png",
+  "FA210w": "fa210.png",
+  "XFACE100": "xface100.png",
+  "UFACE800": "uface800.png",
+  "SPEEDFACEV3L": "speedfacev3l.png",
+};
+
+function getProductImagePath(productName: string): string | undefined {
+  const iconFile = productIconMap[productName];
+  if (iconFile) {
+    // Use __dirname equivalent for renderer - path relative to app
+    return `src/assets/icons/${iconFile}`;
+  }
+  return undefined;
 }
 
 // Products data (embedded from products.ts)
@@ -269,7 +301,7 @@ const products: Product[] = [
   {
     id: "zk-speedfacev3l",
     brand: "ZKTECO",
-    name: "SPEEDFACE V3L",
+    name: "SPEEDFACEV3L",
     category: "Biometrics",
     description: "185x59x20mm",
     capacity: { fingerprint: 3000, card: 3000, face: 3000, transaction: 200000 },
@@ -295,6 +327,7 @@ const contactPersonEl = document.getElementById("contactPerson") as HTMLInputEle
 const contactNumberEl = document.getElementById("contactNumber") as HTMLInputElement;
 const emailAddressEl = document.getElementById("emailAddress") as HTMLInputElement;
 const notesEl = document.getElementById("notes") as HTMLTextAreaElement;
+const brochureOnlyEl = document.getElementById("brochureOnly") as HTMLInputElement;
 const generateBtnEl = document.getElementById("generateBtn") as HTMLButtonElement;
 const clearBtnEl = document.getElementById("clearBtn") as HTMLButtonElement;
 
@@ -463,6 +496,7 @@ async function generateQuotation(): Promise<void> {
     brand: item.product.brand,
     description: item.product.category,
     specs: buildProductSpecs(item.product),
+    imagePath: getProductImagePath(item.product.name),
     quantity: item.quantity,
     unit: "pc",
     unitPrice: item.product.price.fakeAmount,
@@ -477,6 +511,7 @@ async function generateQuotation(): Promise<void> {
     contactPerson: contactPersonEl.value.trim() || undefined,
     contactNumber: contactNumberEl.value.trim() || undefined,
     emailAddress: emailAddressEl.value.trim() || undefined,
+    brochureOnly: brochureOnlyEl.checked,
     items,
     notes: notesEl.value.trim() || undefined,
   };
@@ -512,6 +547,7 @@ function clearAll(): void {
   contactNumberEl.value = "";
   emailAddressEl.value = "";
   notesEl.value = "";
+  brochureOnlyEl.checked = false;
   renderProducts();
   renderSelectedItems();
 }
@@ -520,6 +556,68 @@ function clearAll(): void {
 generateBtnEl.addEventListener("click", generateQuotation);
 clearBtnEl.addEventListener("click", clearAll);
 
+// Settings Modal
+const settingsBtnEl = document.getElementById("settingsBtn") as HTMLButtonElement;
+const settingsModalEl = document.getElementById("settingsModal") as HTMLDivElement;
+const closeSettingsBtnEl = document.getElementById("closeSettingsBtn") as HTMLButtonElement;
+const themeCircles = document.querySelectorAll(".theme-circle");
+
+function openSettings(): void {
+  settingsModalEl.classList.remove("hidden");
+}
+
+function closeSettings(): void {
+  settingsModalEl.classList.add("hidden");
+}
+
+function setTheme(themeName: string): void {
+  // Remove active class from all circles
+  themeCircles.forEach((circle) => circle.classList.remove("active"));
+
+  // Add active class to selected circle
+  const selectedCircle = document.querySelector(`[data-theme="${themeName}"]`);
+  if (selectedCircle) {
+    selectedCircle.classList.add("active");
+  }
+
+  // Apply theme to document
+  if (themeName === "night") {
+    document.documentElement.removeAttribute("data-theme");
+  } else {
+    document.documentElement.setAttribute("data-theme", themeName);
+  }
+
+  // Save preference
+  localStorage.setItem("theme", themeName);
+}
+
+function loadSavedTheme(): void {
+  const savedTheme = localStorage.getItem("theme") || "night";
+  setTheme(savedTheme);
+}
+
+// Settings event listeners
+settingsBtnEl.addEventListener("click", openSettings);
+closeSettingsBtnEl.addEventListener("click", closeSettings);
+
+// Close modal when clicking outside
+settingsModalEl.addEventListener("click", (e) => {
+  if (e.target === settingsModalEl) {
+    closeSettings();
+  }
+});
+
+// Theme selection
+themeCircles.forEach((circle) => {
+  circle.addEventListener("click", () => {
+    const theme = (circle as HTMLElement).dataset.theme;
+    if (theme) {
+      setTheme(theme);
+    }
+  });
+});
+
 // Initial render
+loadSavedTheme();
 renderProducts();
 renderSelectedItems();
