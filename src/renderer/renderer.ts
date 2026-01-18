@@ -32,6 +32,18 @@ interface Product {
 interface SelectedItem {
   product: Product;
   quantity: number;
+  customPrice?: number;
+}
+
+interface Service {
+  id: string;
+  name: string;
+  price: number;
+}
+
+interface SelectedService {
+  service: Service;
+  customPrice?: number;
 }
 
 interface QuotationData {
@@ -54,6 +66,10 @@ interface QuotationData {
     unitPrice: number;
     promoPrice: number;
     totalPrice: number;
+  }[];
+  services?: {
+    name: string;
+    price: number;
   }[];
   notes?: string;
 }
@@ -313,8 +329,18 @@ const products: Product[] = [
   },
 ];
 
+// Services data
+const services: Service[] = [
+  { id: "mounting", name: "Biometrics Mounting", price: 1500 },
+  { id: "orientation", name: "On-Site User Orientation", price: 2500 },
+  { id: "installation", name: "Installation Cost", price: 0 },
+  { id: "delivery", name: "Delivery Fee", price: 500 },
+  { id: "others", name: "Others", price: 0 },
+];
+
 // State
 const selectedItems: Map<string, SelectedItem> = new Map();
+const selectedServicesMap: Map<string, SelectedService> = new Map();
 
 // DOM Elements
 const productListEl = document.getElementById("productList") as HTMLDivElement;
@@ -373,14 +399,18 @@ function toggleProduct(product: Product): void {
 function renderSelectedItems(): void {
   selectedItemsBodyEl.innerHTML = "";
 
+  // Render product items
   selectedItems.forEach((item, productId) => {
-    const row = document.createElement("tr");
-    const total = item.product.price.amount * item.quantity;
+    const unitPrice = item.customPrice !== undefined ? item.customPrice : item.product.price.amount;
+    const total = unitPrice * item.quantity;
 
+    const row = document.createElement("tr");
     row.innerHTML = `
       <td>${item.product.brand}</td>
       <td>${item.product.name}</td>
-      <td>PHP ${item.product.price.amount.toLocaleString()}</td>
+      <td>
+        <input type="number" class="price-input" value="${unitPrice}" min="0" data-product-id="${productId}">
+      </td>
       <td>
         <input type="number" class="qty-input" value="${item.quantity}" min="1" data-product-id="${productId}">
       </td>
@@ -391,6 +421,68 @@ function renderSelectedItems(): void {
     `;
 
     selectedItemsBodyEl.appendChild(row);
+  });
+
+  // Render service items
+  selectedServicesMap.forEach((selectedService, serviceId) => {
+    const unitPrice = selectedService.customPrice !== undefined ? selectedService.customPrice : selectedService.service.price;
+
+    const row = document.createElement("tr");
+    row.className = "service-row";
+    row.innerHTML = `
+      <td>SERVICE</td>
+      <td>${selectedService.service.name}</td>
+      <td>
+        <input type="number" class="price-input service-price-input" value="${unitPrice}" min="0" data-service-id="${serviceId}">
+      </td>
+      <td>1</td>
+      <td>PHP ${unitPrice.toLocaleString()}</td>
+      <td>
+        <button class="btn-remove service-remove" data-service-id="${serviceId}">Remove</button>
+      </td>
+    `;
+
+    selectedItemsBodyEl.appendChild(row);
+  });
+
+  // Add event listeners for product price inputs
+  document.querySelectorAll(".price-input:not(.service-price-input)").forEach((input) => {
+    input.addEventListener("change", (e) => {
+      const target = e.target as HTMLInputElement;
+      const productId = target.dataset.productId!;
+      const newPrice = parseInt(target.value, 10);
+
+      if (newPrice >= 0 && selectedItems.has(productId)) {
+        const item = selectedItems.get(productId)!;
+        // Only set custom price if different from default
+        if (newPrice !== item.product.price.amount) {
+          item.customPrice = newPrice;
+        } else {
+          item.customPrice = undefined;
+        }
+        renderSelectedItems();
+      }
+    });
+  });
+
+  // Add event listeners for service price inputs
+  document.querySelectorAll(".service-price-input").forEach((input) => {
+    input.addEventListener("change", (e) => {
+      const target = e.target as HTMLInputElement;
+      const serviceId = target.dataset.serviceId!;
+      const newPrice = parseInt(target.value, 10);
+
+      if (newPrice >= 0 && selectedServicesMap.has(serviceId)) {
+        const selectedService = selectedServicesMap.get(serviceId)!;
+        // Only set custom price if different from default
+        if (newPrice !== selectedService.service.price) {
+          selectedService.customPrice = newPrice;
+        } else {
+          selectedService.customPrice = undefined;
+        }
+        renderSelectedItems();
+      }
+    });
   });
 
   // Add event listeners for quantity inputs
@@ -407,13 +499,28 @@ function renderSelectedItems(): void {
     });
   });
 
-  // Add event listeners for remove buttons
-  document.querySelectorAll(".btn-remove").forEach((btn) => {
+  // Add event listeners for product remove buttons
+  document.querySelectorAll(".btn-remove:not(.service-remove)").forEach((btn) => {
     btn.addEventListener("click", (e) => {
       const target = e.target as HTMLButtonElement;
       const productId = target.dataset.productId!;
       selectedItems.delete(productId);
       renderProducts();
+      renderSelectedItems();
+    });
+  });
+
+  // Add event listeners for service remove buttons
+  document.querySelectorAll(".service-remove").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      const target = e.target as HTMLButtonElement;
+      const serviceId = target.dataset.serviceId!;
+      selectedServicesMap.delete(serviceId);
+      // Update the UI card
+      const serviceCard = document.querySelector(`.service-card[data-service-id="${serviceId}"]`);
+      if (serviceCard) {
+        serviceCard.classList.remove("selected");
+      }
       renderSelectedItems();
     });
   });
@@ -424,8 +531,15 @@ function renderSelectedItems(): void {
 // Update grand total
 function updateGrandTotal(): void {
   let total = 0;
+  // Sum product prices
   selectedItems.forEach((item) => {
-    total += item.product.price.amount * item.quantity;
+    const unitPrice = item.customPrice !== undefined ? item.customPrice : item.product.price.amount;
+    total += unitPrice * item.quantity;
+  });
+  // Sum service prices
+  selectedServicesMap.forEach((selectedService) => {
+    const unitPrice = selectedService.customPrice !== undefined ? selectedService.customPrice : selectedService.service.price;
+    total += unitPrice;
   });
   grandTotalEl.textContent = `PHP ${total.toLocaleString()}`;
 }
@@ -490,19 +604,28 @@ async function generateQuotation(): Promise<void> {
     return;
   }
 
-  const items = Array.from(selectedItems.values()).map((item) => ({
-    productId: item.product.id,
-    name: item.product.name,
-    brand: item.product.brand,
-    description: item.product.category,
-    specs: buildProductSpecs(item.product),
-    imagePath: getProductImagePath(item.product.name),
-    quantity: item.quantity,
-    unit: "pc",
-    unitPrice: item.product.price.fakeAmount,
-    promoPrice: item.product.price.amount,
-    totalPrice: item.product.price.amount * item.quantity,
-  }));
+  const items = Array.from(selectedItems.values()).map((item) => {
+    const promoPrice = item.customPrice !== undefined ? item.customPrice : item.product.price.amount;
+    return {
+      productId: item.product.id,
+      name: item.product.name,
+      brand: item.product.brand,
+      description: item.product.category,
+      specs: buildProductSpecs(item.product),
+      imagePath: getProductImagePath(item.product.name),
+      quantity: item.quantity,
+      unit: "pc",
+      unitPrice: item.product.price.fakeAmount,
+      promoPrice: promoPrice,
+      totalPrice: promoPrice * item.quantity,
+    };
+  });
+
+  // Get selected services with custom prices
+  const selectedServicesList = Array.from(selectedServicesMap.values()).map((selectedService) => {
+    const price = selectedService.customPrice !== undefined ? selectedService.customPrice : selectedService.service.price;
+    return { name: selectedService.service.name, price: price };
+  });
 
   const data: QuotationData = {
     quoteRefNo,
@@ -513,6 +636,7 @@ async function generateQuotation(): Promise<void> {
     emailAddress: emailAddressEl.value.trim() || undefined,
     brochureOnly: brochureOnlyEl.checked,
     items,
+    services: selectedServicesList.length > 0 ? selectedServicesList : undefined,
     notes: notesEl.value.trim() || undefined,
   };
 
@@ -540,6 +664,7 @@ async function generateQuotation(): Promise<void> {
 // Clear all
 function clearAll(): void {
   selectedItems.clear();
+  selectedServicesMap.clear();
   quoteRefNoEl.value = "";
   companyNameEl.value = "";
   companyAddressEl.value = "";
@@ -548,6 +673,10 @@ function clearAll(): void {
   emailAddressEl.value = "";
   notesEl.value = "";
   brochureOnlyEl.checked = false;
+  // Clear service card selections
+  document.querySelectorAll(".service-card").forEach((card) => {
+    card.classList.remove("selected");
+  });
   renderProducts();
   renderSelectedItems();
 }
@@ -613,6 +742,27 @@ themeCircles.forEach((circle) => {
     const theme = (circle as HTMLElement).dataset.theme;
     if (theme) {
       setTheme(theme);
+    }
+  });
+});
+
+// Service card selection
+const serviceCards = document.querySelectorAll(".service-card");
+serviceCards.forEach((card) => {
+  card.addEventListener("click", () => {
+    const serviceId = (card as HTMLElement).dataset.serviceId;
+    if (serviceId) {
+      if (selectedServicesMap.has(serviceId)) {
+        selectedServicesMap.delete(serviceId);
+        card.classList.remove("selected");
+      } else {
+        const service = services.find((s) => s.id === serviceId);
+        if (service) {
+          selectedServicesMap.set(serviceId, { service });
+          card.classList.add("selected");
+        }
+      }
+      renderSelectedItems();
     }
   });
 });

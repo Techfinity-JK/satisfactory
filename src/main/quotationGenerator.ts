@@ -39,6 +39,11 @@ export interface QuotationItem {
   totalPrice: number;
 }
 
+export interface ServiceItem {
+  name: string;
+  price: number;
+}
+
 export interface QuotationData {
   quoteRefNo: string;
   companyName: string;
@@ -48,6 +53,7 @@ export interface QuotationData {
   emailAddress?: string;
   brochureOnly?: boolean;
   items: QuotationItem[];
+  services?: ServiceItem[];
   notes?: string;
 }
 
@@ -121,7 +127,7 @@ export async function generateQuotation(
           }),
 
           // Products
-          ...createProductSections(data.items, data.brochureOnly),
+          ...createProductSections(data.items, data.brochureOnly, data.services),
 
           // Notes
           ...(data.notes
@@ -253,7 +259,7 @@ function createInfoValueCell(text: string, cellWidth: number, borders: object): 
   });
 }
 
-function createProductSections(items: QuotationItem[], brochureOnly?: boolean): (Paragraph | Table)[] {
+function createProductSections(items: QuotationItem[], brochureOnly?: boolean, services?: ServiceItem[]): (Paragraph | Table)[] {
   const sections: (Paragraph | Table)[] = [];
 
   items.forEach((item) => {
@@ -276,23 +282,61 @@ function createProductSections(items: QuotationItem[], brochureOnly?: boolean): 
     sections.push(createProductTable(item));
   });
 
-  // Grand total (only show if not brochure only mode)
+  // Equipment cost and services (only show if not brochure only mode)
   if (!brochureOnly) {
-    const grandTotal = items.reduce((sum, item) => sum + item.totalPrice, 0);
+    const equipmentCost = items.reduce((sum, item) => sum + item.totalPrice, 0);
     sections.push(
       new Paragraph({
         children: [
           new TextRun({
-            text: `GRAND TOTAL: ₱${grandTotal.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
+            text: `EQUIPMENT COST = ₱${equipmentCost.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
             font: FONT_FAMILY,
             bold: true,
             size: 20,
           }),
         ],
         alignment: AlignmentType.RIGHT,
-        spacing: { before: 300, after: 200 },
+        spacing: { before: 300, after: 100 },
       })
     );
+
+    // Add services if any
+    if (services && services.length > 0) {
+      services.forEach((service) => {
+        sections.push(
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `${service.name} = ₱${service.price.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
+                font: FONT_FAMILY,
+                bold: true,
+                size: 20,
+              }),
+            ],
+            alignment: AlignmentType.RIGHT,
+            spacing: { after: 100 },
+          })
+        );
+      });
+
+      // Grand total (equipment + services)
+      const servicesTotal = services.reduce((sum, s) => sum + s.price, 0);
+      const grandTotal = equipmentCost + servicesTotal;
+      sections.push(
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: `GRAND TOTAL = ₱${grandTotal.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
+              font: FONT_FAMILY,
+              bold: true,
+              size: 22,
+            }),
+          ],
+          alignment: AlignmentType.RIGHT,
+          spacing: { before: 100, after: 200 },
+        })
+      );
+    }
   }
 
   return sections;
