@@ -136,10 +136,32 @@
           <tbody id="selectedItemsBody">
             <!-- Selected items will appear here -->
           </tbody>
-          <tfoot>
+          <tfoot id="tableTfoot">
             <tr>
-              <td colspan="4" class="total-label">Total:</td>
-              <td id="grandTotal" class="total-amount">PHP 0</td>
+              <td colspan="4" class="total-label">Total Equipment Cost:</td>
+              <td id="equipmentCostTotal" class="total-amount">PHP 0</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td colspan="4" class="total-label">Less Discount:</td>
+              <td class="total-amount">
+                <input type="number" class="discount-input" id="discountInput" value="0" min="0">
+              </td>
+              <td></td>
+            </tr>
+            <tr id="installationRow" class="hidden">
+              <td colspan="4" class="total-label">Installation Cost:</td>
+              <td id="installationCostTotal" class="total-amount">PHP 0</td>
+              <td></td>
+            </tr>
+            <tr id="vatRow" class="hidden">
+              <td colspan="4" class="total-label">Plus 12% VAT:</td>
+              <td id="vatTotal" class="total-amount">PHP 0</td>
+              <td></td>
+            </tr>
+            <tr class="grand-total-row">
+              <td colspan="4" class="total-label">Total Investment Cost:</td>
+              <td id="grandTotal" class="total-amount grand-total">PHP 0</td>
               <td></td>
             </tr>
           </tfoot>

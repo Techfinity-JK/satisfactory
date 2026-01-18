@@ -553,6 +553,35 @@ th {
   color: var(--text-secondary);
 }
 
+.discount-input {
+  width: 90px;
+  padding: 5px;
+  text-align: right;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--bg-input);
+  color: var(--text-primary);
+}
+
+.discount-input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+}
+
+.grand-total-row {
+  border-top: 2px solid var(--accent-color);
+}
+
+.grand-total-row .total-label,
+.grand-total-row .grand-total {
+  font-size: 1.2rem;
+  padding-top: 12px;
+}
+
+.hidden {
+  display: none !important;
+}
+
 .notes-section textarea {
   width: 100%;
   min-height: 80px;

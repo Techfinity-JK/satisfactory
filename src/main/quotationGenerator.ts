@@ -53,6 +53,7 @@ export interface QuotationData {
   emailAddress?: string;
   brochureOnly?: boolean;
   vatInclusive?: boolean;
+  discount?: number;
   items: QuotationItem[];
   services?: ServiceItem[];
   notes?: string;
@@ -128,7 +129,7 @@ export async function generateQuotation(
           }),
 
           // Products
-          ...createProductSections(data.items, data.brochureOnly, data.vatInclusive, data.services),
+          ...createProductSections(data.items, data.brochureOnly, data.vatInclusive, data.discount, data.services),
 
           // Notes
           ...(data.notes
@@ -157,7 +158,7 @@ export async function generateQuotation(
             : []),
 
           // Terms and Conditions
-          ...createTermsAndConditions(),
+          ...createTermsAndConditions(data.vatInclusive),
 
           // Signature
           ...createSignatureSection(),
@@ -260,7 +261,7 @@ function createInfoValueCell(text: string, cellWidth: number, borders: object): 
   });
 }
 
-function createProductSections(items: QuotationItem[], brochureOnly?: boolean, vatInclusive?: boolean, services?: ServiceItem[]): (Paragraph | Table)[] {
+function createProductSections(items: QuotationItem[], brochureOnly?: boolean, vatInclusive?: boolean, discount?: number, services?: ServiceItem[]): (Paragraph | Table)[] {
   const sections: (Paragraph | Table)[] = [];
 
   items.forEach((item) => {
@@ -283,17 +284,18 @@ function createProductSections(items: QuotationItem[], brochureOnly?: boolean, v
     sections.push(createProductTable(item));
   });
 
-  // Equipment cost and services (only show if not brochure only mode)
+  // Totals section (only show if not brochure only mode)
   if (!brochureOnly) {
+    // 1. TOTAL EQUIPMENT COST
     const equipmentCost = items.reduce((sum, item) => sum + item.totalPrice, 0);
     sections.push(
       new Paragraph({
         children: [
           new TextRun({
-            text: `EQUIPMENT COST = ₱${equipmentCost.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
+            text: `TOTAL EQUIPMENT COST = ₱${equipmentCost.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
             font: FONT_FAMILY,
             bold: true,
-            size: 20,
+            size: FONT_SIZE,
           }),
         ],
         alignment: AlignmentType.RIGHT,
@@ -301,34 +303,52 @@ function createProductSections(items: QuotationItem[], brochureOnly?: boolean, v
       })
     );
 
-    // Add services if any
-    let servicesTotal = 0;
-    if (services && services.length > 0) {
-      services.forEach((service) => {
-        sections.push(
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: `${service.name} = ₱${service.price.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
-                font: FONT_FAMILY,
-                bold: true,
-                size: 20,
-              }),
-            ],
-            alignment: AlignmentType.RIGHT,
-            spacing: { after: 100 },
-          })
-        );
-      });
-      servicesTotal = services.reduce((sum, s) => sum + s.price, 0);
+    // 2. LESS DISCOUNT (if any)
+    const discountAmount = discount || 0;
+    if (discountAmount > 0) {
+      sections.push(
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: `LESS DISCOUNT = ₱${discountAmount.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
+              font: FONT_FAMILY,
+              bold: true,
+              size: FONT_SIZE,
+            }),
+          ],
+          alignment: AlignmentType.RIGHT,
+          spacing: { after: 100 },
+        })
+      );
     }
 
-    // Calculate subtotal (equipment + services)
-    const subtotal = equipmentCost + servicesTotal;
+    // 3. INSTALLATION COST (services)
+    let installationCost = 0;
+    if (services && services.length > 0) {
+      installationCost = services.reduce((sum, s) => sum + s.price, 0);
+      sections.push(
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: `INSTALLATION COST = ₱${installationCost.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
+              font: FONT_FAMILY,
+              bold: true,
+              size: FONT_SIZE,
+            }),
+          ],
+          alignment: AlignmentType.RIGHT,
+          spacing: { after: 100 },
+        })
+      );
+    }
 
-    // Add VAT if inclusive
+    // Calculate subtotal before VAT
+    const subtotal = equipmentCost - discountAmount + installationCost;
+
+    // 4. PLUS 12% VAT (if inclusive)
+    let vatAmount = 0;
     if (vatInclusive) {
-      const vatAmount = subtotal * 0.12;
+      vatAmount = subtotal * 0.12;
       sections.push(
         new Paragraph({
           children: [
@@ -336,47 +356,31 @@ function createProductSections(items: QuotationItem[], brochureOnly?: boolean, v
               text: `PLUS 12% VAT = ₱${vatAmount.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
               font: FONT_FAMILY,
               bold: true,
-              size: 20,
+              size: FONT_SIZE,
             }),
           ],
           alignment: AlignmentType.RIGHT,
           spacing: { after: 100 },
         })
       );
-
-      // Grand total with VAT
-      const grandTotal = subtotal + vatAmount;
-      sections.push(
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: `GRAND TOTAL = ₱${grandTotal.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
-              font: FONT_FAMILY,
-              bold: true,
-              size: 22,
-            }),
-          ],
-          alignment: AlignmentType.RIGHT,
-          spacing: { before: 100, after: 200 },
-        })
-      );
-    } else if (services && services.length > 0) {
-      // Grand total without VAT (only if services exist)
-      sections.push(
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: `GRAND TOTAL = ₱${subtotal.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
-              font: FONT_FAMILY,
-              bold: true,
-              size: 22,
-            }),
-          ],
-          alignment: AlignmentType.RIGHT,
-          spacing: { before: 100, after: 200 },
-        })
-      );
     }
+
+    // 5. TOTAL INVESTMENT COST
+    const totalInvestment = subtotal + vatAmount;
+    sections.push(
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: `TOTAL INVESTMENT COST = ₱${totalInvestment.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
+            font: FONT_FAMILY,
+            bold: true,
+            size: FONT_SIZE,
+          }),
+        ],
+        alignment: AlignmentType.RIGHT,
+        spacing: { before: 100, after: 200 },
+      })
+    );
   }
 
   return sections;
@@ -861,7 +865,7 @@ function createProductHeaderCell(
   });
 }
 
-function createTermsAndConditions(): (Paragraph | Table)[] {
+function createTermsAndConditions(vatInclusive?: boolean): (Paragraph | Table)[] {
   const borderStyle = {
     style: BorderStyle.SINGLE,
     size: 6,
@@ -879,7 +883,7 @@ function createTermsAndConditions(): (Paragraph | Table)[] {
     {
       num: "1.)",
       text: "Prices quoted above are ",
-      highlight: "VAT Exclusive",
+      highlight: vatInclusive ? "VAT Inclusive" : "VAT Exclusive",
       rest: ". Email or fax certification if your company is vat exempt and zero rated for billing preparation.",
     },
     {

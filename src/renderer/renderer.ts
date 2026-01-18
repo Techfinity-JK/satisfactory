@@ -55,6 +55,7 @@ interface QuotationData {
   emailAddress?: string;
   brochureOnly?: boolean;
   vatInclusive?: boolean;
+  discount?: number;
   items: {
     productId: string;
     name: string;
@@ -346,6 +347,12 @@ const selectedServicesMap: Map<string, SelectedService> = new Map();
 // DOM Elements
 const productListEl = document.getElementById("productList") as HTMLDivElement;
 const selectedItemsBodyEl = document.getElementById("selectedItemsBody") as HTMLTableSectionElement;
+const equipmentCostTotalEl = document.getElementById("equipmentCostTotal") as HTMLTableCellElement;
+const discountInputEl = document.getElementById("discountInput") as HTMLInputElement;
+const installationRowEl = document.getElementById("installationRow") as HTMLTableRowElement;
+const installationCostTotalEl = document.getElementById("installationCostTotal") as HTMLTableCellElement;
+const vatRowEl = document.getElementById("vatRow") as HTMLTableRowElement;
+const vatTotalEl = document.getElementById("vatTotal") as HTMLTableCellElement;
 const grandTotalEl = document.getElementById("grandTotal") as HTMLTableCellElement;
 const quoteRefNoEl = document.getElementById("quoteRefNo") as HTMLInputElement;
 const companyNameEl = document.getElementById("companyName") as HTMLInputElement;
@@ -532,26 +539,48 @@ function renderSelectedItems(): void {
 
 // Update grand total
 function updateGrandTotal(): void {
-  let subtotal = 0;
-  // Sum product prices
+  // 1. Calculate Total Equipment Cost (products only)
+  let equipmentCost = 0;
   selectedItems.forEach((item) => {
     const unitPrice = item.customPrice !== undefined ? item.customPrice : item.product.price.amount;
-    subtotal += unitPrice * item.quantity;
+    equipmentCost += unitPrice * item.quantity;
   });
-  // Sum service prices
+  equipmentCostTotalEl.textContent = `PHP ${equipmentCost.toLocaleString()}`;
+
+  // 2. Get discount
+  const discount = parseInt(discountInputEl.value, 10) || 0;
+
+  // 3. Calculate Installation/Service Cost
+  let installationCost = 0;
   selectedServicesMap.forEach((selectedService) => {
     const unitPrice = selectedService.customPrice !== undefined ? selectedService.customPrice : selectedService.service.price;
-    subtotal += unitPrice;
+    installationCost += unitPrice;
   });
 
-  // Calculate VAT if inclusive
-  if (vatInclusiveEl.checked) {
-    const vatAmount = subtotal * 0.12;
-    const total = subtotal + vatAmount;
-    grandTotalEl.innerHTML = `PHP ${total.toLocaleString()}<br><span class="vat-note">(VAT Inclusive)</span>`;
+  // Show/hide installation row
+  if (installationCost > 0 || selectedServicesMap.size > 0) {
+    installationRowEl.classList.remove("hidden");
+    installationCostTotalEl.textContent = `PHP ${installationCost.toLocaleString()}`;
   } else {
-    grandTotalEl.innerHTML = `PHP ${subtotal.toLocaleString()}<br><span class="vat-note vat-exclusive">(VAT Exclusive)</span>`;
+    installationRowEl.classList.add("hidden");
   }
+
+  // 4. Calculate subtotal before VAT
+  const subtotal = equipmentCost - discount + installationCost;
+
+  // 5. Calculate VAT if inclusive
+  let vatAmount = 0;
+  if (vatInclusiveEl.checked) {
+    vatAmount = subtotal * 0.12;
+    vatRowEl.classList.remove("hidden");
+    vatTotalEl.textContent = `PHP ${vatAmount.toLocaleString()}`;
+  } else {
+    vatRowEl.classList.add("hidden");
+  }
+
+  // 6. Calculate Total Investment Cost
+  const totalInvestment = subtotal + vatAmount;
+  grandTotalEl.textContent = `PHP ${totalInvestment.toLocaleString()}`;
 }
 
 // Build product specs from product data
@@ -637,6 +666,8 @@ async function generateQuotation(): Promise<void> {
     return { name: selectedService.service.name, price: price };
   });
 
+  const discount = parseInt(discountInputEl.value, 10) || 0;
+
   const data: QuotationData = {
     quoteRefNo,
     companyName,
@@ -646,6 +677,7 @@ async function generateQuotation(): Promise<void> {
     emailAddress: emailAddressEl.value.trim() || undefined,
     brochureOnly: brochureOnlyEl.checked,
     vatInclusive: vatInclusiveEl.checked,
+    discount: discount > 0 ? discount : undefined,
     items,
     services: selectedServicesList.length > 0 ? selectedServicesList : undefined,
     notes: notesEl.value.trim() || undefined,
@@ -685,6 +717,7 @@ function clearAll(): void {
   notesEl.value = "";
   brochureOnlyEl.checked = false;
   vatInclusiveEl.checked = false;
+  discountInputEl.value = "0";
   // Clear service card selections
   document.querySelectorAll(".service-card").forEach((card) => {
     card.classList.remove("selected");
@@ -699,6 +732,11 @@ clearBtnEl.addEventListener("click", clearAll);
 
 // VAT checkbox listener - update totals when changed
 vatInclusiveEl.addEventListener("change", () => {
+  updateGrandTotal();
+});
+
+// Discount input listener - update totals when changed
+discountInputEl.addEventListener("input", () => {
   updateGrandTotal();
 });
 
