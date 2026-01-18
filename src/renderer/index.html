@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'">
+  <title>Quotation Generator</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Quotation Generator</h1>
+    </header>
+
+    <main>
+      <section class="customer-info">
+        <h2>Customer Information</h2>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="quoteRefNo">Quote Ref No:</label>
+            <input type="text" id="quoteRefNo" placeholder="e.g. 2025-JK-001">
+          </div>
+          <div class="form-group">
+            <label for="companyName">Company Name:</label>
+            <input type="text" id="companyName" placeholder="Enter company name">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="contactPerson">Contact Person:</label>
+            <input type="text" id="contactPerson" placeholder="Enter contact person">
+          </div>
+          <div class="form-group">
+            <label for="contactNumber">Contact Number:</label>
+            <input type="tel" id="contactNumber" placeholder="Enter contact number">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="companyAddress">Company Address:</label>
+            <textarea id="companyAddress" placeholder="Enter company address"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="emailAddress">Email Address:</label>
+            <input type="email" id="emailAddress" placeholder="Enter email address">
+          </div>
+        </div>
+      </section>
+
+      <section class="product-selection">
+        <h2>Select Products</h2>
+        <div id="productList" class="product-grid">
+          <!-- Products will be rendered here -->
+        </div>
+      </section>
+
+      <section class="selected-items">
+        <h2>Selected Items</h2>
+        <table id="selectedItemsTable">
+          <thead>
+            <tr>
+              <th>Brand</th>
+              <th>Product</th>
+              <th>Unit Price</th>
+              <th>Qty</th>
+              <th>Total</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="selectedItemsBody">
+            <!-- Selected items will appear here -->
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="4" class="total-label">Total:</td>
+              <td id="grandTotal" class="total-amount">PHP 0</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </section>
+
+      <section class="notes-section">
+        <h2>Notes</h2>
+        <textarea id="notes" placeholder="Add any additional notes (optional)"></textarea>
+      </section>
+
+      <div class="actions">
+        <button id="generateBtn" class="btn-primary">Generate Quotation</button>
+        <button id="clearBtn" class="btn-secondary">Clear All</button>
+      </div>
+    </main>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>

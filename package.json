@@ -1,0 +1,23 @@
+{
+  "name": "quotation-generator",
+  "version": "1.0.0",
+  "description": "Quotation generator for biometric products",
+  "main": "dist/main/main.js",
+  "scripts": {
+    "copy-assets": "node scripts/copy-assets.js",
+    "build": "tsc && npm run copy-assets",
+    "start": "npm run build && electron .",
+    "dev": "npm run build && electron ."
+  },
+  "keywords": ["electron", "quotation", "docx"],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "electron": "^28.0.0",
+    "typescript": "^5.3.0"
+  },
+  "dependencies": {
+    "docx": "^8.5.0"
+  }
+}
