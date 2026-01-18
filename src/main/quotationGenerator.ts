@@ -52,6 +52,7 @@ export interface QuotationData {
   contactNumber?: string;
   emailAddress?: string;
   brochureOnly?: boolean;
+  vatInclusive?: boolean;
   items: QuotationItem[];
   services?: ServiceItem[];
   notes?: string;
@@ -127,7 +128,7 @@ export async function generateQuotation(
           }),
 
           // Products
-          ...createProductSections(data.items, data.brochureOnly, data.services),
+          ...createProductSections(data.items, data.brochureOnly, data.vatInclusive, data.services),
 
           // Notes
           ...(data.notes
@@ -259,7 +260,7 @@ function createInfoValueCell(text: string, cellWidth: number, borders: object): 
   });
 }
 
-function createProductSections(items: QuotationItem[], brochureOnly?: boolean, services?: ServiceItem[]): (Paragraph | Table)[] {
+function createProductSections(items: QuotationItem[], brochureOnly?: boolean, vatInclusive?: boolean, services?: ServiceItem[]): (Paragraph | Table)[] {
   const sections: (Paragraph | Table)[] = [];
 
   items.forEach((item) => {
@@ -301,6 +302,7 @@ function createProductSections(items: QuotationItem[], brochureOnly?: boolean, s
     );
 
     // Add services if any
+    let servicesTotal = 0;
     if (services && services.length > 0) {
       services.forEach((service) => {
         sections.push(
@@ -318,15 +320,53 @@ function createProductSections(items: QuotationItem[], brochureOnly?: boolean, s
           })
         );
       });
+      servicesTotal = services.reduce((sum, s) => sum + s.price, 0);
+    }
 
-      // Grand total (equipment + services)
-      const servicesTotal = services.reduce((sum, s) => sum + s.price, 0);
-      const grandTotal = equipmentCost + servicesTotal;
+    // Calculate subtotal (equipment + services)
+    const subtotal = equipmentCost + servicesTotal;
+
+    // Add VAT if inclusive
+    if (vatInclusive) {
+      const vatAmount = subtotal * 0.12;
+      sections.push(
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: `PLUS 12% VAT = ₱${vatAmount.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
+              font: FONT_FAMILY,
+              bold: true,
+              size: 20,
+            }),
+          ],
+          alignment: AlignmentType.RIGHT,
+          spacing: { after: 100 },
+        })
+      );
+
+      // Grand total with VAT
+      const grandTotal = subtotal + vatAmount;
       sections.push(
         new Paragraph({
           children: [
             new TextRun({
               text: `GRAND TOTAL = ₱${grandTotal.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
+              font: FONT_FAMILY,
+              bold: true,
+              size: 22,
+            }),
+          ],
+          alignment: AlignmentType.RIGHT,
+          spacing: { before: 100, after: 200 },
+        })
+      );
+    } else if (services && services.length > 0) {
+      // Grand total without VAT (only if services exist)
+      sections.push(
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: `GRAND TOTAL = ₱${subtotal.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
               font: FONT_FAMILY,
               bold: true,
               size: 22,

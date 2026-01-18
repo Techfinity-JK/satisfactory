@@ -54,6 +54,7 @@ interface QuotationData {
   contactNumber?: string;
   emailAddress?: string;
   brochureOnly?: boolean;
+  vatInclusive?: boolean;
   items: {
     productId: string;
     name: string;
@@ -354,6 +355,7 @@ const contactNumberEl = document.getElementById("contactNumber") as HTMLInputEle
 const emailAddressEl = document.getElementById("emailAddress") as HTMLInputElement;
 const notesEl = document.getElementById("notes") as HTMLTextAreaElement;
 const brochureOnlyEl = document.getElementById("brochureOnly") as HTMLInputElement;
+const vatInclusiveEl = document.getElementById("vatInclusive") as HTMLInputElement;
 const generateBtnEl = document.getElementById("generateBtn") as HTMLButtonElement;
 const clearBtnEl = document.getElementById("clearBtn") as HTMLButtonElement;
 
@@ -530,18 +532,26 @@ function renderSelectedItems(): void {
 
 // Update grand total
 function updateGrandTotal(): void {
-  let total = 0;
+  let subtotal = 0;
   // Sum product prices
   selectedItems.forEach((item) => {
     const unitPrice = item.customPrice !== undefined ? item.customPrice : item.product.price.amount;
-    total += unitPrice * item.quantity;
+    subtotal += unitPrice * item.quantity;
   });
   // Sum service prices
   selectedServicesMap.forEach((selectedService) => {
     const unitPrice = selectedService.customPrice !== undefined ? selectedService.customPrice : selectedService.service.price;
-    total += unitPrice;
+    subtotal += unitPrice;
   });
-  grandTotalEl.textContent = `PHP ${total.toLocaleString()}`;
+
+  // Calculate VAT if inclusive
+  if (vatInclusiveEl.checked) {
+    const vatAmount = subtotal * 0.12;
+    const total = subtotal + vatAmount;
+    grandTotalEl.innerHTML = `PHP ${total.toLocaleString()}<br><span class="vat-note">(VAT Inclusive)</span>`;
+  } else {
+    grandTotalEl.innerHTML = `PHP ${subtotal.toLocaleString()}<br><span class="vat-note vat-exclusive">(VAT Exclusive)</span>`;
+  }
 }
 
 // Build product specs from product data
@@ -635,6 +645,7 @@ async function generateQuotation(): Promise<void> {
     contactNumber: contactNumberEl.value.trim() || undefined,
     emailAddress: emailAddressEl.value.trim() || undefined,
     brochureOnly: brochureOnlyEl.checked,
+    vatInclusive: vatInclusiveEl.checked,
     items,
     services: selectedServicesList.length > 0 ? selectedServicesList : undefined,
     notes: notesEl.value.trim() || undefined,
@@ -673,6 +684,7 @@ function clearAll(): void {
   emailAddressEl.value = "";
   notesEl.value = "";
   brochureOnlyEl.checked = false;
+  vatInclusiveEl.checked = false;
   // Clear service card selections
   document.querySelectorAll(".service-card").forEach((card) => {
     card.classList.remove("selected");
@@ -684,6 +696,11 @@ function clearAll(): void {
 // Event listeners
 generateBtnEl.addEventListener("click", generateQuotation);
 clearBtnEl.addEventListener("click", clearAll);
+
+// VAT checkbox listener - update totals when changed
+vatInclusiveEl.addEventListener("change", () => {
+  updateGrandTotal();
+});
 
 // Settings Modal
 const settingsBtnEl = document.getElementById("settingsBtn") as HTMLButtonElement;

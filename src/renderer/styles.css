@@ -1,18 +1,18 @@
 /* CSS Variables for theming */
 :root {
-  --bg-primary: #1a1a2e;
-  --bg-secondary: #16213e;
-  --bg-card: #1f2937;
-  --bg-input: #374151;
-  --text-primary: #e5e7eb;
-  --text-secondary: #9ca3af;
-  --accent-color: #3b82f6;
-  --accent-hover: #2563eb;
-  --border-color: #374151;
-  --success-color: #10b981;
-  --success-bg: #064e3b;
-  --danger-color: #ef4444;
-  --shadow-color: rgba(0, 0, 0, 0.3);
+  --bg-primary: #0f1117; 
+  --bg-secondary: #151922;
+  --bg-card: #1b1f2a; 
+  --bg-input: #222633;      
+  --text-primary: #e6e8ee;  
+  --text-secondary: #a1a7b3; 
+  --accent-color: #4f8cff;  
+  --accent-hover: #3b6fd8;
+  --border-color: #2a2f3a;
+  --shadow-color: rgba(0, 0, 0, 0.45);
+  --success-color: #4ade80;
+  --success-bg: #062e1f;
+  --danger-color: #f87171;
 }
 
 /* Light Theme */
@@ -341,6 +341,9 @@ h2 {
 /* Brochure Option Checkbox */
 .brochure-option {
   margin-bottom: 15px;
+  display: flex;
+  gap: 25px;
+  flex-wrap: wrap;
 }
 
 .checkbox-label {
@@ -538,6 +541,16 @@ th {
   font-weight: 600;
   color: var(--accent-color);
   font-size: 1.1rem;
+}
+
+.vat-note {
+  font-size: 11px;
+  font-weight: normal;
+  color: var(--success-color);
+}
+
+.vat-note.vat-exclusive {
+  color: var(--text-secondary);
 }
 
 .notes-section textarea {
