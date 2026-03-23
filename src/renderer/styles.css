@@ -338,6 +338,36 @@ h2 {
   resize: vertical;
 }
 
+/* Product Tabs */
+.product-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.product-tab {
+  padding: 10px 20px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  border-radius: 6px 6px 0 0;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.product-tab:hover {
+  background: var(--bg-input);
+  color: var(--text-primary);
+}
+
+.product-tab.active {
+  background: var(--accent-color);
+  color: white;
+  border-color: var(--accent-color);
+}
+
 /* Brochure Option Checkbox */
 .brochure-option {
   margin-bottom: 15px;
@@ -409,6 +439,13 @@ h2 {
 .product-card .price {
   color: var(--accent-color);
   font-weight: 500;
+}
+
+.product-card .description {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin: 2px 0 6px;
+  line-height: 1.4;
 }
 
 .product-card .original-price {
@@ -667,12 +704,18 @@ th {
 
 .drag-handle {
   cursor: grab;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   color: var(--text-secondary);
-  padding: 8px 4px;
+  padding: 0 8px;
   transition: color 0.2s ease;
+  width: 30px;
+  vertical-align: middle;
+}
+
+.drag-handle svg {
+  display: block;
+  margin: 0 auto;
+  width: 14px;
+  height: 14px;
 }
 
 .drag-handle:hover {
@@ -681,11 +724,6 @@ th {
 
 .drag-handle:active {
   cursor: grabbing;
-}
-
-.drag-handle svg {
-  width: 16px;
-  height: 16px;
 }
 
 /* Dragging States */

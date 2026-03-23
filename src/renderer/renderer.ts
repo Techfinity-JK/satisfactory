@@ -343,6 +343,118 @@ const products: Product[] = [
     warranty: { duration: 12, unit: "months" },
     isActive: true,
   },
+  
+  // Door Access Products
+  {
+    id: "g-m06",
+    brand: "GENERIC",
+    name: "M06",
+    category: "Door Access",
+    description: "125khz RFID",
+    capacity: { fingerprint: 0, card: 2000, face: 0, transaction: 0 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 5700, amount: 5700, currency: "PHP" },
+    withADMS: false,
+    warranty: { duration: 12, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "zk-x6",
+    brand: "ZKTECO",
+    name: "X6",
+    category: "Door Access",
+    description: "125khz RFID",
+    capacity: { fingerprint: 500, card: 500, face: 0, transaction: 0 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 7900, amount: 7900, currency: "PHP" },
+    withADMS: false,
+    warranty: { duration: 12, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "g-dems",
+    brand: "GENERIC",
+    name: "Door Exit Metal Square",
+    category: "Door Access",
+    description: "Four Door Access Control Panel",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 800, amount: 800, currency: "PHP" },
+    withADMS: false,
+    warranty: { duration: 6, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "g-al-280",
+    brand: "GENERIC",
+    name: "AL-280",
+    category: "Door Access",
+    description: " 600Lbs Electronic Magnetic Lock\n"+
+                 " Holding Force: 270kg\n"+
+                 " Working Voltage: DC12V/24V Input\n"+
+                 " Weight: 1.97kg\n"+
+                 " Size 253*25*48mm",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 4400, amount: 4400, currency: "PHP" },
+    withADMS: false,
+    warranty: { duration: 6, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "g-al-280pzpl",
+    brand: "GENERIC",
+    name: "AL-280PZ/PL",
+    category: "Door Access",
+    description: "Z&L bracket for AL280",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 2400, amount: 2400, currency: "PHP" },
+    withADMS: false,
+    warranty: { duration: 0, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "g-rps",
+    brand: "GENERIC",
+    name: "RPS",
+    category: "Door Access",
+    description: " 12Vdc 10A Regulated Power Supply\n"+
+                 " Input: 100 -265VAC 50/60HZ\n"+
+                 " Output: +12V 10A MAX\n",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 2800, amount: 2800, currency: "PHP" },
+    withADMS: false,
+    warranty: { duration: 6, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "zk-power-supply",
+    brand: "ZKTECO",
+    name: "PS-902",
+    category: "Door Access",
+    description: "12V 3A Power Supply with Battery Backup",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 3500, amount: 2200, currency: "PHP" },
+    withADMS: false,
+    warranty: { duration: 6, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "zk-card-reader",
+    brand: "ZKTECO",
+    name: "KR500",
+    category: "Door Access",
+    description: "RFID Card Reader 125KHz",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 2500, amount: 1500, currency: "PHP" },
+    withADMS: false,
+    warranty: { duration: 12, unit: "months" },
+    isActive: true,
+  },
 ];
 
 // Services data
@@ -361,6 +473,7 @@ const itemGroups: Map<string, ItemGroup> = new Map();
 const itemToGroup: Map<string, string> = new Map(); // itemId -> groupId
 let groupIdCounter = 0;
 let productInstanceCounter = 0; // Counter for unique product instances
+let currentCategory = "Biometrics"; // Current product category tab
 
 // Order tracking for items within groups and ungrouped
 const groupItemOrder: Map<string, string[]> = new Map(); // groupId -> itemIds in order
@@ -392,7 +505,7 @@ const clearBtnEl = document.getElementById("clearBtn") as HTMLButtonElement;
 function renderProducts(): void {
   productListEl.innerHTML = "";
 
-  const activeProducts = products.filter((p) => p.isActive);
+  const activeProducts = products.filter((p) => p.isActive && p.category === currentCategory);
 
   activeProducts.forEach((product) => {
     const card = document.createElement("div");
@@ -415,6 +528,25 @@ function renderProducts(): void {
     card.addEventListener("click", () => addProduct(product));
     productListEl.appendChild(card);
   });
+}
+
+// Switch product category tab
+function switchCategory(category: string): void {
+  currentCategory = category;
+
+  // Update tab active states
+  document.querySelectorAll(".product-tab").forEach((tab) => {
+    const tabCategory = (tab as HTMLElement).dataset.category;
+    if (tabCategory === "biometrics" && category === "Biometrics") {
+      tab.classList.add("active");
+    } else if (tabCategory === "door-access" && category === "Door Access") {
+      tab.classList.add("active");
+    } else {
+      tab.classList.remove("active");
+    }
+  });
+
+  renderProducts();
 }
 
 // Add a product instance (can add same product multiple times)
@@ -1108,7 +1240,7 @@ async function generateQuotation(): Promise<void> {
         productId: item.product.id,
         name: item.product.name,
         brand: item.product.brand,
-        description: item.product.category,
+        description: item.product.description,
         specs: buildProductSpecs(item.product),
         imagePath: getProductImagePath(item.product.name),
         quantity: item.quantity,
@@ -1325,6 +1457,19 @@ serviceCards.forEach((card) => {
         }
       }
       renderSelectedItems();
+    }
+  });
+});
+
+// Product category tabs
+const productTabs = document.querySelectorAll(".product-tab");
+productTabs.forEach((tab) => {
+  tab.addEventListener("click", () => {
+    const category = (tab as HTMLElement).dataset.category;
+    if (category === "biometrics") {
+      switchCategory("Biometrics");
+    } else if (category === "door-access") {
+      switchCategory("Door Access");
     }
   });
 });
