@@ -46,6 +46,31 @@ interface SelectedService {
   customPrice?: number;
 }
 
+interface ItemGroup {
+  id: string;
+  name: string;
+}
+
+interface QuotationItem {
+  productId: string;
+  name: string;
+  brand: string;
+  description?: string;
+  specs?: string[];
+  imagePath?: string;
+  quantity: number;
+  unit: string;
+  unitPrice: number;
+  promoPrice: number;
+  totalPrice: number;
+}
+
+interface QuotationGroup {
+  id: string;
+  name: string;
+  items: QuotationItem[];
+}
+
 interface QuotationData {
   quoteRefNo: string;
   companyName: string;
@@ -56,19 +81,8 @@ interface QuotationData {
   brochureOnly?: boolean;
   vatInclusive?: boolean;
   discount?: number;
-  items: {
-    productId: string;
-    name: string;
-    brand: string;
-    description?: string;
-    specs?: string[];
-    imagePath?: string;
-    quantity: number;
-    unit: string;
-    unitPrice: number;
-    promoPrice: number;
-    totalPrice: number;
-  }[];
+  items: QuotationItem[];
+  groups?: QuotationGroup[];
   services?: {
     name: string;
     price: number;
@@ -341,8 +355,16 @@ const services: Service[] = [
 ];
 
 // State
-const selectedItems: Map<string, SelectedItem> = new Map();
+const selectedItems: Map<string, SelectedItem> = new Map(); // instanceId -> SelectedItem
 const selectedServicesMap: Map<string, SelectedService> = new Map();
+const itemGroups: Map<string, ItemGroup> = new Map();
+const itemToGroup: Map<string, string> = new Map(); // itemId -> groupId
+let groupIdCounter = 0;
+let productInstanceCounter = 0; // Counter for unique product instances
+
+// Order tracking for items within groups and ungrouped
+const groupItemOrder: Map<string, string[]> = new Map(); // groupId -> itemIds in order
+let ungroupedItemOrder: string[] = []; // itemIds for ungrouped items
 
 // DOM Elements
 const productListEl = document.getElementById("productList") as HTMLDivElement;
@@ -377,81 +399,326 @@ function renderProducts(): void {
     card.className = "product-card";
     card.dataset.productId = product.id;
 
-    if (selectedItems.has(product.id)) {
-      card.classList.add("selected");
-    }
+    // Count how many instances of this product are selected
+    const instanceCount = Array.from(selectedItems.values()).filter(
+      (item) => item.product.id === product.id
+    ).length;
 
     card.innerHTML = `
       <div class="brand">${product.brand}</div>
       <div class="name">${product.name}</div>
       <div class="original-price">PHP ${product.price.fakeAmount.toLocaleString()}</div>
       <div class="price">PHP ${product.price.amount.toLocaleString()}</div>
+      ${instanceCount > 0 ? `<div class="instance-badge">${instanceCount} added</div>` : '<div class="add-hint">Click to add</div>'}
     `;
 
-    card.addEventListener("click", () => toggleProduct(product));
+    card.addEventListener("click", () => addProduct(product));
     productListEl.appendChild(card);
   });
 }
 
-// Toggle product selection
-function toggleProduct(product: Product): void {
-  if (selectedItems.has(product.id)) {
-    selectedItems.delete(product.id);
-  } else {
-    selectedItems.set(product.id, { product, quantity: 1 });
-  }
+// Add a product instance (can add same product multiple times)
+function addProduct(product: Product): void {
+  const instanceId = `product-${++productInstanceCounter}`;
+  selectedItems.set(instanceId, { product, quantity: 1 });
+  ungroupedItemOrder.push(instanceId);
   renderProducts();
   renderSelectedItems();
+}
+
+// Drag handle SVG icon (6 dots)
+const dragHandleSvg = `<svg viewBox="0 0 16 16" fill="currentColor">
+  <circle cx="5" cy="3" r="1.5"/>
+  <circle cx="11" cy="3" r="1.5"/>
+  <circle cx="5" cy="8" r="1.5"/>
+  <circle cx="11" cy="8" r="1.5"/>
+  <circle cx="5" cy="13" r="1.5"/>
+  <circle cx="11" cy="13" r="1.5"/>
+</svg>`;
+
+// Track drag state
+let draggedRow: HTMLTableRowElement | null = null;
+let draggedItemType: "product" | "service" | null = null;
+let draggedItemId: string | null = null;
+let draggedFromGroup: string | null = null;
+
+// Group management functions
+function createGroup(name: string): string {
+  const id = `group-${++groupIdCounter}`;
+  itemGroups.set(id, { id, name });
+  groupItemOrder.set(id, []);
+  return id;
+}
+
+function deleteGroup(groupId: string): void {
+  const itemsInGroup = groupItemOrder.get(groupId) || [];
+  // Move items back to ungrouped
+  itemsInGroup.forEach((itemId) => {
+    itemToGroup.delete(itemId);
+    ungroupedItemOrder.push(itemId);
+  });
+  groupItemOrder.delete(groupId);
+  itemGroups.delete(groupId);
+}
+
+function addItemToGroup(itemId: string, groupId: string): void {
+  const currentGroup = itemToGroup.get(itemId);
+
+  // Remove from current location
+  if (currentGroup) {
+    const order = groupItemOrder.get(currentGroup);
+    if (order) {
+      const idx = order.indexOf(itemId);
+      if (idx > -1) order.splice(idx, 1);
+    }
+  } else {
+    const idx = ungroupedItemOrder.indexOf(itemId);
+    if (idx > -1) ungroupedItemOrder.splice(idx, 1);
+  }
+
+  // Add to new group
+  itemToGroup.set(itemId, groupId);
+  const targetOrder = groupItemOrder.get(groupId);
+  if (targetOrder && !targetOrder.includes(itemId)) {
+    targetOrder.push(itemId);
+  }
+}
+
+function removeItemFromGroup(itemId: string): void {
+  const currentGroup = itemToGroup.get(itemId);
+  if (currentGroup) {
+    const order = groupItemOrder.get(currentGroup);
+    if (order) {
+      const idx = order.indexOf(itemId);
+      if (idx > -1) order.splice(idx, 1);
+    }
+    itemToGroup.delete(itemId);
+    ungroupedItemOrder.push(itemId);
+  }
+}
+
+function getItemsInGroup(groupId: string): string[] {
+  return groupItemOrder.get(groupId) || [];
+}
+
+function getUngroupedItems(): string[] {
+  // Return items that are not in any group
+  const allItemIds = [...selectedItems.keys(), ...selectedServicesMap.keys()];
+  return allItemIds.filter((id) => !itemToGroup.has(id));
+}
+
+// Sync ungroupedItemOrder with actual ungrouped items
+function syncUngroupedOrder(): void {
+  const actualUngrouped = getUngroupedItems();
+  // Remove items from order that are no longer ungrouped
+  ungroupedItemOrder = ungroupedItemOrder.filter((id) => actualUngrouped.includes(id));
+  // Add new ungrouped items that aren't in the order
+  actualUngrouped.forEach((id) => {
+    if (!ungroupedItemOrder.includes(id)) {
+      ungroupedItemOrder.push(id);
+    }
+  });
+}
+
+// Create a product row
+function createProductRow(item: SelectedItem, productId: string, groupId: string | null): HTMLTableRowElement {
+  const unitPrice = item.customPrice !== undefined ? item.customPrice : item.product.price.amount;
+  const total = unitPrice * item.quantity;
+
+  const row = document.createElement("tr");
+  row.draggable = true;
+  row.dataset.itemType = "product";
+  row.dataset.itemId = productId;
+  row.dataset.groupId = groupId || "";
+
+  // Build group action buttons
+  let groupActions = "";
+  if (itemGroups.size > 0) {
+    if (groupId) {
+      groupActions = `<button class="btn-ungroup" data-item-id="${productId}" title="Remove from group">Ungroup</button>`;
+    } else {
+      const groupOptions = Array.from(itemGroups.values())
+        .map((g) => `<option value="${g.id}">${g.name}</option>`)
+        .join("");
+      groupActions = `<select class="group-select" data-item-id="${productId}">
+        <option value="">Add to group...</option>
+        ${groupOptions}
+      </select>`;
+    }
+  }
+
+  row.innerHTML = `
+    <td class="drag-handle" title="Drag to reorder">${dragHandleSvg}</td>
+    <td>${item.product.brand}</td>
+    <td>${item.product.name}</td>
+    <td>
+      <input type="number" class="price-input" value="${unitPrice}" min="0" data-product-id="${productId}">
+    </td>
+    <td>
+      <input type="number" class="qty-input" value="${item.quantity}" min="1" data-product-id="${productId}">
+    </td>
+    <td>PHP ${total.toLocaleString()}</td>
+    <td class="action-cell">
+      ${groupActions}
+      <button class="btn-remove" data-product-id="${productId}">Remove</button>
+    </td>
+  `;
+
+  return row;
+}
+
+// Create a service row
+function createServiceRow(selectedService: SelectedService, serviceId: string, groupId: string | null): HTMLTableRowElement {
+  const unitPrice = selectedService.customPrice !== undefined ? selectedService.customPrice : selectedService.service.price;
+
+  const row = document.createElement("tr");
+  row.draggable = true;
+  row.dataset.itemType = "service";
+  row.dataset.itemId = serviceId;
+  row.dataset.groupId = groupId || "";
+  row.className = "service-row";
+
+  // Build group action buttons
+  let groupActions = "";
+  if (itemGroups.size > 0) {
+    if (groupId) {
+      groupActions = `<button class="btn-ungroup" data-item-id="${serviceId}" title="Remove from group">Ungroup</button>`;
+    } else {
+      const groupOptions = Array.from(itemGroups.values())
+        .map((g) => `<option value="${g.id}">${g.name}</option>`)
+        .join("");
+      groupActions = `<select class="group-select" data-item-id="${serviceId}">
+        <option value="">Add to group...</option>
+        ${groupOptions}
+      </select>`;
+    }
+  }
+
+  row.innerHTML = `
+    <td class="drag-handle" title="Drag to reorder">${dragHandleSvg}</td>
+    <td>SERVICE</td>
+    <td>${selectedService.service.name}</td>
+    <td>
+      <input type="number" class="price-input service-price-input" value="${unitPrice}" min="0" data-service-id="${serviceId}">
+    </td>
+    <td>1</td>
+    <td>PHP ${unitPrice.toLocaleString()}</td>
+    <td class="action-cell">
+      ${groupActions}
+      <button class="btn-remove service-remove" data-service-id="${serviceId}">Remove</button>
+    </td>
+  `;
+
+  return row;
+}
+
+// Create a group header row
+function createGroupHeaderRow(group: ItemGroup): HTMLTableRowElement {
+  const row = document.createElement("tr");
+  row.className = "group-header-row";
+  row.dataset.groupId = group.id;
+  row.innerHTML = `
+    <td colspan="7" class="group-header-cell">
+      <div class="group-header-content">
+        <span class="group-icon">📁</span>
+        <input type="text" class="group-name-input" value="${group.name}" data-group-id="${group.id}">
+        <button class="btn-delete-group" data-group-id="${group.id}" title="Delete group">×</button>
+      </div>
+    </td>
+  `;
+  return row;
 }
 
 // Render selected items table
 function renderSelectedItems(): void {
   selectedItemsBodyEl.innerHTML = "";
+  syncUngroupedOrder();
 
-  // Render product items
-  selectedItems.forEach((item, productId) => {
-    const unitPrice = item.customPrice !== undefined ? item.customPrice : item.product.price.amount;
-    const total = unitPrice * item.quantity;
-
-    const row = document.createElement("tr");
-    row.innerHTML = `
-      <td>${item.product.brand}</td>
-      <td>${item.product.name}</td>
-      <td>
-        <input type="number" class="price-input" value="${unitPrice}" min="0" data-product-id="${productId}">
-      </td>
-      <td>
-        <input type="number" class="qty-input" value="${item.quantity}" min="1" data-product-id="${productId}">
-      </td>
-      <td>PHP ${total.toLocaleString()}</td>
-      <td>
-        <button class="btn-remove" data-product-id="${productId}">Remove</button>
-      </td>
-    `;
-
-    selectedItemsBodyEl.appendChild(row);
+  // Render ungrouped items first
+  ungroupedItemOrder.forEach((itemId) => {
+    if (selectedItems.has(itemId)) {
+      const item = selectedItems.get(itemId)!;
+      const row = createProductRow(item, itemId, null);
+      addDragEventListeners(row);
+      selectedItemsBodyEl.appendChild(row);
+    } else if (selectedServicesMap.has(itemId)) {
+      const service = selectedServicesMap.get(itemId)!;
+      const row = createServiceRow(service, itemId, null);
+      addDragEventListeners(row);
+      selectedItemsBodyEl.appendChild(row);
+    }
   });
 
-  // Render service items
-  selectedServicesMap.forEach((selectedService, serviceId) => {
-    const unitPrice = selectedService.customPrice !== undefined ? selectedService.customPrice : selectedService.service.price;
+  // Render each group
+  itemGroups.forEach((group, groupId) => {
+    // Group header
+    const headerRow = createGroupHeaderRow(group);
+    // Add drop listeners to group header so items can be dropped onto it
+    headerRow.addEventListener("dragover", handleDragOver);
+    headerRow.addEventListener("dragleave", handleDragLeave);
+    headerRow.addEventListener("drop", handleDrop);
+    selectedItemsBodyEl.appendChild(headerRow);
 
-    const row = document.createElement("tr");
-    row.className = "service-row";
-    row.innerHTML = `
-      <td>SERVICE</td>
-      <td>${selectedService.service.name}</td>
-      <td>
-        <input type="number" class="price-input service-price-input" value="${unitPrice}" min="0" data-service-id="${serviceId}">
-      </td>
-      <td>1</td>
-      <td>PHP ${unitPrice.toLocaleString()}</td>
-      <td>
-        <button class="btn-remove service-remove" data-service-id="${serviceId}">Remove</button>
-      </td>
-    `;
+    // Group items
+    const itemsInGroup = getItemsInGroup(groupId);
+    itemsInGroup.forEach((itemId) => {
+      if (selectedItems.has(itemId)) {
+        const item = selectedItems.get(itemId)!;
+        const row = createProductRow(item, itemId, groupId);
+        addDragEventListeners(row);
+        selectedItemsBodyEl.appendChild(row);
+      } else if (selectedServicesMap.has(itemId)) {
+        const service = selectedServicesMap.get(itemId)!;
+        const row = createServiceRow(service, itemId, groupId);
+        addDragEventListeners(row);
+        selectedItemsBodyEl.appendChild(row);
+      }
+    });
+  });
 
-    selectedItemsBodyEl.appendChild(row);
+  // Add event listeners for group name inputs
+  document.querySelectorAll(".group-name-input").forEach((input) => {
+    input.addEventListener("change", (e) => {
+      const target = e.target as HTMLInputElement;
+      const groupId = target.dataset.groupId!;
+      const group = itemGroups.get(groupId);
+      if (group) {
+        group.name = target.value;
+      }
+    });
+  });
+
+  // Add event listeners for delete group buttons
+  document.querySelectorAll(".btn-delete-group").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      const target = e.target as HTMLButtonElement;
+      const groupId = target.dataset.groupId!;
+      deleteGroup(groupId);
+      renderSelectedItems();
+    });
+  });
+
+  // Add event listeners for group select dropdowns
+  document.querySelectorAll(".group-select").forEach((select) => {
+    select.addEventListener("change", (e) => {
+      const target = e.target as HTMLSelectElement;
+      const itemId = target.dataset.itemId!;
+      const groupId = target.value;
+      if (groupId) {
+        addItemToGroup(itemId, groupId);
+        renderSelectedItems();
+      }
+    });
+  });
+
+  // Add event listeners for ungroup buttons
+  document.querySelectorAll(".btn-ungroup").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      const target = e.target as HTMLButtonElement;
+      const itemId = target.dataset.itemId!;
+      removeItemFromGroup(itemId);
+      renderSelectedItems();
+    });
   });
 
   // Add event listeners for product price inputs
@@ -463,7 +730,6 @@ function renderSelectedItems(): void {
 
       if (newPrice >= 0 && selectedItems.has(productId)) {
         const item = selectedItems.get(productId)!;
-        // Only set custom price if different from default
         if (newPrice !== item.product.price.amount) {
           item.customPrice = newPrice;
         } else {
@@ -483,7 +749,6 @@ function renderSelectedItems(): void {
 
       if (newPrice >= 0 && selectedServicesMap.has(serviceId)) {
         const selectedService = selectedServicesMap.get(serviceId)!;
-        // Only set custom price if different from default
         if (newPrice !== selectedService.service.price) {
           selectedService.customPrice = newPrice;
         } else {
@@ -513,6 +778,15 @@ function renderSelectedItems(): void {
     btn.addEventListener("click", (e) => {
       const target = e.target as HTMLButtonElement;
       const productId = target.dataset.productId!;
+      // Remove from group tracking
+      itemToGroup.delete(productId);
+      const idx = ungroupedItemOrder.indexOf(productId);
+      if (idx > -1) ungroupedItemOrder.splice(idx, 1);
+      // Remove from all group orders
+      groupItemOrder.forEach((order) => {
+        const i = order.indexOf(productId);
+        if (i > -1) order.splice(i, 1);
+      });
       selectedItems.delete(productId);
       renderProducts();
       renderSelectedItems();
@@ -524,8 +798,16 @@ function renderSelectedItems(): void {
     btn.addEventListener("click", (e) => {
       const target = e.target as HTMLButtonElement;
       const serviceId = target.dataset.serviceId!;
+      // Remove from group tracking
+      itemToGroup.delete(serviceId);
+      const idx = ungroupedItemOrder.indexOf(serviceId);
+      if (idx > -1) ungroupedItemOrder.splice(idx, 1);
+      // Remove from all group orders
+      groupItemOrder.forEach((order) => {
+        const i = order.indexOf(serviceId);
+        if (i > -1) order.splice(i, 1);
+      });
       selectedServicesMap.delete(serviceId);
-      // Update the UI card
       const serviceCard = document.querySelector(`.service-card[data-service-id="${serviceId}"]`);
       if (serviceCard) {
         serviceCard.classList.remove("selected");
@@ -535,6 +817,180 @@ function renderSelectedItems(): void {
   });
 
   updateGrandTotal();
+}
+
+// Add drag event listeners to a row
+function addDragEventListeners(row: HTMLTableRowElement): void {
+  row.addEventListener("dragstart", handleDragStart);
+  row.addEventListener("dragend", handleDragEnd);
+  row.addEventListener("dragover", handleDragOver);
+  row.addEventListener("dragleave", handleDragLeave);
+  row.addEventListener("drop", handleDrop);
+}
+
+function handleDragStart(e: DragEvent): void {
+  const target = e.target as HTMLElement;
+  const row = target.closest("tr") as HTMLTableRowElement;
+  if (!row) return;
+
+  draggedRow = row;
+  draggedItemType = row.dataset.itemType as "product" | "service";
+  draggedItemId = row.dataset.itemId || null;
+  draggedFromGroup = row.dataset.groupId || null;
+
+  row.classList.add("dragging");
+
+  if (e.dataTransfer) {
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", row.dataset.itemId || "");
+  }
+}
+
+function handleDragEnd(e: DragEvent): void {
+  const target = e.target as HTMLElement;
+  const row = target.closest("tr") as HTMLTableRowElement;
+  if (row) {
+    row.classList.remove("dragging");
+  }
+
+  // Clear all drag-over classes
+  document.querySelectorAll(".drag-over, .drag-over-bottom").forEach((el) => {
+    el.classList.remove("drag-over", "drag-over-bottom");
+  });
+
+  draggedRow = null;
+  draggedItemType = null;
+  draggedItemId = null;
+  draggedFromGroup = null;
+}
+
+function handleDragOver(e: DragEvent): void {
+  e.preventDefault();
+  if (!e.dataTransfer) return;
+  e.dataTransfer.dropEffect = "move";
+
+  const target = e.target as HTMLElement;
+  const row = target.closest("tr") as HTMLTableRowElement;
+  if (!row || row === draggedRow) return;
+
+  // Clear other drag-over classes
+  document.querySelectorAll(".drag-over, .drag-over-bottom").forEach((el) => {
+    if (el !== row) {
+      el.classList.remove("drag-over", "drag-over-bottom");
+    }
+  });
+
+  // Determine if we're above or below the middle of the row
+  const rect = row.getBoundingClientRect();
+  const midY = rect.top + rect.height / 2;
+
+  if (e.clientY < midY) {
+    row.classList.add("drag-over");
+    row.classList.remove("drag-over-bottom");
+  } else {
+    row.classList.add("drag-over-bottom");
+    row.classList.remove("drag-over");
+  }
+}
+
+function handleDragLeave(e: DragEvent): void {
+  const target = e.target as HTMLElement;
+  const row = target.closest("tr") as HTMLTableRowElement;
+  if (row) {
+    row.classList.remove("drag-over", "drag-over-bottom");
+  }
+}
+
+function handleDrop(e: DragEvent): void {
+  e.preventDefault();
+
+  const target = e.target as HTMLElement;
+  const dropRow = target.closest("tr") as HTMLTableRowElement;
+  if (!dropRow || !draggedRow || dropRow === draggedRow) return;
+
+  // Check if dropping on a group header
+  if (dropRow.classList.contains("group-header-row")) {
+    const targetGroupId = dropRow.dataset.groupId;
+    if (targetGroupId && draggedItemId) {
+      // Move item to this group
+      addItemToGroup(draggedItemId, targetGroupId);
+      renderSelectedItems();
+    }
+    dropRow.classList.remove("drag-over", "drag-over-bottom");
+    return;
+  }
+
+  const dropItemId = dropRow.dataset.itemId;
+  const dropGroupId = dropRow.dataset.groupId || null;
+
+  if (!dropItemId || !draggedItemId) return;
+
+  // Determine drop position
+  const rect = dropRow.getBoundingClientRect();
+  const midY = rect.top + rect.height / 2;
+  const insertAfter = e.clientY >= midY;
+
+  // Reorder the items
+  reorderItems(draggedItemId, draggedFromGroup, dropItemId, dropGroupId, insertAfter);
+
+  // Clear drag-over classes
+  dropRow.classList.remove("drag-over", "drag-over-bottom");
+}
+
+function reorderItems(
+  fromId: string,
+  fromGroupId: string | null,
+  toId: string,
+  toGroupId: string | null,
+  insertAfter: boolean
+): void {
+  // Determine source and target arrays
+  const fromArray = fromGroupId ? groupItemOrder.get(fromGroupId) : ungroupedItemOrder;
+  const toArray = toGroupId ? groupItemOrder.get(toGroupId) : ungroupedItemOrder;
+
+  if (!fromArray || !toArray) return;
+
+  // Find indices
+  const fromIndex = fromArray.indexOf(fromId);
+  const toIndex = toArray.indexOf(toId);
+
+  if (fromIndex === -1 || toIndex === -1) return;
+
+  // Same group/array - simple reorder
+  if (fromArray === toArray) {
+    // Remove from current position
+    fromArray.splice(fromIndex, 1);
+
+    // Calculate new index
+    let newIndex = toIndex;
+    if (fromIndex < toIndex) {
+      newIndex = insertAfter ? toIndex : toIndex - 1;
+    } else {
+      newIndex = insertAfter ? toIndex + 1 : toIndex;
+    }
+
+    // Insert at new position
+    fromArray.splice(newIndex, 0, fromId);
+  } else {
+    // Moving between groups/arrays
+    // Remove from source
+    fromArray.splice(fromIndex, 1);
+
+    // Update group tracking
+    if (fromGroupId) {
+      itemToGroup.delete(fromId);
+    }
+    if (toGroupId) {
+      itemToGroup.set(fromId, toGroupId);
+    }
+
+    // Calculate insert position in target
+    const insertIndex = insertAfter ? toIndex + 1 : toIndex;
+    toArray.splice(insertIndex, 0, fromId);
+  }
+
+  // Re-render
+  renderSelectedItems();
 }
 
 // Update grand total
@@ -643,22 +1099,58 @@ async function generateQuotation(): Promise<void> {
     return;
   }
 
-  const items = Array.from(selectedItems.values()).map((item) => {
-    const promoPrice = item.customPrice !== undefined ? item.customPrice : item.product.price.amount;
-    return {
-      productId: item.product.id,
-      name: item.product.name,
-      brand: item.product.brand,
-      description: item.product.category,
-      specs: buildProductSpecs(item.product),
-      imagePath: getProductImagePath(item.product.name),
-      quantity: item.quantity,
-      unit: "pc",
-      unitPrice: item.product.price.fakeAmount,
-      promoPrice: promoPrice,
-      totalPrice: promoPrice * item.quantity,
-    };
+  // Helper to create quotation item from product/service
+  const createQuotationItem = (itemId: string): QuotationItem | null => {
+    if (selectedItems.has(itemId)) {
+      const item = selectedItems.get(itemId)!;
+      const promoPrice = item.customPrice !== undefined ? item.customPrice : item.product.price.amount;
+      return {
+        productId: item.product.id,
+        name: item.product.name,
+        brand: item.product.brand,
+        description: item.product.category,
+        specs: buildProductSpecs(item.product),
+        imagePath: getProductImagePath(item.product.name),
+        quantity: item.quantity,
+        unit: "pc",
+        unitPrice: item.product.price.fakeAmount,
+        promoPrice: promoPrice,
+        totalPrice: promoPrice * item.quantity,
+      };
+    }
+    return null;
+  };
+
+  // Build ungrouped items (items not in any group)
+  const ungroupedItems: QuotationItem[] = [];
+  ungroupedItemOrder.forEach((itemId) => {
+    const item = createQuotationItem(itemId);
+    if (item) ungroupedItems.push(item);
   });
+
+  // Build groups with their items
+  const groups: QuotationGroup[] = [];
+  itemGroups.forEach((group, groupId) => {
+    const groupItems: QuotationItem[] = [];
+    const itemsInGroup = getItemsInGroup(groupId);
+    itemsInGroup.forEach((itemId) => {
+      const item = createQuotationItem(itemId);
+      if (item) groupItems.push(item);
+    });
+    if (groupItems.length > 0) {
+      groups.push({
+        id: group.id,
+        name: group.name,
+        items: groupItems,
+      });
+    }
+  });
+
+  // Combine all items for total calculation (ungrouped + grouped)
+  const allItems: QuotationItem[] = [
+    ...ungroupedItems,
+    ...groups.flatMap((g) => g.items),
+  ];
 
   // Get selected services with custom prices
   const selectedServicesList = Array.from(selectedServicesMap.values()).map((selectedService) => {
@@ -678,7 +1170,8 @@ async function generateQuotation(): Promise<void> {
     brochureOnly: brochureOnlyEl.checked,
     vatInclusive: vatInclusiveEl.checked,
     discount: discount > 0 ? discount : undefined,
-    items,
+    items: ungroupedItems,
+    groups: groups.length > 0 ? groups : undefined,
     services: selectedServicesList.length > 0 ? selectedServicesList : undefined,
     notes: notesEl.value.trim() || undefined,
   };
@@ -708,6 +1201,12 @@ async function generateQuotation(): Promise<void> {
 function clearAll(): void {
   selectedItems.clear();
   selectedServicesMap.clear();
+  itemGroups.clear();
+  itemToGroup.clear();
+  groupItemOrder.clear();
+  ungroupedItemOrder = [];
+  groupIdCounter = 0;
+  productInstanceCounter = 0;
   quoteRefNoEl.value = "";
   companyNameEl.value = "";
   companyAddressEl.value = "";
@@ -729,6 +1228,14 @@ function clearAll(): void {
 // Event listeners
 generateBtnEl.addEventListener("click", generateQuotation);
 clearBtnEl.addEventListener("click", clearAll);
+
+// Add Group button
+const addGroupBtnEl = document.getElementById("addGroupBtn") as HTMLButtonElement;
+addGroupBtnEl.addEventListener("click", () => {
+  const groupName = `Group ${itemGroups.size + 1}`;
+  createGroup(groupName);
+  renderSelectedItems();
+});
 
 // VAT checkbox listener - update totals when changed
 vatInclusiveEl.addEventListener("change", () => {

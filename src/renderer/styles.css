@@ -417,6 +417,28 @@ h2 {
   font-size: 12px;
 }
 
+.product-card .instance-badge {
+  background: var(--accent-color);
+  color: white;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-top: 8px;
+  display: inline-block;
+}
+
+.product-card .add-hint {
+  color: var(--text-secondary);
+  font-size: 11px;
+  margin-top: 8px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.product-card:hover .add-hint {
+  opacity: 1;
+}
+
 /* Services Section */
 .services-heading {
   color: var(--text-secondary);
@@ -635,4 +657,197 @@ th {
   text-align: center;
   padding: 20px;
   color: var(--text-secondary);
+}
+
+/* Drag Handle Styles */
+.drag-handle-header {
+  width: 30px;
+  padding: 12px 8px;
+}
+
+.drag-handle {
+  cursor: grab;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  padding: 8px 4px;
+  transition: color 0.2s ease;
+}
+
+.drag-handle:hover {
+  color: var(--accent-color);
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+.drag-handle svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Dragging States */
+tr.dragging {
+  opacity: 0.5;
+  background: var(--bg-input);
+}
+
+tr.drag-over {
+  border-top: 2px solid var(--accent-color);
+}
+
+tr.drag-over-bottom {
+  border-bottom: 2px solid var(--accent-color);
+}
+
+#selectedItemsBody tr {
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+#selectedItemsBody tr[draggable="true"] {
+  user-select: none;
+}
+
+/* Section Header with Add Group Button */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.section-header h2 {
+  margin-bottom: 0;
+}
+
+.btn-add-group {
+  background: var(--accent-color);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s ease;
+}
+
+.btn-add-group:hover {
+  background: var(--accent-hover);
+}
+
+/* Group Header Row */
+.group-header-row {
+  background: var(--accent-color) !important;
+}
+
+.group-header-row td {
+  padding: 8px 12px;
+}
+
+.group-header-cell {
+  background: var(--accent-color);
+  border: none !important;
+}
+
+.group-header-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.group-icon {
+  font-size: 16px;
+}
+
+.group-name-input {
+  background: transparent;
+  border: 1px solid transparent;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 4px;
+  flex: 1;
+  max-width: 300px;
+}
+
+.group-name-input:hover,
+.group-name-input:focus {
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.1);
+  outline: none;
+}
+
+.btn-delete-group {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-delete-group:hover {
+  background: var(--danger-color);
+}
+
+/* Group Item Styling */
+tr[data-group-id]:not([data-group-id=""]) {
+  background: var(--bg-secondary);
+}
+
+tr[data-group-id]:not([data-group-id=""]):hover {
+  background: var(--bg-input);
+}
+
+/* Action Cell */
+.action-cell {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.group-select {
+  padding: 4px 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.group-select:focus {
+  outline: none;
+  border-color: var(--accent-color);
+}
+
+.btn-ungroup {
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.btn-ungroup:hover {
+  background: var(--border-color);
+  color: var(--text-primary);
+}
+
+/* Drag over group header */
+.group-header-row.drag-over,
+.group-header-row.drag-over-bottom {
+  box-shadow: inset 0 0 0 2px white;
 }

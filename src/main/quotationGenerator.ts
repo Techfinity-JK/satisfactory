@@ -44,6 +44,12 @@ export interface ServiceItem {
   price: number;
 }
 
+export interface QuotationGroup {
+  id: string;
+  name: string;
+  items: QuotationItem[];
+}
+
 export interface QuotationData {
   quoteRefNo: string;
   companyName: string;
@@ -55,6 +61,7 @@ export interface QuotationData {
   vatInclusive?: boolean;
   discount?: number;
   items: QuotationItem[];
+  groups?: QuotationGroup[];
   services?: ServiceItem[];
   notes?: string;
 }
@@ -129,7 +136,7 @@ export async function generateQuotation(
           }),
 
           // Products
-          ...createProductSections(data.items, data.brochureOnly, data.vatInclusive, data.discount, data.services),
+          ...createProductSections(data.items, data.groups, data.brochureOnly, data.vatInclusive, data.discount, data.services),
 
           // Notes
           ...(data.notes
@@ -261,38 +268,94 @@ function createInfoValueCell(text: string, cellWidth: number, borders: object): 
   });
 }
 
-function createProductSections(items: QuotationItem[], brochureOnly?: boolean, vatInclusive?: boolean, discount?: number, services?: ServiceItem[]): (Paragraph | Table)[] {
+function createProductSections(items: QuotationItem[], groups?: QuotationGroup[], brochureOnly?: boolean, vatInclusive?: boolean, discount?: number, services?: ServiceItem[]): (Paragraph | Table)[] {
   const sections: (Paragraph | Table)[] = [];
 
-  items.forEach((item) => {
-    // Product header bullet point
-    sections.push(
-      new Paragraph({
-        children: [
-          new TextRun({
-            text: `•    ${item.brand} - ${item.name}${item.description ? ` - ${item.description}` : ""}`,
-            font: FONT_FAMILY,
-            bold: true,
-            size: FONT_SIZE,
-          }),
-        ],
-        spacing: { before: 200, after: 120 },
-      })
-    );
+  // Helper to render items and return subtotal
+  const renderItemsSection = (sectionItems: QuotationItem[], groupName?: string): number => {
+    let subtotal = 0;
 
-    // Product table
-    sections.push(createProductTable(item));
-  });
+    // Add group header if this is a group
+    if (groupName) {
+      sections.push(
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: groupName,
+              font: FONT_FAMILY,
+              bold: true,
+              size: 22, // Slightly larger for group headers
+            }),
+          ],
+          spacing: { before: 300, after: 150 },
+        })
+      );
+    }
+
+    sectionItems.forEach((item) => {
+      // Product header bullet point
+      sections.push(
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: `•    ${item.brand} - ${item.name}${item.description ? ` - ${item.description}` : ""}`,
+              font: FONT_FAMILY,
+              bold: true,
+              size: FONT_SIZE,
+            }),
+          ],
+          spacing: { before: 200, after: 120 },
+        })
+      );
+
+      // Product table
+      sections.push(createProductTable(item));
+      subtotal += item.totalPrice;
+    });
+
+    // Add group subtotal if this is a group
+    if (groupName && !brochureOnly) {
+      sections.push(
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: `${groupName} Subtotal = ₱${subtotal.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
+              font: FONT_FAMILY,
+              bold: true,
+              size: FONT_SIZE,
+              italics: true,
+            }),
+          ],
+          alignment: AlignmentType.RIGHT,
+          spacing: { before: 150, after: 200 },
+        })
+      );
+    }
+
+    return subtotal;
+  };
+
+  // Render ungrouped items first
+  let totalEquipmentCost = 0;
+  if (items.length > 0) {
+    totalEquipmentCost += renderItemsSection(items);
+  }
+
+  // Render each group
+  if (groups && groups.length > 0) {
+    groups.forEach((group) => {
+      totalEquipmentCost += renderItemsSection(group.items, group.name);
+    });
+  }
 
   // Totals section (only show if not brochure only mode)
   if (!brochureOnly) {
     // 1. TOTAL EQUIPMENT COST
-    const equipmentCost = items.reduce((sum, item) => sum + item.totalPrice, 0);
     sections.push(
       new Paragraph({
         children: [
           new TextRun({
-            text: `TOTAL EQUIPMENT COST = ₱${equipmentCost.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
+            text: `TOTAL EQUIPMENT COST = ₱${totalEquipmentCost.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
             font: FONT_FAMILY,
             bold: true,
             size: FONT_SIZE,
@@ -343,7 +406,7 @@ function createProductSections(items: QuotationItem[], brochureOnly?: boolean, v
     }
 
     // Calculate subtotal before VAT
-    const subtotal = equipmentCost - discountAmount + installationCost;
+    const subtotal = totalEquipmentCost - discountAmount + installationCost;
 
     // 4. PLUS 12% VAT (if inclusive)
     let vatAmount = 0;
