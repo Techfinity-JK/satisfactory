@@ -127,7 +127,14 @@
       <section class="selected-items">
         <div class="section-header">
           <h2>Selected Items</h2>
-          <button id="addGroupBtn" class="btn-add-group">+ Add Group</button>
+          <div class="section-header-actions">
+            <label class="toggle-label">
+              <input type="checkbox" id="sixColumnMode">
+              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+              <span>6-Column Output</span>
+            </label>
+            <button id="addGroupBtn" class="btn-add-group">+ Add Group</button>
+          </div>
         </div>
         <table id="selectedItemsTable">
           <thead>
