@@ -339,10 +339,33 @@ h2 {
 }
 
 /* Product Tabs */
+.product-tabs-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
 .product-tabs {
   display: flex;
   gap: 8px;
-  margin-bottom: 15px;
+}
+
+.product-search {
+  flex: 1;
+  max-width: 260px;
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.product-search:focus {
+  border-color: var(--accent-color);
 }
 
 .product-tab {

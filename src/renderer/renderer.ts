@@ -731,6 +731,7 @@ const groupItemOrder: Map<string, string[]> = new Map(); // groupId -> itemIds i
 let ungroupedItemOrder: string[] = []; // itemIds for ungrouped items
 
 // DOM Elements
+const productSearchEl = document.getElementById("productSearch") as HTMLInputElement;
 const productListEl = document.getElementById("productList") as HTMLDivElement;
 const selectedItemsBodyEl = document.getElementById("selectedItemsBody") as HTMLTableSectionElement;
 const equipmentCostTotalEl = document.getElementById("equipmentCostTotal") as HTMLTableCellElement;
@@ -757,7 +758,12 @@ const sixColumnModeEl = document.getElementById("sixColumnMode") as HTMLInputEle
 function renderProducts(): void {
   productListEl.innerHTML = "";
 
-  const activeProducts = products.filter((p) => p.isActive && p.category === currentCategory);
+  const searchTerm = productSearchEl.value.toLowerCase().trim();
+  const activeProducts = products.filter((p) => {
+    if (!p.isActive || p.category !== currentCategory) return false;
+    if (!searchTerm) return true;
+    return p.name.toLowerCase().includes(searchTerm) || p.brand.toLowerCase().includes(searchTerm);
+  });
 
   activeProducts.forEach((product) => {
     const card = document.createElement("div");
@@ -785,6 +791,7 @@ function renderProducts(): void {
 // Switch product category tab
 function switchCategory(category: string): void {
   currentCategory = category;
+  productSearchEl.value = "";
 
   // Update tab active states
   document.querySelectorAll(".product-tab").forEach((tab) => {
@@ -1727,6 +1734,8 @@ productTabs.forEach((tab) => {
     }
   });
 });
+
+productSearchEl.addEventListener("input", () => renderProducts());
 
 // Initial render
 loadSavedTheme();
