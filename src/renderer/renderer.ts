@@ -89,6 +89,7 @@ interface QuotationData {
     price: number;
   }[];
   sixColumnMode?: boolean;
+  showPesoSign?: boolean;
   notes?: string;
 }
 
@@ -378,7 +379,7 @@ const products: Product[] = [
     brand: "GENERIC",
     name: "M06",
     category: "Door Access",
-    description: "125khz RFID",
+    description: " 125khz RFID",
     capacity: { fingerprint: 0, card: 2000, face: 0, transaction: 0 },
     download: { lan: false, usb: false, wifi: false },
     price: { fakeAmount: 5700, amount: 5700, currency: "PHP" },
@@ -391,7 +392,7 @@ const products: Product[] = [
     brand: "ZKTECO",
     name: "X6",
     category: "Door Access",
-    description: "125khz RFID",
+    description: " 125khz RFID",
     capacity: { fingerprint: 500, card: 500, face: 0, transaction: 0 },
     download: { lan: false, usb: false, wifi: false },
     price: { fakeAmount: 7900, amount: 7900, currency: "PHP" },
@@ -404,7 +405,7 @@ const products: Product[] = [
     brand: "GENERIC",
     name: "Door Exit Metal Square",
     category: "Door Access",
-    description: "Four Door Access Control Panel",
+    description: " For Door Access Control Panel",
     capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
     download: { lan: false, usb: false, wifi: false },
     price: { fakeAmount: 800, amount: 800, currency: "PHP" },
@@ -434,7 +435,7 @@ const products: Product[] = [
     brand: "GENERIC",
     name: "AL-280PZ/PL",
     category: "Door Access",
-    description: "Z&L bracket for AL280",
+    description: " Z&L bracket for AL280",
     capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
     download: { lan: false, usb: false, wifi: false },
     price: { fakeAmount: 2400, amount: 2400, currency: "PHP" },
@@ -462,7 +463,7 @@ const products: Product[] = [
     brand: "GENERIC",
     name: "EBG",
     category: "Door Access",
-    description: "Emergency Break Glass",
+    description: " Emergency Break Glass",
     capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
     download: { lan: false, usb: false, wifi: false },
     price: { fakeAmount: 1200, amount: 1200, currency: "PHP" },
@@ -475,7 +476,7 @@ const products: Product[] = [
     brand: "GENERIC",
     name: "Small Push Button",
     category: "Door Access",
-    description: "Small Push Button (to be installed in reception) ",
+    description: " Small Push Button (to be installed in reception) ",
     capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
     download: { lan: false, usb: false, wifi: false },
     price: { fakeAmount: 150, amount: 150, currency: "PHP" },
@@ -488,7 +489,7 @@ const products: Product[] = [
     brand: "GENERIC",
     name: "Slim Push Button",
     category: "Door Access",
-    description: "Slim Push Button",
+    description: " Slim Push Button",
     capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
     download: { lan: false, usb: false, wifi: false },
     price: { fakeAmount: 800, amount: 800, currency: "PHP" },
@@ -501,7 +502,7 @@ const products: Product[] = [
     brand: "ZKTECO",
     name: "TMD01",
     category: "Door Access",
-    description: "Temperature Detection Module for FA210",
+    description: " Temperature Detection Module for FA210",
     capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
     download: { lan: false, usb: false, wifi: false },
     price: { fakeAmount: 9500, amount: 9500, currency: "PHP" },
@@ -514,7 +515,7 @@ const products: Product[] = [
     brand: "GENERIC",
     name: "LCD Intercom",
     category: "Door Access",
-    description: "7 inch LCD monitor, the color CMOS",
+    description: " 7 inch LCD monitor, the color CMOS",
     capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
     download: { lan: false, usb: false, wifi: false },
     price: { fakeAmount: 12500, amount: 12500, currency: "PHP" },
@@ -527,7 +528,7 @@ const products: Product[] = [
     brand: "GENERIC",
     name: "Proximity Card",
     category: "Door Access",
-    description: "Proximity Card 125khz(Thin)",
+    description: " Proximity Card 125khz(Thin)",
     capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
     download: { lan: false, usb: false, wifi: false },
     price: { fakeAmount: 80, amount: 80, currency: "PHP" },
@@ -540,7 +541,7 @@ const products: Product[] = [
     brand: "GENERIC",
     name: "U-Bracket",
     category: "Door Access",
-    description: "U-Bracket (for frameless door)",
+    description: " U-Bracket (for frameless door)",
     capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
     download: { lan: false, usb: false, wifi: false },
     price: { fakeAmount: 1200, amount: 1200, currency: "PHP" },
@@ -553,7 +554,7 @@ const products: Product[] = [
     brand: "GENERIC",
     name: "Dropbolt**",
     category: "Door Access",
-    description: "Dropbolt with L&Z Bracket**",
+    description: " Dropbolt with L&Z Bracket**",
     capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
     download: { lan: false, usb: false, wifi: false },
     price: { fakeAmount: 8200, amount: 8200, currency: "PHP" },
@@ -566,7 +567,7 @@ const products: Product[] = [
     brand: "GENERIC",
     name: "Aluminum U-Bracket**",
     category: "Door Access",
-    description: "Aluminum U-Bracket for Dropbolt",
+    description: " Aluminum U-Bracket for Dropbolt",
     capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
     download: { lan: false, usb: false, wifi: false },
     price: { fakeAmount: 1500, amount: 1500, currency: "PHP" },
@@ -579,7 +580,7 @@ const products: Product[] = [
     brand: "GENERIC",
     name: "Drop Bolt",
     category: "Door Access",
-    description: "Drop Bolt Lock for Fully Frame Less Glass Door ",
+    description: " Drop Bolt Lock for Fully Frame Less Glass Door ",
     capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
     download: { lan: false, usb: false, wifi: false },
     price: { fakeAmount: 6500, amount: 6500, currency: "PHP" },
@@ -592,7 +593,7 @@ const products: Product[] = [
     brand: "ZKTECO",
     name: "RPS w/ BB",
     category: "Door Access",
-    description: "12Vdc 5A Regulated Power Supply (with backup battery)",
+    description: " 12Vdc 5A Regulated Power Supply (with backup battery)",
     capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
     download: { lan: false, usb: false, wifi: false },
     price: { fakeAmount: 4500, amount: 4500, currency: "PHP" },
@@ -605,9 +606,9 @@ const products: Product[] = [
     brand: "GENERIC",
     name: "RPS deviceless",
     category: "Door Access",
-    description: "12V 3A Door Access Control Power Supply for\n" +
-                 "Electric Lock\n" +
-                 "AC110-220V to 12VDC Power Supply Control",
+    description: " 12V 3A Door Access Control Power Supply for\n" +
+                 " Electric Lock\n" +
+                 " AC110-220V to 12VDC Power Supply Control",
     capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
     download: { lan: false, usb: false, wifi: false },
     price: { fakeAmount: 4500, amount: 4500, currency: "PHP" },
@@ -620,7 +621,7 @@ const products: Product[] = [
     brand: "ZKTECO",
     name: "FR1200",
     category: "Door Access",
-    description: "Biometrics Scanner with Built-in Card Reader",
+    description: " Biometrics Scanner with Built-in Card Reader",
     capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
     download: { lan: false, usb: false, wifi: false },
     price: { fakeAmount: 8500, amount: 8500, currency: "PHP" },
@@ -633,7 +634,7 @@ const products: Product[] = [
     brand: "GENERIC",
     name: "K1",
     category: "Door Access",
-    description: "Touch Free Push to Exit",
+    description: " Touch Free Push to Exit",
     capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
     download: { lan: false, usb: false, wifi: false },
     price: { fakeAmount: 1200, amount: 1200, currency: "PHP" },
@@ -646,7 +647,7 @@ const products: Product[] = [
     brand: "GENERIC",
     name: "Wireless Remote",
     category: "Door Access",
-    description: "Wireless Receiver to Exit with Remote Control",
+    description: " Wireless Receiver to Exit with Remote Control",
     capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
     download: { lan: false, usb: false, wifi: false },
     price: { fakeAmount: 1500, amount: 1500, currency: "PHP" },
@@ -659,7 +660,7 @@ const products: Product[] = [
     brand: "GENERIC",
     name: "Emergency Key Switch",
     category: "Door Access",
-    description: "Emergency Key Switch",
+    description: " Emergency Key Switch",
     capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
     download: { lan: false, usb: false, wifi: false },
     price: { fakeAmount: 1500, amount: 1500, currency: "PHP" },
@@ -672,7 +673,7 @@ const products: Product[] = [
     brand: "GENERIC",
     name: "Door Buzzer",
     category: "Door Access",
-    description: "Door Buzzer",
+    description: " Door Buzzer",
     capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
     download: { lan: false, usb: false, wifi: false },
     price: { fakeAmount: 350, amount: 350, currency: "PHP" },
@@ -685,7 +686,7 @@ const products: Product[] = [
     brand: "GENERIC",
     name: "Wireless Door Bell",
     category: "Door Access",
-    description: "Wireless Door Bell",
+    description: " Wireless Door Bell",
     capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
     download: { lan: false, usb: false, wifi: false },
     price: { fakeAmount: 1500, amount: 1500, currency: "PHP" },
@@ -698,7 +699,7 @@ const products: Product[] = [
     brand: "GENERIC",
     name: "Battery",
     category: "Door Access",
-    description: "Lead-Acid Battery 12v, 7.2Ah",
+    description: " Lead-Acid Battery 12v, 7.2Ah",
     capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
     download: { lan: false, usb: false, wifi: false },
     price: { fakeAmount: 2500, amount: 2500, currency: "PHP" },
@@ -753,6 +754,7 @@ const vatInclusiveEl = document.getElementById("vatInclusive") as HTMLInputEleme
 const generateBtnEl = document.getElementById("generateBtn") as HTMLButtonElement;
 const clearBtnEl = document.getElementById("clearBtn") as HTMLButtonElement;
 const sixColumnModeEl = document.getElementById("sixColumnMode") as HTMLInputElement;
+const showPesoSignEl = document.getElementById("showPesoSign") as HTMLInputElement;
 
 // Render products
 function renderProducts(): void {
@@ -1463,7 +1465,7 @@ function buildProductSpecs(product: Product): string[] {
   }
 
   // Warranty
-  if (product.warranty) {
+  if (product.warranty && product.warranty.duration > 0) {
     specs.push(`${product.warranty.duration} ${product.warranty.unit.toUpperCase()} WARRANTY`);
   }
 
@@ -1565,7 +1567,8 @@ async function generateQuotation(): Promise<void> {
     items: ungroupedItems,
     groups: groups.length > 0 ? groups : undefined,
     services: selectedServicesList.length > 0 ? selectedServicesList : undefined,
-    sixColumnMode: sixColumnModeEl.checked,
+    sixColumnMode: !sixColumnModeEl.checked,
+    showPesoSign: showPesoSignEl.checked,
     notes: notesEl.value.trim() || undefined,
   };
 

@@ -65,6 +65,7 @@ export interface QuotationData {
   groups?: QuotationGroup[];
   services?: ServiceItem[];
   sixColumnMode?: boolean;
+  showPesoSign?: boolean;
   notes?: string;
 }
 
@@ -138,7 +139,7 @@ export async function generateQuotation(
           }),
 
           // Products
-          ...createProductSections(data.items, data.groups, data.brochureOnly, data.vatInclusive, data.discount, data.services, data.sixColumnMode),
+          ...createProductSections(data.items, data.groups, data.brochureOnly, data.vatInclusive, data.discount, data.services, data.sixColumnMode, data.showPesoSign),
 
           // Notes
           ...(data.notes
@@ -270,8 +271,9 @@ function createInfoValueCell(text: string, cellWidth: number, borders: object): 
   });
 }
 
-function createProductSections(items: QuotationItem[], groups?: QuotationGroup[], brochureOnly?: boolean, vatInclusive?: boolean, discount?: number, services?: ServiceItem[], sixColumnMode?: boolean): (Paragraph | Table)[] {
+function createProductSections(items: QuotationItem[], groups?: QuotationGroup[], brochureOnly?: boolean, vatInclusive?: boolean, discount?: number, services?: ServiceItem[], sixColumnMode?: boolean, showPesoSign?: boolean): (Paragraph | Table)[] {
   const sections: (Paragraph | Table)[] = [];
+  const curr = showPesoSign ? "₱" : "";
 
   // Helper to render items as a single table and return subtotal
   const renderItemsSection = (sectionItems: QuotationItem[], groupName?: string): number => {
@@ -297,7 +299,7 @@ function createProductSections(items: QuotationItem[], groups?: QuotationGroup[]
     }
 
     // Create a single table containing all items
-    sections.push(createGroupedTable(sectionItems, sixColumnMode));
+    sections.push(createGroupedTable(sectionItems, sixColumnMode, showPesoSign));
 
     // Add group subtotal if this is a group
     if (groupName && !brochureOnly) {
@@ -305,7 +307,7 @@ function createProductSections(items: QuotationItem[], groups?: QuotationGroup[]
         new Paragraph({
           children: [
             new TextRun({
-              text: `${groupName} Subtotal = ₱${subtotal.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
+              text: `${groupName} Subtotal = ${curr}${subtotal.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
               font: FONT_FAMILY,
               bold: true,
               size: FONT_SIZE,
@@ -341,7 +343,7 @@ function createProductSections(items: QuotationItem[], groups?: QuotationGroup[]
       new Paragraph({
         children: [
           new TextRun({
-            text: `TOTAL EQUIPMENT COST = ₱${totalEquipmentCost.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
+            text: `TOTAL EQUIPMENT COST = ${curr}${totalEquipmentCost.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
             font: FONT_FAMILY,
             bold: true,
             size: FONT_SIZE,
@@ -359,7 +361,7 @@ function createProductSections(items: QuotationItem[], groups?: QuotationGroup[]
         new Paragraph({
           children: [
             new TextRun({
-              text: `LESS DISCOUNT = ₱${discountAmount.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
+              text: `LESS DISCOUNT = ${curr}${discountAmount.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
               font: FONT_FAMILY,
               bold: true,
               size: FONT_SIZE,
@@ -379,7 +381,7 @@ function createProductSections(items: QuotationItem[], groups?: QuotationGroup[]
         new Paragraph({
           children: [
             new TextRun({
-              text: `INSTALLATION COST = ₱${installationCost.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
+              text: `INSTALLATION COST = ${curr}${installationCost.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
               font: FONT_FAMILY,
               bold: true,
               size: FONT_SIZE,
@@ -402,7 +404,7 @@ function createProductSections(items: QuotationItem[], groups?: QuotationGroup[]
         new Paragraph({
           children: [
             new TextRun({
-              text: `PLUS 12% VAT = ₱${vatAmount.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
+              text: `PLUS 12% VAT = ${curr}${vatAmount.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
               font: FONT_FAMILY,
               bold: true,
               size: FONT_SIZE,
@@ -420,7 +422,7 @@ function createProductSections(items: QuotationItem[], groups?: QuotationGroup[]
       new Paragraph({
         children: [
           new TextRun({
-            text: `TOTAL INVESTMENT COST = ₱${totalInvestment.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
+            text: `TOTAL INVESTMENT COST = ${curr}${totalInvestment.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
             font: FONT_FAMILY,
             bold: true,
             size: FONT_SIZE,
@@ -499,7 +501,8 @@ function createProductSections(items: QuotationItem[], groups?: QuotationGroup[]
 }
 
 // Create a single table containing multiple products
-function createGroupedTable(items: QuotationItem[], sixColumnMode?: boolean): Table {
+function createGroupedTable(items: QuotationItem[], sixColumnMode?: boolean, showPesoSign?: boolean): Table {
+  const curr = showPesoSign ? "₱" : "";
   const borderStyle = {
     style: BorderStyle.SINGLE,
     size: 6,
@@ -618,7 +621,7 @@ function createGroupedTable(items: QuotationItem[], sixColumnMode?: boolean): Ta
     // Product data row
     const dataRowChildren = [
       new TableCell({ children: modelCellChildren, borders, verticalAlign: VerticalAlign.CENTER }),
-      new TableCell({ children: descriptionParagraphs, borders, verticalAlign: VerticalAlign.TOP }),
+      new TableCell({ children: descriptionParagraphs, borders, verticalAlign: VerticalAlign.CENTER }),
       new TableCell({
         children: [new Paragraph({ children: [new TextRun({ text: item.quantity.toString(), font: FONT_FAMILY, size: FONT_SIZE })], alignment: AlignmentType.CENTER })],
         borders, verticalAlign: VerticalAlign.CENTER,
@@ -628,15 +631,15 @@ function createGroupedTable(items: QuotationItem[], sixColumnMode?: boolean): Ta
         borders, verticalAlign: VerticalAlign.CENTER,
       }),
       new TableCell({
-        children: [new Paragraph({ children: [new TextRun({ text: `₱${item.unitPrice.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`, font: FONT_FAMILY, size: FONT_SIZE })], alignment: AlignmentType.CENTER })],
+        children: [new Paragraph({ children: [new TextRun({ text: `${curr}${item.unitPrice.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`, font: FONT_FAMILY, size: FONT_SIZE })], alignment: AlignmentType.CENTER })],
         borders, verticalAlign: VerticalAlign.CENTER,
       }),
       ...(!sixColumnMode ? [new TableCell({
-        children: [new Paragraph({ children: [new TextRun({ text: `₱${item.promoPrice.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`, font: FONT_FAMILY, size: FONT_SIZE })], alignment: AlignmentType.CENTER })],
+        children: [new Paragraph({ children: [new TextRun({ text: `${curr}${item.promoPrice.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`, font: FONT_FAMILY, size: FONT_SIZE })], alignment: AlignmentType.CENTER })],
         borders, verticalAlign: VerticalAlign.CENTER,
       })] : []),
       new TableCell({
-        children: [new Paragraph({ children: [new TextRun({ text: `₱${item.totalPrice.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`, font: FONT_FAMILY, bold: true, size: FONT_SIZE })], alignment: AlignmentType.CENTER })],
+        children: [new Paragraph({ children: [new TextRun({ text: `${curr}${item.totalPrice.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`, font: FONT_FAMILY, bold: true, size: FONT_SIZE })], alignment: AlignmentType.CENTER })],
         borders, verticalAlign: VerticalAlign.CENTER,
       }),
     ];
@@ -775,7 +778,7 @@ function createProductTable(item: QuotationItem): Table {
                 }),
               ],
         borders,
-        verticalAlign: VerticalAlign.TOP,
+        verticalAlign: VerticalAlign.CENTER,
       }),
       // Qty
       new TableCell({
