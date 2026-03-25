@@ -13,9 +13,56 @@ import {
   VerticalAlign,
   convertInchesToTwip,
   UnderlineType,
+  HeightRule,
 } from "docx";
 import * as fs from "fs";
 import * as path from "path";
+
+// Returns { width, height } in pixels from a PNG or JPEG file buffer, or null if unreadable.
+function getImageDimensions(buf: Buffer): { width: number; height: number } | null {
+  // PNG: signature 8 bytes, then IHDR chunk: 4 len + 4 "IHDR" + 4 width + 4 height
+  if (buf.length >= 24 && buf.readUInt32BE(0) === 0x89504e47) {
+    return { width: buf.readUInt32BE(16), height: buf.readUInt32BE(20) };
+  }
+  // JPEG: scan for SOF0/SOF2 markers (0xFFC0, 0xFFC2)
+  if (buf.length >= 4 && buf[0] === 0xff && buf[1] === 0xd8) {
+    let offset = 2;
+    while (offset + 8 < buf.length) {
+      if (buf[offset] !== 0xff) break;
+      const marker = buf[offset + 1];
+      const segLen = buf.readUInt16BE(offset + 2);
+      if ((marker === 0xc0 || marker === 0xc2) && offset + 8 < buf.length) {
+        return { width: buf.readUInt16BE(offset + 7), height: buf.readUInt16BE(offset + 5) };
+      }
+      offset += 2 + segLen;
+    }
+  }
+  return null;
+}
+
+// Per-icon max size overrides (filename → max px). Default is 80.
+const ICON_MAX_SIZE: { [filename: string]: number } = {
+  "door-exit-metal-square.jpg": 50,
+  "rps.png": 50,
+  "ebg.png": 50,
+  "small-push-button.jpg": 50,
+  "k1.png": 50,
+  "emergency-key-switch.png": 50,
+  "tmd01.png": 50,
+  "proximity-card.png": 50,
+};
+
+function getIconMaxSize(imagePath: string): number {
+  const filename = path.basename(imagePath);
+  return ICON_MAX_SIZE[filename] ?? 80;
+}
+
+// Scale dimensions to fit within maxSize x maxSize while preserving aspect ratio.
+function fitInBox(w: number, h: number, maxSize: number): { width: number; height: number } {
+  if (w <= maxSize && h <= maxSize) return { width: w, height: h };
+  const scale = Math.min(maxSize / w, maxSize / h);
+  return { width: Math.round(w * scale), height: Math.round(h * scale) };
+}
 
 // Table colors
 const HEADER_COLOR = "0070C0";
@@ -31,6 +78,7 @@ export interface QuotationItem {
   brand: string;
   category: string;
   description?: string;
+  dimension?: string;
   specs?: string[];
   imagePath?: string;
   quantity: number;
@@ -66,6 +114,7 @@ export interface QuotationData {
   services?: ServiceItem[];
   sixColumnMode?: boolean;
   showPesoSign?: boolean;
+  agent?: string;
   notes?: string;
 }
 
@@ -100,14 +149,11 @@ export async function generateQuotation(
           new Paragraph({
             children: [
               new ImageRun({
-                data: fs.readFileSync("src/assets/header/header.PNG"),
-                transformation: {
-                  width: 690,
-                  height: 220,
-                },
+                data: fs.readFileSync(`src/assets/header/header_${data.agent ?? "jk"}.png`),
+                transformation: { width: 700, height: 248 },
               }),
             ],
-            spacing: { after: 400 },
+            spacing: { before: 0, after: 300 },
           }),
 
           // Quote Reference Number
@@ -518,8 +564,8 @@ function createGroupedTable(items: QuotationItem[], sixColumnMode?: boolean, sho
 
   // Column widths: redistribute promo column (13%) across remaining cols when in 6-col mode
   const w = sixColumnMode
-    ? { model: 15, desc: 43, qty: 5, unit: 5, unitPrice: 14, amount: 18 }
-    : { model: 15, desc: 35, qty: 5, unit: 5, unitPrice: 13, promo: 13, amount: 14 };
+    ? { model: 20, desc: 46, qty: 5, unit: 5, unitPrice: 12, amount: 12 }
+    : { model: 20, desc: 33, qty: 5, unit: 5, unitPrice: 12, promo: 13, amount: 12 };
 
   // Header row
   const headerChildren = [
@@ -532,7 +578,10 @@ function createGroupedTable(items: QuotationItem[], sixColumnMode?: boolean, sho
     createProductHeaderCell("AMOUNT", w.amount, borders),
   ];
 
-  const headerRow = new TableRow({ children: headerChildren });
+  const headerRow = new TableRow({
+    children: headerChildren,
+    height: { value: 480, rule: HeightRule.ATLEAST },
+  });
 
   const allRows: TableRow[] = [headerRow];
 
@@ -544,26 +593,33 @@ function createGroupedTable(items: QuotationItem[], sixColumnMode?: boolean, sho
   // Add rows for each item
   items.forEach((item) => {
 
-    // Build item description with specs
+    // Build item description: description lines → specs (incl. dimension → warranty)
     const descriptionParagraphs: Paragraph[] = [];
 
-    // Add product description if present
+    // 1. Product description (split on \n into separate paragraphs)
     if (item.description) {
-      descriptionParagraphs.push(
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: item.description,
-              font: FONT_FAMILY,
-              size: FONT_SIZE,
-            }),
-          ],
-        })
-      );
+      item.description.split("\n").forEach((line) => {
+        const trimmed = line.trim();
+        if (trimmed) {
+          descriptionParagraphs.push(
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: trimmed,
+                  font: FONT_FAMILY,
+                  size: FONT_SIZE,
+                }),
+              ],
+            })
+          );
+        }
+      });
     }
 
+    // 2. Specs (capacity, connectivity, ADMS, dimension, warranty — built in renderer)
     if (item.specs && item.specs.length > 0) {
       item.specs.forEach((spec) => {
+        const isWarranty = spec.includes("WARRANTY") || spec.includes("ADMS");
         descriptionParagraphs.push(
           new Paragraph({
             children: [
@@ -571,6 +627,7 @@ function createGroupedTable(items: QuotationItem[], sixColumnMode?: boolean, sho
                 text: `~ ${spec}`,
                 font: FONT_FAMILY,
                 size: FONT_SIZE,
+                bold: isWarranty,
               }),
             ],
           })
@@ -585,15 +642,16 @@ function createGroupedTable(items: QuotationItem[], sixColumnMode?: boolean, sho
     if (item.imagePath) {
       const absoluteImagePath = path.resolve(process.cwd(), item.imagePath);
       if (fs.existsSync(absoluteImagePath)) {
+        const imgBuf = fs.readFileSync(absoluteImagePath);
+        const dims = getImageDimensions(imgBuf);
+        const iconMax = getIconMaxSize(absoluteImagePath);
+        const { width: imgW, height: imgH } = dims ? fitInBox(dims.width, dims.height, iconMax) : { width: iconMax, height: iconMax };
         modelCellChildren.push(
           new Paragraph({
             children: [
               new ImageRun({
-                data: fs.readFileSync(absoluteImagePath),
-                transformation: {
-                  width: 80,
-                  height: 80,
-                },
+                data: imgBuf,
+                transformation: { width: imgW, height: imgH },
               }),
             ],
             alignment: AlignmentType.CENTER,
@@ -724,16 +782,15 @@ function createProductTable(item: QuotationItem): Table {
   if (item.imagePath) {
     const absoluteImagePath = path.resolve(process.cwd(), item.imagePath);
     if (fs.existsSync(absoluteImagePath)) {
+      const imgBuf = fs.readFileSync(absoluteImagePath);
+      const dims = getImageDimensions(imgBuf);
+      const { width: imgW, height: imgH } = dims ? fitInBox(dims.width, dims.height, 80) : { width: 80, height: 80 };
       modelCellChildren.push(
         new Paragraph({
           children: [
             new ImageRun({
-              data: fs.readFileSync(absoluteImagePath),
-              transformation: {
-                width: 80,
-                height: 80,
-              },
-              //type: "png",
+              data: imgBuf,
+              transformation: { width: imgW, height: imgH },
             }),
           ],
           alignment: AlignmentType.CENTER,

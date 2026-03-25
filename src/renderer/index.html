@@ -47,6 +47,17 @@
         <h2>Customer Information</h2>
         <div class="form-row">
           <div class="form-group">
+            <label for="agentSelect">Agent</label>
+            <select id="agentSelect">
+              <option value="jk" selected>JK</option>
+              <option value="shae">SHAE</option>
+              <option value="jhel">JHEL</option>
+              <option value="cle">CLE</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
             <label for="quoteRefNo">Quote Ref No:</label>
             <input type="text" id="quoteRefNo" placeholder="e.g. 2025-JK-001">
           </div>
@@ -86,22 +97,6 @@
           </div>
           <input type="text" id="productSearch" class="product-search" placeholder="Search products...">
         </div>
-        <div class="brochure-option">
-          <label class="checkbox-label">
-            <input type="checkbox" id="brochureOnly">
-            <span>Brochure Only</span>
-            <span class="checkbox-hint">(Hides Grand Total)</span>
-          </label>
-          <label class="checkbox-label">
-            <input type="checkbox" id="vatInclusive">
-            <span>VAT Inclusive</span>
-            <span class="checkbox-hint">(Adds 12% VAT)</span>
-          </label>
-          <label class="checkbox-label">
-            <input type="checkbox" id="showPesoSign">
-            <span>Show ₱ Sign</span>
-          </label>
-        </div>
         <div id="productList" class="product-grid">
           <!-- Products will be rendered here -->
         </div>
@@ -135,6 +130,20 @@
         <div class="section-header">
           <h2>Selected Items</h2>
           <div class="section-header-actions">
+            <label class="checkbox-label">
+              <input type="checkbox" id="brochureOnly">
+              <span>Brochure Only</span>
+              <span class="checkbox-hint">(Hides Grand Total)</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" id="vatInclusive">
+              <span>VAT Inclusive</span>
+              <span class="checkbox-hint">(Adds 12% VAT)</span>
+            </label>
+            <label class="checkbox-label">
+              <input type="checkbox" id="showPesoSign">
+              <span>Show ₱ Sign</span>
+            </label>
             <label class="toggle-label">
               <input type="checkbox" id="sixColumnMode">
               <span class="toggle-track"><span class="toggle-thumb"></span></span>

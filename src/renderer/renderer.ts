@@ -22,6 +22,7 @@ interface Product {
     currency: "PHP" | "USD" | "EUR";
   };
   withADMS: boolean;
+  dimension?: string;
   warranty?: {
     duration: number;
     unit: "months" | "years";
@@ -57,6 +58,7 @@ interface QuotationItem {
   brand: string;
   category: string;
   description?: string;
+  dimension?: string;
   specs?: string[];
   imagePath?: string;
   quantity: number;
@@ -90,6 +92,7 @@ interface QuotationData {
   }[];
   sixColumnMode?: boolean;
   showPesoSign?: boolean;
+  agent?: string;
   notes?: string;
 }
 
@@ -156,11 +159,11 @@ const products: Product[] = [
     brand: "ZKTECO",
     name: "LX50",
     category: "Biometrics",
-    description: "Dimension: 106x60x42mm",
     capacity: { fingerprint: 500, card: 0, face: 0, transaction: 50000 },
     download: { lan: false, usb: true, wifi: false },
     price: { fakeAmount: 10900, amount: 5700, currency: "PHP" },
     withADMS: false,
+    dimension: "106x60x42mm",
     warranty: { duration: 18, unit: "months" },
     isActive: true,
   },
@@ -169,11 +172,11 @@ const products: Product[] = [
     brand: "ZKTECO",
     name: "TX628",
     category: "Biometrics",
-    description: "Dimension: 180x135x37mm",
     capacity: { fingerprint: 3200, card: 3200, face: 0, transaction: 120000 },
     download: { lan: true, usb: true, wifi: false },
     price: { fakeAmount: 14900, amount: 8900, currency: "PHP" },
     withADMS: false,
+    dimension: "180x135x37mm",
     warranty: { duration: 36, unit: "months" },
     isActive: true,
   },
@@ -182,11 +185,11 @@ const products: Product[] = [
     brand: "ZKTECO",
     name: "SC700",
     category: "Biometrics",
-    description: "Dimension: 106x104x36mm",
     capacity: { fingerprint: 0, card: 30000, face: 0, transaction: 100000 },
     download: { lan: true, usb: true, wifi: false },
     price: { fakeAmount: 13500, amount: 9500, currency: "PHP" },
     withADMS: false,
+    dimension: "106x104x36mm",
     warranty: { duration: 18, unit: "months" },
     isActive: true,
   },
@@ -195,11 +198,11 @@ const products: Product[] = [
     brand: "GRANDING",
     name: "T8",
     category: "Biometrics",
-    description: "Dimension: 108x140x30mm",
     capacity: { fingerprint: 3000, card: 3000, face: 0, transaction: 100000 },
     download: { lan: true, usb: true, wifi: false },
     price: { fakeAmount: 15900, amount: 11200, currency: "PHP" },
     withADMS: true,
+    dimension: "108x140x30mm",
     warranty: { duration: 36, unit: "months" },
     isActive: true,
   },
@@ -208,11 +211,11 @@ const products: Product[] = [
     brand: "GRANDING",
     name: "FA1000",
     category: "Biometrics",
-    description: "to do",
     capacity: { fingerprint: 0, card: 1000, face: 500, transaction: 150000 },
     download: { lan: true, usb: false, wifi: true },
     price: { fakeAmount: 13200, amount: 9200, currency: "PHP" },
     withADMS: true,
+    dimension: "",
     warranty: { duration: 18, unit: "months" },
     isActive: true,
   },
@@ -221,11 +224,11 @@ const products: Product[] = [
     brand: "ZKTECO",
     name: "BK100",
     category: "Biometrics",
-    description: "161x93x152mm",
     capacity: { fingerprint: 3000, card: 0, face: 800, transaction: 250000 },
     download: { lan: true, usb: true, wifi: false },
     price: { fakeAmount: 16500, amount: 9200, currency: "PHP" },
     withADMS: false,
+    dimension: "161x93x152mm",
     warranty: { duration: 36, unit: "months" },
     isActive: true,
   },
@@ -234,11 +237,11 @@ const products: Product[] = [
     brand: "ZKTECO",
     name: "MB10",
     category: "Biometrics",
-    description: "to do",
     capacity: { fingerprint: 500, card: 0, face: 100, transaction: 50000 },
     download: { lan: true, usb: true, wifi: true },
     price: { fakeAmount: 17900, amount: 10900, currency: "PHP" },
     withADMS: true,
+    dimension: "",
     warranty: { duration: 18, unit: "months" },
     isActive: true,
   },
@@ -247,11 +250,11 @@ const products: Product[] = [
     brand: "GRANDING",
     name: "FA110",
     category: "Biometrics",
-    description: "161x93x152mm",
     capacity: { fingerprint: 500, card: 500, face: 500, transaction: 50000 },
     download: { lan: true, usb: true, wifi: true },
     price: { fakeAmount: 17900, amount: 9700, currency: "PHP" },
     withADMS: true,
+    dimension: "161x93x152mm",
     warranty: { duration: 36, unit: "months" },
     isActive: true,
   },
@@ -260,11 +263,11 @@ const products: Product[] = [
     brand: "ZKTECO",
     name: "F22",
     category: "Biometrics",
-    description: "78x158.5x41mm",
     capacity: { fingerprint: 3000, card: 5000, face: 0, transaction: 50000 },
     download: { lan: true, usb: true, wifi: true },
     price: { fakeAmount: 19800, amount: 14700, currency: "PHP" },
     withADMS: false,
+    dimension: "78x158.5x41mm",
     warranty: { duration: 36, unit: "months" },
     isActive: true,
   },
@@ -273,11 +276,11 @@ const products: Product[] = [
     brand: "ZKTECO",
     name: "SF200",
     category: "Biometrics",
-    description: "to do",
     capacity: { fingerprint: 2000, card: 5000, face: 0, transaction: 100000 },
     download: { lan: true, usb: false, wifi: true },
     price: { fakeAmount: 15700, amount: 11500, currency: "PHP" },
     withADMS: false,
+    dimension: "",
     warranty: { duration: 36, unit: "months" },
     isActive: true,
   },
@@ -286,11 +289,11 @@ const products: Product[] = [
     brand: "ZKTECO",
     name: "IFACE3",
     category: "Biometrics",
-    description: "to do",
     capacity: { fingerprint: 4000, card: 5000, face: 1500, transaction: 100000 },
     download: { lan: true, usb: true, wifi: false },
     price: { fakeAmount: 19400, amount: 14000, currency: "PHP" },
     withADMS: true,
+    dimension: "",
     warranty: { duration: 36, unit: "months" },
     isActive: true,
   },
@@ -299,11 +302,11 @@ const products: Product[] = [
     brand: "ZKTECO",
     name: "MB460",
     category: "Biometrics",
-    description: "to do",
     capacity: { fingerprint: 2000, card: 5000, face: 1500, transaction: 100000 },
     download: { lan: true, usb: true, wifi: false },
     price: { fakeAmount: 21200, amount: 14800, currency: "PHP" },
     withADMS: true,
+    dimension: "",
     warranty: { duration: 36, unit: "months" },
     isActive: true,
   },
@@ -312,11 +315,11 @@ const products: Product[] = [
     brand: "GRANDING",
     name: "FA210",
     category: "Biometrics",
-    description: "to do",
     capacity: { fingerprint: 2000, card: 2000, face: 1500, transaction: 100000 },
     download: { lan: true, usb: true, wifi: false },
     price: { fakeAmount: 22500, amount: 14800, currency: "PHP" },
     withADMS: true,
+    dimension: "",
     warranty: { duration: 36, unit: "months" },
     isActive: true,
   },
@@ -325,11 +328,11 @@ const products: Product[] = [
     brand: "GRANDING",
     name: "FA210w",
     category: "Biometrics",
-    description: "to do",
     capacity: { fingerprint: 2000, card: 2000, face: 1500, transaction: 100000 },
     download: { lan: true, usb: true, wifi: true },
     price: { fakeAmount: 24000, amount: 17000, currency: "PHP" },
     withADMS: true,
+    dimension: "",
     warranty: { duration: 36, unit: "months" },
     isActive: true,
   },
@@ -338,11 +341,11 @@ const products: Product[] = [
     brand: "ZKTECO",
     name: "XFACE100",
     category: "Biometrics",
-    description: "to do",
     capacity: { fingerprint: 2000, card: 0, face: 1500, transaction: 100000 },
     download: { lan: true, usb: true, wifi: true },
     price: { fakeAmount: 27000, amount: 18900, currency: "PHP" },
     withADMS: true,
+    dimension: "",
     warranty: { duration: 36, unit: "months" },
     isActive: true,
   },
@@ -351,11 +354,11 @@ const products: Product[] = [
     brand: "ZKTECO",
     name: "UFACE800",
     category: "Biometrics",
-    description: "194x156x86mm",
     capacity: { fingerprint: 4000, card: 0, face: 3000, transaction: 120000 },
     download: { lan: true, usb: true, wifi: true },
     price: { fakeAmount: 32900, amount: 22800, currency: "PHP" },
     withADMS: true,
+    dimension: "194x156x86mm",
     warranty: { duration: 36, unit: "months" },
     isActive: true,
   },
@@ -364,11 +367,11 @@ const products: Product[] = [
     brand: "ZKTECO",
     name: "SPEEDFACEV3L",
     category: "Biometrics",
-    description: "185x59x20mm",
     capacity: { fingerprint: 3000, card: 3000, face: 3000, transaction: 200000 },
     download: { lan: true, usb: false, wifi: true },
     price: { fakeAmount: 18500, amount: 12900, currency: "PHP" },
     withADMS: true,
+    dimension: "185x59x20mm",
     warranty: { duration: 12, unit: "months" },
     isActive: true,
   },
@@ -755,6 +758,7 @@ const generateBtnEl = document.getElementById("generateBtn") as HTMLButtonElemen
 const clearBtnEl = document.getElementById("clearBtn") as HTMLButtonElement;
 const sixColumnModeEl = document.getElementById("sixColumnMode") as HTMLInputElement;
 const showPesoSignEl = document.getElementById("showPesoSign") as HTMLInputElement;
+const agentSelectEl = document.getElementById("agentSelect") as HTMLSelectElement;
 
 // Render products
 function renderProducts(): void {
@@ -1464,6 +1468,11 @@ function buildProductSpecs(product: Product): string[] {
     specs.push("ADMS Supported");
   }
 
+  // Dimension
+  if (product.dimension) {
+    specs.push(`Dimension: ${product.dimension}`);
+  }
+
   // Warranty
   if (product.warranty && product.warranty.duration > 0) {
     specs.push(`${product.warranty.duration} ${product.warranty.unit.toUpperCase()} WARRANTY`);
@@ -1503,6 +1512,7 @@ async function generateQuotation(): Promise<void> {
         brand: item.product.brand,
         category: item.product.category,
         description: item.product.description,
+        dimension: item.product.dimension,
         specs: buildProductSpecs(item.product),
         imagePath: getProductImagePath(item.product.name),
         quantity: item.quantity,
@@ -1569,6 +1579,7 @@ async function generateQuotation(): Promise<void> {
     services: selectedServicesList.length > 0 ? selectedServicesList : undefined,
     sixColumnMode: !sixColumnModeEl.checked,
     showPesoSign: showPesoSignEl.checked,
+    agent: agentSelectEl.value,
     notes: notesEl.value.trim() || undefined,
   };
 
