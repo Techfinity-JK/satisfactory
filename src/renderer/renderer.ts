@@ -39,12 +39,8 @@ interface SelectedItem {
 interface Service {
   id: string;
   name: string;
+  description?: string;
   price: number;
-}
-
-interface SelectedService {
-  service: Service;
-  customPrice?: number;
 }
 
 interface ItemGroup {
@@ -84,12 +80,9 @@ interface QuotationData {
   brochureOnly?: boolean;
   vatInclusive?: boolean;
   discount?: number;
+  installationCost?: number;
   items: QuotationItem[];
   groups?: QuotationGroup[];
-  services?: {
-    name: string;
-    price: number;
-  }[];
   sixColumnMode?: boolean;
   showPesoSign?: boolean;
   agent?: string;
@@ -714,16 +707,14 @@ const products: Product[] = [
 
 // Services data
 const services: Service[] = [
-  { id: "mounting", name: "Biometrics Mounting", price: 1500 },
-  { id: "orientation", name: "On-Site User Orientation", price: 2500 },
-  { id: "installation", name: "Installation Cost", price: 0 },
-  { id: "delivery", name: "Delivery Fee", price: 500 },
-  { id: "others", name: "Others", price: 0 },
+  { id: "mounting", name: "Biometrics Mounting", description: "Mounting of biometric device on wall or post", price: 1500 },
+  { id: "orientation", name: "On-Site User Orientation", description: "On-site training and orientation for end users on how to use the device", price: 2500 },
+  { id: "delivery", name: "Delivery Fee", description: "Delivery of equipment to client location", price: 500 },
+  { id: "others", name: "Others", description: "Miscellaneous service fee", price: 0 },
 ];
 
 // State
 const selectedItems: Map<string, SelectedItem> = new Map(); // instanceId -> SelectedItem
-const selectedServicesMap: Map<string, SelectedService> = new Map();
 const itemGroups: Map<string, ItemGroup> = new Map();
 const itemToGroup: Map<string, string> = new Map(); // itemId -> groupId
 let groupIdCounter = 0;
@@ -739,9 +730,10 @@ const productSearchEl = document.getElementById("productSearch") as HTMLInputEle
 const productListEl = document.getElementById("productList") as HTMLDivElement;
 const selectedItemsBodyEl = document.getElementById("selectedItemsBody") as HTMLTableSectionElement;
 const equipmentCostTotalEl = document.getElementById("equipmentCostTotal") as HTMLTableCellElement;
+const totalEquipmentCostRowEl = document.getElementById("totalEquipmentCostRow") as HTMLTableRowElement;
+const totalEquipmentCostEl = document.getElementById("totalEquipmentCost") as HTMLTableCellElement;
 const discountInputEl = document.getElementById("discountInput") as HTMLInputElement;
-const installationRowEl = document.getElementById("installationRow") as HTMLTableRowElement;
-const installationCostTotalEl = document.getElementById("installationCostTotal") as HTMLTableCellElement;
+const installationCostInputEl = document.getElementById("installationCostInput") as HTMLInputElement;
 const vatRowEl = document.getElementById("vatRow") as HTMLTableRowElement;
 const vatTotalEl = document.getElementById("vatTotal") as HTMLTableCellElement;
 const grandTotalEl = document.getElementById("grandTotal") as HTMLTableCellElement;
@@ -823,6 +815,49 @@ function addProduct(product: Product): void {
   renderSelectedItems();
 }
 
+// Add a service instance as a selectable item
+function addService(service: Service): void {
+  const instanceId = `product-${++productInstanceCounter}`;
+  const asProduct: Product = {
+    id: service.id,
+    brand: "Service",
+    name: service.name,
+    category: "Service",
+    description: service.description,
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: service.price, amount: service.price, currency: "PHP" },
+    withADMS: false,
+    warranty: { duration: 0, unit: "months" },
+    isActive: true,
+  };
+  selectedItems.set(instanceId, { product: asProduct, quantity: 1 });
+  ungroupedItemOrder.push(instanceId);
+  renderServices();
+  renderSelectedItems();
+}
+
+// Update service card badges to show how many instances are added
+function renderServices(): void {
+  services.forEach((service) => {
+    const card = document.querySelector(`.service-card[data-service-id="${service.id}"]`) as HTMLElement | null;
+    if (!card) return;
+    const count = Array.from(selectedItems.values()).filter((item) => item.product.id === service.id).length;
+    let badge = card.querySelector(".instance-badge, .add-hint") as HTMLElement | null;
+    if (!badge) {
+      badge = document.createElement("div");
+      card.appendChild(badge);
+    }
+    if (count > 0) {
+      badge.className = "instance-badge";
+      badge.textContent = `${count} added`;
+    } else {
+      badge.className = "add-hint";
+      badge.textContent = "Click to add";
+    }
+  });
+}
+
 // Drag handle SVG icon (6 dots)
 const dragHandleSvg = `<svg viewBox="0 0 16 16" fill="currentColor">
   <circle cx="5" cy="3" r="1.5"/>
@@ -900,7 +935,7 @@ function getItemsInGroup(groupId: string): string[] {
 
 function getUngroupedItems(): string[] {
   // Return items that are not in any group
-  const allItemIds = [...selectedItems.keys(), ...selectedServicesMap.keys()];
+  const allItemIds = [...selectedItems.keys()];
   return allItemIds.filter((id) => !itemToGroup.has(id));
 }
 
@@ -964,50 +999,6 @@ function createProductRow(item: SelectedItem, productId: string, groupId: string
   return row;
 }
 
-// Create a service row
-function createServiceRow(selectedService: SelectedService, serviceId: string, groupId: string | null): HTMLTableRowElement {
-  const unitPrice = selectedService.customPrice !== undefined ? selectedService.customPrice : selectedService.service.price;
-
-  const row = document.createElement("tr");
-  row.draggable = true;
-  row.dataset.itemType = "service";
-  row.dataset.itemId = serviceId;
-  row.dataset.groupId = groupId || "";
-  row.className = "service-row";
-
-  // Build group action buttons
-  let groupActions = "";
-  if (itemGroups.size > 0) {
-    if (groupId) {
-      groupActions = `<button class="btn-ungroup" data-item-id="${serviceId}" title="Remove from group">Ungroup</button>`;
-    } else {
-      const groupOptions = Array.from(itemGroups.values())
-        .map((g) => `<option value="${g.id}">${g.name}</option>`)
-        .join("");
-      groupActions = `<select class="group-select" data-item-id="${serviceId}">
-        <option value="">Add to group...</option>
-        ${groupOptions}
-      </select>`;
-    }
-  }
-
-  row.innerHTML = `
-    <td class="drag-handle" title="Drag to reorder">${dragHandleSvg}</td>
-    <td>SERVICE</td>
-    <td>${selectedService.service.name}</td>
-    <td>
-      <input type="number" class="price-input service-price-input" value="${unitPrice}" min="0" data-service-id="${serviceId}">
-    </td>
-    <td>1</td>
-    <td>PHP ${unitPrice.toLocaleString()}</td>
-    <td class="action-cell">
-      ${groupActions}
-      <button class="btn-remove service-remove" data-service-id="${serviceId}">Remove</button>
-    </td>
-  `;
-
-  return row;
-}
 
 // Create a group header row
 function createGroupHeaderRow(group: ItemGroup): HTMLTableRowElement {
@@ -1038,11 +1029,6 @@ function renderSelectedItems(): void {
       const row = createProductRow(item, itemId, null);
       addDragEventListeners(row);
       selectedItemsBodyEl.appendChild(row);
-    } else if (selectedServicesMap.has(itemId)) {
-      const service = selectedServicesMap.get(itemId)!;
-      const row = createServiceRow(service, itemId, null);
-      addDragEventListeners(row);
-      selectedItemsBodyEl.appendChild(row);
     }
   });
 
@@ -1062,11 +1048,6 @@ function renderSelectedItems(): void {
       if (selectedItems.has(itemId)) {
         const item = selectedItems.get(itemId)!;
         const row = createProductRow(item, itemId, groupId);
-        addDragEventListeners(row);
-        selectedItemsBodyEl.appendChild(row);
-      } else if (selectedServicesMap.has(itemId)) {
-        const service = selectedServicesMap.get(itemId)!;
-        const row = createServiceRow(service, itemId, groupId);
         addDragEventListeners(row);
         selectedItemsBodyEl.appendChild(row);
       }
@@ -1118,8 +1099,8 @@ function renderSelectedItems(): void {
     });
   });
 
-  // Add event listeners for product price inputs
-  document.querySelectorAll(".price-input:not(.service-price-input)").forEach((input) => {
+  // Add event listeners for price inputs
+  document.querySelectorAll(".price-input").forEach((input) => {
     input.addEventListener("change", (e) => {
       const target = e.target as HTMLInputElement;
       const productId = target.dataset.productId!;
@@ -1131,25 +1112,6 @@ function renderSelectedItems(): void {
           item.customPrice = newPrice;
         } else {
           item.customPrice = undefined;
-        }
-        renderSelectedItems();
-      }
-    });
-  });
-
-  // Add event listeners for service price inputs
-  document.querySelectorAll(".service-price-input").forEach((input) => {
-    input.addEventListener("change", (e) => {
-      const target = e.target as HTMLInputElement;
-      const serviceId = target.dataset.serviceId!;
-      const newPrice = parseInt(target.value, 10);
-
-      if (newPrice >= 0 && selectedServicesMap.has(serviceId)) {
-        const selectedService = selectedServicesMap.get(serviceId)!;
-        if (newPrice !== selectedService.service.price) {
-          selectedService.customPrice = newPrice;
-        } else {
-          selectedService.customPrice = undefined;
         }
         renderSelectedItems();
       }
@@ -1170,8 +1132,8 @@ function renderSelectedItems(): void {
     });
   });
 
-  // Add event listeners for product remove buttons
-  document.querySelectorAll(".btn-remove:not(.service-remove)").forEach((btn) => {
+  // Add event listeners for remove buttons
+  document.querySelectorAll(".btn-remove").forEach((btn) => {
     btn.addEventListener("click", (e) => {
       const target = e.target as HTMLButtonElement;
       const productId = target.dataset.productId!;
@@ -1186,29 +1148,7 @@ function renderSelectedItems(): void {
       });
       selectedItems.delete(productId);
       renderProducts();
-      renderSelectedItems();
-    });
-  });
-
-  // Add event listeners for service remove buttons
-  document.querySelectorAll(".service-remove").forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-      const target = e.target as HTMLButtonElement;
-      const serviceId = target.dataset.serviceId!;
-      // Remove from group tracking
-      itemToGroup.delete(serviceId);
-      const idx = ungroupedItemOrder.indexOf(serviceId);
-      if (idx > -1) ungroupedItemOrder.splice(idx, 1);
-      // Remove from all group orders
-      groupItemOrder.forEach((order) => {
-        const i = order.indexOf(serviceId);
-        if (i > -1) order.splice(i, 1);
-      });
-      selectedServicesMap.delete(serviceId);
-      const serviceCard = document.querySelector(`.service-card[data-service-id="${serviceId}"]`);
-      if (serviceCard) {
-        serviceCard.classList.remove("selected");
-      }
+      renderServices();
       renderSelectedItems();
     });
   });
@@ -1392,7 +1332,7 @@ function reorderItems(
 
 // Update grand total
 function updateGrandTotal(): void {
-  // 1. Calculate Total Equipment Cost (products only)
+  // 1. Calculate Total Cost (all selected items)
   let equipmentCost = 0;
   selectedItems.forEach((item) => {
     const unitPrice = item.customPrice !== undefined ? item.customPrice : item.product.price.amount;
@@ -1400,26 +1340,21 @@ function updateGrandTotal(): void {
   });
   equipmentCostTotalEl.textContent = `PHP ${equipmentCost.toLocaleString()}`;
 
-  // 2. Get discount
+  // 2. Get discount and installation cost
   const discount = parseInt(discountInputEl.value, 10) || 0;
+  const installationCost = parseInt(installationCostInputEl.value, 10) || 0;
 
-  // 3. Calculate Installation/Service Cost
-  let installationCost = 0;
-  selectedServicesMap.forEach((selectedService) => {
-    const unitPrice = selectedService.customPrice !== undefined ? selectedService.customPrice : selectedService.service.price;
-    installationCost += unitPrice;
-  });
-
-  // Show/hide installation row
-  if (installationCost > 0 || selectedServicesMap.size > 0) {
-    installationRowEl.classList.remove("hidden");
-    installationCostTotalEl.textContent = `PHP ${installationCost.toLocaleString()}`;
+  // 3. Total Equipment Cost (after discount) — only show when discount is applied
+  const totalAfterDiscount = equipmentCost - discount;
+  if (discount > 0) {
+    totalEquipmentCostEl.textContent = `PHP ${totalAfterDiscount.toLocaleString()}`;
+    totalEquipmentCostRowEl.classList.remove("hidden");
   } else {
-    installationRowEl.classList.add("hidden");
+    totalEquipmentCostRowEl.classList.add("hidden");
   }
 
   // 4. Calculate subtotal before VAT
-  const subtotal = equipmentCost - discount + installationCost;
+  const subtotal = totalAfterDiscount + installationCost;
 
   // 5. Calculate VAT if inclusive
   let vatAmount = 0;
@@ -1505,6 +1440,7 @@ async function generateQuotation(): Promise<void> {
   const createQuotationItem = (itemId: string): QuotationItem | null => {
     if (selectedItems.has(itemId)) {
       const item = selectedItems.get(itemId)!;
+      const isService = item.product.category === "Service";
       const promoPrice = item.customPrice !== undefined ? item.customPrice : item.product.price.amount;
       return {
         productId: item.product.id,
@@ -1513,10 +1449,10 @@ async function generateQuotation(): Promise<void> {
         category: item.product.category,
         description: item.product.description,
         dimension: item.product.dimension,
-        specs: buildProductSpecs(item.product),
-        imagePath: getProductImagePath(item.product.name),
+        specs: isService ? [] : buildProductSpecs(item.product),
+        imagePath: isService ? undefined : getProductImagePath(item.product.name),
         quantity: item.quantity,
-        unit: "pc",
+        unit: isService ? "lot" : "pc",
         unitPrice: item.product.price.fakeAmount,
         promoPrice: promoPrice,
         totalPrice: promoPrice * item.quantity,
@@ -1556,13 +1492,8 @@ async function generateQuotation(): Promise<void> {
     ...groups.flatMap((g) => g.items),
   ];
 
-  // Get selected services with custom prices
-  const selectedServicesList = Array.from(selectedServicesMap.values()).map((selectedService) => {
-    const price = selectedService.customPrice !== undefined ? selectedService.customPrice : selectedService.service.price;
-    return { name: selectedService.service.name, price: price };
-  });
-
   const discount = parseInt(discountInputEl.value, 10) || 0;
+  const installationCost = parseInt(installationCostInputEl.value, 10) || 0;
 
   const data: QuotationData = {
     quoteRefNo,
@@ -1574,9 +1505,9 @@ async function generateQuotation(): Promise<void> {
     brochureOnly: brochureOnlyEl.checked,
     vatInclusive: vatInclusiveEl.checked,
     discount: discount > 0 ? discount : undefined,
+    installationCost: installationCost > 0 ? installationCost : undefined,
     items: ungroupedItems,
     groups: groups.length > 0 ? groups : undefined,
-    services: selectedServicesList.length > 0 ? selectedServicesList : undefined,
     sixColumnMode: !sixColumnModeEl.checked,
     showPesoSign: showPesoSignEl.checked,
     agent: agentSelectEl.value,
@@ -1607,7 +1538,6 @@ async function generateQuotation(): Promise<void> {
 // Clear all
 function clearAll(): void {
   selectedItems.clear();
-  selectedServicesMap.clear();
   itemGroups.clear();
   itemToGroup.clear();
   groupItemOrder.clear();
@@ -1624,11 +1554,9 @@ function clearAll(): void {
   brochureOnlyEl.checked = false;
   vatInclusiveEl.checked = false;
   discountInputEl.value = "0";
-  // Clear service card selections
-  document.querySelectorAll(".service-card").forEach((card) => {
-    card.classList.remove("selected");
-  });
+  installationCostInputEl.value = "0";
   renderProducts();
+  renderServices();
   renderSelectedItems();
 }
 
@@ -1651,6 +1579,11 @@ vatInclusiveEl.addEventListener("change", () => {
 
 // Discount input listener - update totals when changed
 discountInputEl.addEventListener("input", () => {
+  updateGrandTotal();
+});
+
+// Installation cost input listener - update totals when changed
+installationCostInputEl.addEventListener("input", () => {
   updateGrandTotal();
 });
 
@@ -1715,23 +1648,14 @@ themeCircles.forEach((circle) => {
   });
 });
 
-// Service card selection
+// Service card click — add instance like products
 const serviceCards = document.querySelectorAll(".service-card");
 serviceCards.forEach((card) => {
   card.addEventListener("click", () => {
     const serviceId = (card as HTMLElement).dataset.serviceId;
     if (serviceId) {
-      if (selectedServicesMap.has(serviceId)) {
-        selectedServicesMap.delete(serviceId);
-        card.classList.remove("selected");
-      } else {
-        const service = services.find((s) => s.id === serviceId);
-        if (service) {
-          selectedServicesMap.set(serviceId, { service });
-          card.classList.add("selected");
-        }
-      }
-      renderSelectedItems();
+      const service = services.find((s) => s.id === serviceId);
+      if (service) addService(service);
     }
   });
 });
@@ -1754,4 +1678,5 @@ productSearchEl.addEventListener("input", () => renderProducts());
 // Initial render
 loadSavedTheme();
 renderProducts();
+renderServices();
 renderSelectedItems();

@@ -88,11 +88,6 @@ export interface QuotationItem {
   totalPrice: number;
 }
 
-export interface ServiceItem {
-  name: string;
-  price: number;
-}
-
 export interface QuotationGroup {
   id: string;
   name: string;
@@ -109,9 +104,9 @@ export interface QuotationData {
   brochureOnly?: boolean;
   vatInclusive?: boolean;
   discount?: number;
+  installationCost?: number;
   items: QuotationItem[];
   groups?: QuotationGroup[];
-  services?: ServiceItem[];
   sixColumnMode?: boolean;
   showPesoSign?: boolean;
   agent?: string;
@@ -185,7 +180,7 @@ export async function generateQuotation(
           }),
 
           // Products
-          ...createProductSections(data.items, data.groups, data.brochureOnly, data.vatInclusive, data.discount, data.services, data.sixColumnMode, data.showPesoSign),
+          ...createProductSections(data.items, data.groups, data.brochureOnly, data.vatInclusive, data.discount, data.sixColumnMode, data.showPesoSign, data.installationCost),
 
           // Notes
           ...(data.notes
@@ -317,7 +312,7 @@ function createInfoValueCell(text: string, cellWidth: number, borders: object): 
   });
 }
 
-function createProductSections(items: QuotationItem[], groups?: QuotationGroup[], brochureOnly?: boolean, vatInclusive?: boolean, discount?: number, services?: ServiceItem[], sixColumnMode?: boolean, showPesoSign?: boolean): (Paragraph | Table)[] {
+function createProductSections(items: QuotationItem[], groups?: QuotationGroup[], brochureOnly?: boolean, vatInclusive?: boolean, discount?: number, sixColumnMode?: boolean, showPesoSign?: boolean, installationCost?: number): (Paragraph | Table)[] {
   const sections: (Paragraph | Table)[] = [];
   const curr = showPesoSign ? "₱" : "";
 
@@ -384,85 +379,89 @@ function createProductSections(items: QuotationItem[], groups?: QuotationGroup[]
 
   // Totals section (only show if not brochure only mode)
   if (!brochureOnly) {
-    // 1. TOTAL EQUIPMENT COST
+    const discountAmount = discount || 0;
+    const installationAmount = installationCost || 0;
+
+    const totalAfterDiscount = totalEquipmentCost - discountAmount;
+
+    // Group 1: EQUIPMENT PRICE [+ LESS DISCOUNT + TOTAL EQUIPMENT COST] — soft line breaks, no space between
+    const priceGroupChildren: TextRun[] = [
+      new TextRun({
+        text: `EQUIPMENT PRICE = ${curr}${totalEquipmentCost.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
+        font: FONT_FAMILY,
+        bold: true,
+        size: FONT_SIZE,
+      }),
+    ];
+    if (discountAmount > 0) {
+      priceGroupChildren.push(new TextRun({ break: 1 }));
+      priceGroupChildren.push(
+        new TextRun({
+          text: `LESS DISCOUNT = ${curr}${discountAmount.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
+          font: FONT_FAMILY,
+          bold: true,
+          size: FONT_SIZE,
+        })
+      );
+      priceGroupChildren.push(new TextRun({ break: 1 }));
+      priceGroupChildren.push(
+        new TextRun({
+          text: `TOTAL EQUIPMENT COST = ${curr}${totalAfterDiscount.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
+          font: FONT_FAMILY,
+          bold: true,
+          size: FONT_SIZE,
+        })
+      );
+    }
     sections.push(
       new Paragraph({
-        children: [
-          new TextRun({
-            text: `TOTAL EQUIPMENT COST = ${curr}${totalEquipmentCost.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
-            font: FONT_FAMILY,
-            bold: true,
-            size: FONT_SIZE,
-          }),
-        ],
+        children: priceGroupChildren,
         alignment: AlignmentType.RIGHT,
         spacing: { before: 300, after: 100 },
       })
     );
 
-    // 2. LESS DISCOUNT (if any)
-    const discountAmount = discount || 0;
-    if (discountAmount > 0) {
-      sections.push(
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: `LESS DISCOUNT = ${curr}${discountAmount.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
-              font: FONT_FAMILY,
-              bold: true,
-              size: FONT_SIZE,
-            }),
-          ],
-          alignment: AlignmentType.RIGHT,
-          spacing: { after: 100 },
-        })
-      );
-    }
-
-    // 3. INSTALLATION COST (services)
-    let installationCost = 0;
-    if (services && services.length > 0) {
-      installationCost = services.reduce((sum, s) => sum + s.price, 0);
-      sections.push(
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: `INSTALLATION COST = ${curr}${installationCost.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
-              font: FONT_FAMILY,
-              bold: true,
-              size: FONT_SIZE,
-            }),
-          ],
-          alignment: AlignmentType.RIGHT,
-          spacing: { after: 100 },
-        })
-      );
-    }
-
     // Calculate subtotal before VAT
-    const subtotal = totalEquipmentCost - discountAmount + installationCost;
+    const subtotal = totalAfterDiscount + installationAmount;
 
-    // 4. PLUS 12% VAT (if inclusive)
+    // Group 2: INSTALLATION COST + PLUS 12% VAT — soft line breaks, no space between
     let vatAmount = 0;
     if (vatInclusive) {
       vatAmount = subtotal * 0.12;
+    }
+    if (installationAmount > 0 || vatAmount > 0) {
+      const extraGroupChildren: TextRun[] = [];
+      if (installationAmount > 0) {
+        extraGroupChildren.push(
+          new TextRun({
+            text: `INSTALLATION COST = ${curr}${installationAmount.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
+            font: FONT_FAMILY,
+            bold: true,
+            size: FONT_SIZE,
+          })
+        );
+      }
+      if (vatAmount > 0) {
+        if (extraGroupChildren.length > 0) extraGroupChildren.push(new TextRun({ break: 1 }));
+        extraGroupChildren.push(
+          new TextRun({
+            text: `PLUS 12% VAT = ${curr}${vatAmount.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
+            font: FONT_FAMILY,
+            bold: true,
+            size: FONT_SIZE,
+          })
+        );
+      }
       sections.push(
         new Paragraph({
-          children: [
-            new TextRun({
-              text: `PLUS 12% VAT = ${curr}${vatAmount.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
-              font: FONT_FAMILY,
-              bold: true,
-              size: FONT_SIZE,
-            }),
-          ],
+          children: extraGroupChildren,
           alignment: AlignmentType.RIGHT,
           spacing: { after: 100 },
         })
       );
     }
 
-    // 5. TOTAL INVESTMENT COST
+    // TOTAL INVESTMENT COST (bold, underlined, highlighted)
     const totalInvestment = subtotal + vatAmount;
     sections.push(
       new Paragraph({
@@ -471,6 +470,8 @@ function createProductSections(items: QuotationItem[], groups?: QuotationGroup[]
             text: `TOTAL INVESTMENT COST = ${curr}${totalInvestment.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
             font: FONT_FAMILY,
             bold: true,
+            underline: {},
+            highlight: "yellow",
             size: FONT_SIZE,
           }),
         ],

@@ -111,11 +111,7 @@
             <div class="service-name">On-Site User Orientation</div>
             <div class="service-price">PHP 2,500</div>
           </div>
-          <div class="service-card" data-service-id="installation">
-            <div class="service-name">Installation Cost</div>
-            <div class="service-price">PHP 0</div>
-          </div>
-          <div class="service-card" data-service-id="delivery">
+<div class="service-card" data-service-id="delivery">
             <div class="service-name">Delivery Fee</div>
             <div class="service-price">PHP 500</div>
           </div>
@@ -170,7 +166,7 @@
           <tfoot id="tableTfoot">
             <tr>
               <td></td>
-              <td colspan="4" class="total-label">Total Equipment Cost:</td>
+              <td colspan="4" class="total-label">Equipment Price:</td>
               <td id="equipmentCostTotal" class="total-amount">PHP 0</td>
               <td></td>
             </tr>
@@ -182,10 +178,18 @@
               </td>
               <td></td>
             </tr>
-            <tr id="installationRow" class="hidden">
+            <tr id="totalEquipmentCostRow" class="hidden">
+              <td></td>
+              <td colspan="4" class="total-label">Total Equipment Cost:</td>
+              <td id="totalEquipmentCost" class="total-amount">PHP 0</td>
+              <td></td>
+            </tr>
+            <tr>
               <td></td>
               <td colspan="4" class="total-label">Installation Cost:</td>
-              <td id="installationCostTotal" class="total-amount">PHP 0</td>
+              <td class="total-amount">
+                <input type="number" class="discount-input" id="installationCostInput" value="0" min="0">
+              </td>
               <td></td>
             </tr>
             <tr id="vatRow" class="hidden">
