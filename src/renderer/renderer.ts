@@ -107,6 +107,8 @@ const productIconMap: { [key: string]: string } = {
   "MB460": "mb460.png",
   "FA210": "fa210.png",
   "FA210w": "fa210.png",
+  "F04": "f04.png",
+  "TF1700": "tf1700.png",
   "XFACE100": "xface100.png",
   "UFACE800": "uface800.png",
   "SPEEDFACEV3L": "speedfacev3l.png",
@@ -153,6 +155,11 @@ const products: Product[] = [
     brand: "ZKTECO",
     name: "LX50",
     category: "Biometrics",
+    description: " ~ 500 User capacity\n"+
+                 " ~ 500 Fingerprint capacity\n"+
+                 " ~ 50,000 transaction logs capacity\n"+
+                 " ~ USB flash disk download\n"+
+                 " ~ Dimension: 106x60x42mm",
     capacity: { fingerprint: 500, card: 0, face: 0, transaction: 50000 },
     download: { lan: false, usb: true, wifi: false },
     price: { fakeAmount: 10900, amount: 5700, currency: "PHP" },
@@ -166,6 +173,14 @@ const products: Product[] = [
     brand: "ZKTECO",
     name: "TX628",
     category: "Biometrics",
+    description: " ~ 3,200 User capacity\n"+
+                 " ~ 3,200 Fingerprint capacity\n"+
+                 " ~ 120,000 transaction logs capacity\n"+
+                 " ~ network connectivity\n"+
+                 " ~ USB flash disk download\n"+
+                 " ~ built-in scheduler bell\n"+
+                 " ~ Audio Visual Indication and rejection of Fingers\n"+
+                 " ~ Dimension: 180x135x37mm",
     capacity: { fingerprint: 3200, card: 3200, face: 0, transaction: 120000 },
     download: { lan: true, usb: true, wifi: false },
     price: { fakeAmount: 14900, amount: 8900, currency: "PHP" },
@@ -179,6 +194,12 @@ const products: Product[] = [
     brand: "ZKTECO",
     name: "SC700",
     category: "Biometrics",
+    description: " ~ 30,000 Card Capacity\n"+
+                 " ~ 100,000 Logs Capacity\n"+
+                 " ~ Network Connectivity/ USB Host\n"+
+                 " ~ Support Magnetic Contact\n"+
+                 " ~ 125khz RFID\n"+
+                 " ~ Dimension: 106x104x36mm",
     capacity: { fingerprint: 0, card: 30000, face: 0, transaction: 100000 },
     download: { lan: true, usb: true, wifi: false },
     price: { fakeAmount: 13500, amount: 9500, currency: "PHP" },
@@ -192,6 +213,15 @@ const products: Product[] = [
     brand: "GRANDING",
     name: "T8",
     category: "Biometrics",
+    description: " ~ 3000 Fingerprint capacity\n"+
+                 " ~ 3000 card capacity\n"+
+                 " ~ 100,000 transaction logs capacity\n"+
+                 " ~ network connectivity\n"+
+                 " ~ USB flash disk download\n"+
+                 " ~ built-in scheduler bell\n"+
+                 " ~ Audio Visual Indication and rejection of Fingers\n"+
+                 " ~ Dimension: 108x140x30mm\n"+
+                 " ~ with ADMS",
     capacity: { fingerprint: 3000, card: 3000, face: 0, transaction: 100000 },
     download: { lan: true, usb: true, wifi: false },
     price: { fakeAmount: 15900, amount: 11200, currency: "PHP" },
@@ -205,6 +235,15 @@ const products: Product[] = [
     brand: "GRANDING",
     name: "FA1000",
     category: "Biometrics",
+    description: " ~ 4.3 inch Touch Screen\n"+
+                 " ~ 1,000 User Capacity\n"+
+                 " ~ 500 Face Capacity\n"+
+                 " ~ 1,000 Card Capacity\n"+
+                 " ~ 150,000 Transaction Logs Capacity\n"+
+                 " ~ TCP/IP, WIFI\n"+
+                 " ~ Standard Function: ADMS, Work Code, Self\n"+
+                 " Service Query, Automatic Status, T9 Input, \n"+
+                 " Camera, 9 Digit User",
     capacity: { fingerprint: 0, card: 1000, face: 500, transaction: 150000 },
     download: { lan: true, usb: false, wifi: true },
     price: { fakeAmount: 13200, amount: 9200, currency: "PHP" },
@@ -218,6 +257,14 @@ const products: Product[] = [
     brand: "ZKTECO",
     name: "BK100",
     category: "Biometrics",
+    description: " ~ 1000 User Capacity\n"+
+                 " ~ 800 Face Capacity\n"+
+                 " ~ 3,000 fingerprint templates capacity\n"+
+                 " ~ 250,000 transaction logs capacity\n"+
+                 " ~ network//USB flash disk   download\n"+
+                 " ~ Standard Function DSLT, Scheduled bell, Self \n"+
+                 " ~ Service Query, Automatic status switch, Photo Id\n"+
+                 " ~ Dimension: 161x93x152mm",
     capacity: { fingerprint: 3000, card: 0, face: 800, transaction: 250000 },
     download: { lan: true, usb: true, wifi: false },
     price: { fakeAmount: 16500, amount: 9200, currency: "PHP" },
@@ -231,6 +278,16 @@ const products: Product[] = [
     brand: "ZKTECO",
     name: "MB10",
     category: "Biometrics",
+    description: " ~ Display: 2.8-inch TFT Screen\n"+
+                 " ~ Face Capacity: 100\n"+
+                 " ~ Fingerprint Capacity: 500\n"+
+                 " ~ Transactions: 50,000\n"+
+                 " ~ Communication: TCP/IP, USB Host, WIFI\n"+
+                 " ~ Hardware: 1GHz Dual-Core CPU, 256MB RAM,\n"+
+                 " ~ 1MP Binocular Camera\n"+
+                 " ~ Operation System: Linux\n"+
+                 " ~ Facial Recognition Speed: ≤1s\n"+
+                 " ~ Supported Software: BioTime 8.0",
     capacity: { fingerprint: 500, card: 0, face: 100, transaction: 50000 },
     download: { lan: true, usb: true, wifi: true },
     price: { fakeAmount: 17900, amount: 10900, currency: "PHP" },
@@ -244,6 +301,16 @@ const products: Product[] = [
     brand: "GRANDING",
     name: "FA110",
     category: "Biometrics",
+    description: " ~ 2.8 Inch TFT Screen\n"+
+                 " ~ 500 Face Capacity\n"+
+                 " ~ 500 fingerprint templates capacity\n"+
+                 " ~ 500 Card capacity\n"+
+                 " ~ 50,000 transaction logs capacity\n"+
+                 " ~ network//USB Host/ WIFI\n"+
+                 " ~ Standard Function DSLT, Scheduled bell, Self\n"+
+                 " ~ Service Query, Automatic status switch, Photo Id\n"+
+                 " ~ Adms\n"+
+                 " ~ Dimension: 161x93x152mm",
     capacity: { fingerprint: 500, card: 500, face: 500, transaction: 50000 },
     download: { lan: true, usb: true, wifi: true },
     price: { fakeAmount: 17900, amount: 9700, currency: "PHP" },
@@ -257,6 +324,17 @@ const products: Product[] = [
     brand: "ZKTECO",
     name: "F22",
     category: "Biometrics",
+    description: " ~ 3000 fingerprint templates\n"+
+                 " ~ 5,000 card capacity\n"+
+                 " ~ 50,000 transaction logs capacity\n"+
+                 " ~ built-in EM card reader\n"+
+                 " ~ network/USB flash disk download/ WI-FI\n"+
+                 " ~ support multiple Time Zone\n"+
+                 " ~ support magnetic contact\n"+
+                 " ~ Standard Function: 9 digital ID, Automatic\n"+
+                 " ~ Status Switch, Anti-Passback, Scheduler Bell\n"+
+                 " ~ 125khz RFID\n"+
+                 " ~ Dimension 78x158.5x41m",
     capacity: { fingerprint: 3000, card: 5000, face: 0, transaction: 50000 },
     download: { lan: true, usb: true, wifi: true },
     price: { fakeAmount: 19800, amount: 14700, currency: "PHP" },
@@ -270,6 +348,13 @@ const products: Product[] = [
     brand: "ZKTECO",
     name: "SF200",
     category: "Biometrics",
+    description: " ~ 2000 Fingerprint Templates Capacity\n"+
+                 " ~ 5,000 Card Capacity\n"+
+                 " ~ 100,000 Transaction logs Capacity\n"+
+                 " ~ Network Connectivity/ Wi-Fi \n"+
+                 " ~ Support Multiple Time Zone\n"+
+                 " ~ support magnetic contact\n"+
+                 " ~ With Power Adapter",
     capacity: { fingerprint: 2000, card: 5000, face: 0, transaction: 100000 },
     download: { lan: true, usb: false, wifi: true },
     price: { fakeAmount: 15700, amount: 11500, currency: "PHP" },
@@ -283,6 +368,14 @@ const products: Product[] = [
     brand: "ZKTECO",
     name: "IFACE3",
     category: "Biometrics",
+    description: " ~ 1,500 Face Capacity\n"+
+                 " ~ 4,000 fingerprint templates capacity\n"+
+                 " ~ 5,000 Card Capacity\n"+
+                 " ~ 100,000 transaction logs capacity\n"+
+                 " ~ network//USB flash disk download\n"+
+                 " ~ Automatic Switch Status\n"+
+                 " ~ power adapter\n"+
+                 " ~ with ADMS",
     capacity: { fingerprint: 4000, card: 5000, face: 1500, transaction: 100000 },
     download: { lan: true, usb: true, wifi: false },
     price: { fakeAmount: 19400, amount: 14000, currency: "PHP" },
@@ -296,11 +389,19 @@ const products: Product[] = [
     brand: "ZKTECO",
     name: "MB460",
     category: "Biometrics",
+    description: " ~ 1,500 Face Capacity\n"+
+                 " ~ 2,000 fingerprint templates capacity\n"+
+                 " ~ 5,000 Card Capacity\n"+
+                 " ~ 100,000 transaction logs capacity\n"+
+                 " ~ network//USB flash disk download\n"+
+                 " ~ Automatic Switch Status\n"+
+                 " ~ Dimension: 167x148x32mm\n"+
+                 " ~ with ADMS",
     capacity: { fingerprint: 2000, card: 5000, face: 1500, transaction: 100000 },
     download: { lan: true, usb: true, wifi: false },
     price: { fakeAmount: 21200, amount: 14800, currency: "PHP" },
     withADMS: true,
-    dimension: "",
+    dimension: "167x148x32mm",
     warranty: { duration: 36, unit: "months" },
     isActive: true,
   },
@@ -309,6 +410,13 @@ const products: Product[] = [
     brand: "GRANDING",
     name: "FA210",
     category: "Biometrics",
+    description: " ~ 1,500 Face Capacity\n"+
+                 " ~ 2,000 fingerprint templates capacity\n"+
+                 " ~ 2,000 Card Capacity\n"+
+                 " ~ 100,000 transaction logs capacity\n"+
+                 " ~ network//USB flash disk download\n"+
+                 " ~ Automatic Switch Status\n"+
+                 " ~ with ADMS",
     capacity: { fingerprint: 2000, card: 2000, face: 1500, transaction: 100000 },
     download: { lan: true, usb: true, wifi: false },
     price: { fakeAmount: 22500, amount: 14800, currency: "PHP" },
@@ -322,6 +430,13 @@ const products: Product[] = [
     brand: "GRANDING",
     name: "FA210w",
     category: "Biometrics",
+    description: " ~ 1,500 Face Capacity\n"+
+                 " ~ 2,000 fingerprint templates capacity\n"+
+                 " ~ 2,000 Card Capacity\n"+
+                 " ~ 100,000 transaction logs capacity\n"+
+                 " ~ network//USB flash disk download\n"+
+                 " ~ Automatic Switch Status\n"+
+                 " ~ with ADMS",
     capacity: { fingerprint: 2000, card: 2000, face: 1500, transaction: 100000 },
     download: { lan: true, usb: true, wifi: true },
     price: { fakeAmount: 24000, amount: 17000, currency: "PHP" },
@@ -335,6 +450,13 @@ const products: Product[] = [
     brand: "ZKTECO",
     name: "XFACE100",
     category: "Biometrics",
+    description: " ~ 1,500 Face Capacity\n"+
+                 " ~ 2,000 fingerprint templates capacity\n"+
+                 " ~ 100,000 transaction logs capacity\n"+
+                 " ~ network//USB flash disk download\n"+
+                 " ~ WIFI\n"+
+                 " ~ ADMS\n"+
+                 " ~ Automatic Switch Status",
     capacity: { fingerprint: 2000, card: 0, face: 1500, transaction: 100000 },
     download: { lan: true, usb: true, wifi: true },
     price: { fakeAmount: 27000, amount: 18900, currency: "PHP" },
@@ -348,6 +470,16 @@ const products: Product[] = [
     brand: "ZKTECO",
     name: "UFACE800",
     category: "Biometrics",
+    description: " ~ Touchscreen display with heat-sensitive\n"+
+                 " function keys\n"+
+                 " ~ 3,000 face templates capacity\n"+
+                 " ~ 4,000 fingerprint templates capacity\n"+
+                 " ~ 120,000 transaction logs capacity\n"+
+                 " ~ network connectivity\n"+
+                 " ~ wifi(optional)\n"+
+                 " ~ USB flash disk download\n"+
+                 " ~ built-in scheduler bell\n"+
+                 " ~ Dimension: 194x165x86mm",
     capacity: { fingerprint: 4000, card: 0, face: 3000, transaction: 120000 },
     download: { lan: true, usb: true, wifi: true },
     price: { fakeAmount: 32900, amount: 22800, currency: "PHP" },
@@ -357,10 +489,41 @@ const products: Product[] = [
     isActive: true,
   },
   {
+    id: "gt-facepro-4",
+    brand: "GRANDING",
+    name: "FACEPRO 4",
+    category: "Biometrics",
+    description: " ~ 4 inch TFT Color Touch LED Screen (480 x 800)\n"+
+                 " ~ 6,000 card templates capacity\n"+
+                 " ~ 3,000 face templates capacity\n"+
+                 " ~ 3,000 fingerprint templates capacity\n"+
+                 " ~ 200,000 transactions logs capacity\n"+
+                 " ~ network connectivity\n"+
+                 " ~ built-in scheduler bell\n"+
+                 " ~ with power adapter\n"+
+                 " ~ Dimension: 185x88mm",
+    capacity: { fingerprint: 3000, card: 6000, face: 3000, transaction: 200000 },
+    download: { lan: true, usb: false, wifi: true },
+    price: { fakeAmount: 25900, amount: 19700, currency: "PHP" },
+    withADMS: true,
+    dimension: "185x88x20mm",
+    warranty: { duration: 12, unit: "months" },
+    isActive: true,
+  },
+  {
     id: "zk-speedfacev3l",
     brand: "ZKTECO",
     name: "SPEEDFACEV3L",
     category: "Biometrics",
+    description: " ~ 2.4-inch touch Screen\n"+
+                 " ~ 3,000 card templates capacity\n"+
+                 " ~ 3,000 face templates capacity\n"+
+                 " ~ 3,000 fingerprint templates capacity\n"+
+                 " ~ 200,000 transactions logs capacity\n"+
+                 " ~ network connectivity\n"+
+                 " ~ wifi(optional)\n"+
+                 " ~ built-in scheduler bell\n"+
+                 " ~ Dimension: 185x59x20mm",
     capacity: { fingerprint: 3000, card: 3000, face: 3000, transaction: 200000 },
     download: { lan: true, usb: false, wifi: true },
     price: { fakeAmount: 18500, amount: 12900, currency: "PHP" },
@@ -410,6 +573,70 @@ const products: Product[] = [
     isActive: true,
   },
   {
+    id: "zk-sc700",
+    brand: "ZKTECO",
+    name: "SC700",
+    category: "Door Access",
+    description: " ~ 30,000 Card Capacity\n"+
+                 " ~ 100,000 Logs Capacity\n"+
+                 " ~ Network Connectivity/ USB Host\n"+
+                 " ~ Support Magnetic Contact\n"+
+                 " ~ 125khz RFID\n"+
+                 " ~ Dimension: 106x104x36mm",
+    capacity: { fingerprint: 0, card: 30000, face: 0, transaction: 100000 },
+    download: { lan: true, usb: true, wifi: false },
+    price: { fakeAmount: 13500, amount: 13500, currency: "PHP" },
+    withADMS: false,
+    dimension: "106x104x36mm",
+    warranty: { duration: 18, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "gt-fa1000",
+    brand: "GRANDING",
+    name: "FA1000",
+    category: "Door Access",
+    description: " ~ 4.3 inch Touch Screen\n"+
+                 " ~ 1,000 User Capacity\n"+
+                 " ~ 500 Face Capacity\n"+
+                 " ~ 1,000 Card Capacity\n"+
+                 " ~ 150,000 Transaction Logs Capacity\n"+
+                 " ~ TCP/IP, WIFI\n"+
+                 " ~ Standard Function: ADMS, Work Code, Self\n"+
+                 " Service Query, Automatic Status, T9 Input, \n"+
+                 " Camera, 9 Digit User",
+    capacity: { fingerprint: 0, card: 1000, face: 500, transaction: 150000 },
+    download: { lan: true, usb: false, wifi: true },
+    price: { fakeAmount: 13200, amount: 13200, currency: "PHP" },
+    withADMS: true,
+    dimension: "",
+    warranty: { duration: 18, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "gt-fa110",
+    brand: "GRANDING",
+    name: "FA110",
+    category: "Door Access",
+    description: " ~ 2.8 Inch TFT Screen\n"+
+                 " ~ 500 Face Capacity\n"+
+                 " ~ 500 fingerprint templates capacity\n"+
+                 " ~ 500 Card capacity\n"+
+                 " ~ 50,000 transaction logs capacity\n"+
+                 " ~ network//USB Host/ WIFI\n"+
+                 " ~ Standard Function DSLT, Scheduled bell, Self\n"+
+                 " ~ Service Query, Automatic status switch, Photo Id\n"+
+                 " ~ Adms\n"+
+                 " ~ Dimension: 161x93x152mm",
+    capacity: { fingerprint: 500, card: 500, face: 500, transaction: 50000 },
+    download: { lan: true, usb: true, wifi: true },
+    price: { fakeAmount: 13900, amount: 13900, currency: "PHP" },
+    withADMS: true,
+    dimension: "161x93x152mm",
+    warranty: { duration: 36, unit: "months" },
+    isActive: true,
+  },
+  {
     id: "gt-f04",
     brand: "GRANDING",
     name: "F04",
@@ -426,6 +653,50 @@ const products: Product[] = [
     price: { fakeAmount: 14300, amount: 14300, currency: "PHP" },
     withADMS: false,
     warranty: { duration: 12, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "zk-sf200",
+    brand: "ZKTECO",
+    name: "SF200",
+    category: "Door Access",
+    description: " ~ 2000 Fingerprint Templates Capacity\n"+
+                 " ~ 5,000 Card Capacity\n"+
+                 " ~ 100,000 Transaction logs Capacity\n"+
+                 " ~ Network Connectivity/ Wi-Fi \n"+
+                 " ~ Support Multiple Time Zone\n"+
+                 " ~ support magnetic contact\n"+
+                 " ~ With Power Adapter",
+    capacity: { fingerprint: 2000, card: 5000, face: 0, transaction: 100000 },
+    download: { lan: true, usb: false, wifi: true },
+    price: { fakeAmount: 15700, amount: 15700, currency: "PHP" },
+    withADMS: false,
+    dimension: "",
+    warranty: { duration: 36, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "zk-f22",
+    brand: "ZKTECO",
+    name: "F22",
+    category: "Door Access",
+    description: " ~ 3000 fingerprint templates\n"+
+                 " ~ 5,000 card capacity\n"+
+                 " ~ 50,000 transaction logs capacity\n"+
+                 " ~ built-in EM card reader\n"+
+                 " ~ network/USB flash disk download/ WI-FI\n"+
+                 " ~ support multiple Time Zone\n"+
+                 " ~ support magnetic contact\n"+
+                 " ~ Standard Function: 9 digital ID, Automatic\n"+
+                 " ~ Status Switch, Anti-Passback, Scheduler Bell\n"+
+                 " ~ 125khz RFID\n"+
+                 " ~ Dimension 78x158.5x41m",
+    capacity: { fingerprint: 3000, card: 5000, face: 0, transaction: 50000 },
+    download: { lan: true, usb: true, wifi: true },
+    price: { fakeAmount: 19800, amount: 19800, currency: "PHP" },
+    withADMS: false,
+    dimension: "78x158.5x41mm",
+    warranty: { duration: 36, unit: "months" },
     isActive: true,
   },
   {
@@ -449,6 +720,68 @@ const products: Product[] = [
     download: { lan: false, usb: false, wifi: false },
     price: { fakeAmount: 19700, amount: 19700, currency: "PHP" },
     withADMS: false,
+    warranty: { duration: 36, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "zk-mb460",
+    brand: "ZKTECO",
+    name: "MB460",
+    category: "Door Access",
+    description: " ~ 1,500 Face Capacity\n"+
+                 " ~ 2,000 fingerprint templates capacity\n"+
+                 " ~ 5,000 Card Capacity\n"+
+                 " ~ 100,000 transaction logs capacity\n"+
+                 " ~ network//USB flash disk download\n"+
+                 " ~ Automatic Switch Status\n"+
+                 " ~ Dimension: 167x148x32mm\n"+
+                 " ~ with ADMS",
+    capacity: { fingerprint: 2000, card: 5000, face: 1500, transaction: 100000 },
+    download: { lan: true, usb: true, wifi: false },
+    price: { fakeAmount: 21200, amount: 21200, currency: "PHP" },
+    withADMS: true,
+    dimension: "167x148x32mm",
+    warranty: { duration: 36, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "zk-iface3",
+    brand: "ZKTECO",
+    name: "IFACE3",
+    category: "Door Access",
+    description: " ~ 1,500 Face Capacity\n"+
+                 " ~ 4,000 fingerprint templates capacity\n"+
+                 " ~ 5,000 Card Capacity\n"+
+                 " ~ 100,000 transaction logs capacity\n"+
+                 " ~ network//USB flash disk download\n"+
+                 " ~ Automatic Switch Status\n"+
+                 " ~ power adapter\n"+
+                 " ~ with ADMS",
+    capacity: { fingerprint: 4000, card: 5000, face: 1500, transaction: 100000 },
+    download: { lan: true, usb: true, wifi: false },
+    price: { fakeAmount: 19400, amount: 19400, currency: "PHP" },
+    withADMS: true,
+    dimension: "",
+    warranty: { duration: 36, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "gt-fa210",
+    brand: "GRANDING",
+    name: "FA210",
+    category: "Door Access",
+    description: " ~ 1,500 Face Capacity\n"+
+                 " ~ 2,000 fingerprint templates capacity\n"+
+                 " ~ 2,000 Card Capacity\n"+
+                 " ~ 100,000 transaction logs capacity\n"+
+                 " ~ network//USB flash disk download\n"+
+                 " ~ Automatic Switch Status\n"+
+                 " ~ with ADMS",
+    capacity: { fingerprint: 2000, card: 2000, face: 1500, transaction: 100000 },
+    download: { lan: true, usb: true, wifi: false },
+    price: { fakeAmount: 22500, amount: 22500, currency: "PHP" },
+    withADMS: true,
+    dimension: "",
     warranty: { duration: 36, unit: "months" },
     isActive: true,
   },
@@ -1481,6 +1814,8 @@ function reorderItems(
   renderSelectedItems();
 }
 
+let currentEquipmentCost = 0;
+
 // Update grand total
 function updateGrandTotal(): void {
   // 1. Calculate Total Cost (all selected items)
@@ -1489,6 +1824,7 @@ function updateGrandTotal(): void {
     const unitPrice = item.customPrice !== undefined ? item.customPrice : item.product.price.amount;
     equipmentCost += unitPrice * item.quantity;
   });
+  currentEquipmentCost = equipmentCost;
   equipmentCostTotalEl.textContent = `PHP ${equipmentCost.toLocaleString()}`;
 
   // 2. Get discount and installation cost
@@ -1729,6 +2065,16 @@ vatInclusiveEl.addEventListener("change", () => {
 // Discount input listener - update totals when changed
 discountInputEl.addEventListener("input", () => {
   updateGrandTotal();
+});
+
+// Discount percentage buttons
+document.querySelectorAll<HTMLButtonElement>(".discount-pct-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const pct = parseInt(btn.dataset.pct ?? "0", 10);
+    const discountAmount = Math.round(currentEquipmentCost * pct / 100);
+    discountInputEl.value = String(discountAmount);
+    updateGrandTotal();
+  });
 });
 
 // Installation cost input listener - update totals when changed

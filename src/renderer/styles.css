@@ -670,6 +670,34 @@ th {
   color: var(--text-secondary);
 }
 
+.discount-field {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.discount-pct-btns {
+  display: flex;
+  gap: 4px;
+}
+
+.discount-pct-btn {
+  padding: 2px 7px;
+  font-size: 11px;
+  border: 1px solid var(--accent-color);
+  border-radius: 3px;
+  background: transparent;
+  color: var(--accent-color);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.discount-pct-btn:hover {
+  background: var(--accent-color);
+  color: #fff;
+}
+
 .discount-input {
   width: 90px;
   padding: 5px;

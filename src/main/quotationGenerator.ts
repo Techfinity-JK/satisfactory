@@ -216,7 +216,7 @@ export async function generateQuotation(
           ...createTermsAndConditions(data.vatInclusive, data.installationCost, getMaxWarrantyMonths(data)),
 
           // Signature
-          ...createSignatureSection(),
+          ...createSignatureSection(data.agent),
         ],
       },
     ],
@@ -235,7 +235,7 @@ function createCustomerInfoTable(data: QuotationData): Table {
 
   const borderStyle = {
     style: BorderStyle.SINGLE,
-    size: 8,
+    size: 4,
     color: BORDER_COLOR,
   };
 
@@ -346,24 +346,6 @@ function createProductSections(items: QuotationItem[], groups?: QuotationGroup[]
     // Create a single table containing all items
     sections.push(createGroupedTable(sectionItems, sixColumnMode, showPesoSign));
 
-    // Add group subtotal if this is a group
-    if (groupName && !brochureOnly) {
-      sections.push(
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: `${groupName} Subtotal = ${curr}${subtotal.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
-              font: FONT_FAMILY,
-              bold: true,
-              size: FONT_SIZE,
-              italics: true,
-            }),
-          ],
-          alignment: AlignmentType.RIGHT,
-          spacing: { before: 150, after: 200 },
-        })
-      );
-    }
 
     return subtotal;
   };
@@ -556,7 +538,7 @@ function createGroupedTable(items: QuotationItem[], sixColumnMode?: boolean, sho
   const curr = showPesoSign ? "₱" : "";
   const borderStyle = {
     style: BorderStyle.SINGLE,
-    size: 6,
+    size: 4,
     color: BORDER_COLOR,
   };
 
@@ -569,8 +551,8 @@ function createGroupedTable(items: QuotationItem[], sixColumnMode?: boolean, sho
 
   // Column widths: redistribute promo column (13%) across remaining cols when in 6-col mode
   const w = sixColumnMode
-    ? { model: 20, desc: 46, qty: 5, unit: 5, unitPrice: 12, amount: 12 }
-    : { model: 20, desc: 33, qty: 5, unit: 5, unitPrice: 12, promo: 13, amount: 12 };
+    ? { model: 17, desc: 49, qty: 5, unit: 5, unitPrice: 12, amount: 12 }
+    : { model: 17, desc: 36, qty: 5, unit: 5, unitPrice: 12, promo: 13, amount: 12 };
 
   // Header row
   const headerChildren = [
@@ -598,10 +580,9 @@ function createGroupedTable(items: QuotationItem[], sixColumnMode?: boolean, sho
   // Add rows for each item
   items.forEach((item) => {
 
-    // Build item description: description lines → specs (incl. dimension → warranty)
+    // Build item description
     const descriptionParagraphs: Paragraph[] = [];
 
-    // 1. Product description (split on \n into separate paragraphs)
     if (item.description) {
       item.description.split("\n").forEach((line) => {
         const trimmed = line.trim();
@@ -618,25 +599,6 @@ function createGroupedTable(items: QuotationItem[], sixColumnMode?: boolean, sho
             })
           );
         }
-      });
-    }
-
-    // 2. Specs (capacity, connectivity, ADMS, dimension, warranty — built in renderer)
-    if (item.specs && item.specs.length > 0) {
-      item.specs.forEach((spec) => {
-        const isWarranty = spec.includes("WARRANTY") || spec.includes("ADMS");
-        descriptionParagraphs.push(
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: `~ ${spec}`,
-                font: FONT_FAMILY,
-                size: FONT_SIZE,
-                bold: isWarranty,
-              }),
-            ],
-          })
-        );
       });
     }
 
@@ -672,7 +634,6 @@ function createGroupedTable(items: QuotationItem[], sixColumnMode?: boolean, sho
           new TextRun({
             text: item.name,
             font: FONT_FAMILY,
-            bold: true,
             size: FONT_SIZE,
           }),
         ],
@@ -738,7 +699,7 @@ function createGroupedTable(items: QuotationItem[], sixColumnMode?: boolean, sho
 function createProductTable(item: QuotationItem): Table {
   const borderStyle = {
     style: BorderStyle.SINGLE,
-    size: 6,
+    size: 4,
     color: BORDER_COLOR,
   };
 
@@ -762,21 +723,24 @@ function createProductTable(item: QuotationItem): Table {
     ],
   });
 
-  // Build item description with specs
+  // Build item description
   const descriptionParagraphs: Paragraph[] = [];
-  if (item.specs && item.specs.length > 0) {
-    item.specs.forEach((spec) => {
-      descriptionParagraphs.push(
-        new Paragraph({
-          children: [
-            new TextRun({
-              text: `~ ${spec}`,
-              font: FONT_FAMILY,
-              size: FONT_SIZE,
-            }),
-          ],
-        })
-      );
+  if (item.description) {
+    item.description.split("\n").forEach((line) => {
+      const trimmed = line.trim();
+      if (trimmed) {
+        descriptionParagraphs.push(
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: trimmed,
+                font: FONT_FAMILY,
+                size: FONT_SIZE,
+              }),
+            ],
+          })
+        );
+      }
     });
   }
 
@@ -811,7 +775,6 @@ function createProductTable(item: QuotationItem): Table {
         new TextRun({
           text: item.name,
           font: FONT_FAMILY,
-          bold: true,
           size: FONT_SIZE,
         }),
       ],
@@ -1237,7 +1200,7 @@ function warrantyToText(months: number): string {
 function createTermsAndConditions(vatInclusive?: boolean, installationCost?: number, maxWarrantyMonths?: number): (Paragraph | Table)[] {
   const borderStyle = {
     style: BorderStyle.SINGLE,
-    size: 6,
+    size: 4,
     color: "000000",
   };
 
@@ -1381,7 +1344,7 @@ function createTermsAndConditions(vatInclusive?: boolean, installationCost?: num
 function createRemarksSection(): (Paragraph | Table)[] {
   const noBorder = { style: BorderStyle.NONE, size: 0, color: "FFFFFF" };
   const noBorders = { top: noBorder, bottom: noBorder, left: noBorder, right: noBorder };
-  const boxBorder = { style: BorderStyle.SINGLE, size: 8, color: "000000" };
+  const boxBorder = { style: BorderStyle.SINGLE, size: 4, color: "000000" };
   const allBoxBorders = { top: boxBorder, bottom: boxBorder, left: boxBorder, right: boxBorder };
   const sigLineBorder = { style: BorderStyle.SINGLE, size: 4, color: "000000" };
 
@@ -1564,7 +1527,14 @@ function createRemarksSection(): (Paragraph | Table)[] {
   ];
 }
 
-function createSignatureSection(): Paragraph[] {
+function createSignatureSection(agent?: string): Paragraph[] {
+  const agentDetails: Record<string, { name: string; number: string }> = {
+    shae: { name: "SHAENA FALLE", number: "09070456737" },
+    cle: { name: "LEO DURA", number: "09100255412" },
+    jhel: { name: "Jhel Villavecencio", number: "09460378085" },
+  };
+  const details = agentDetails[agent ?? ""] ?? { name: "JOHN KARL NOLASCO", number: "09484263778" };
+
   return [
     new Paragraph({
       children: [
@@ -1583,7 +1553,7 @@ function createSignatureSection(): Paragraph[] {
     new Paragraph({
       children: [
         new TextRun({
-          text: "JOHN KARL NOLASCO",
+          text: details.name,
           font: FONT_FAMILY,
           bold: true,
           underline: { type: UnderlineType.SINGLE },
@@ -1603,7 +1573,7 @@ function createSignatureSection(): Paragraph[] {
     new Paragraph({
       children: [
         new TextRun({
-          text: "09484263778",
+          text: details.number,
           font: FONT_FAMILY,
           size: FONT_SIZE,
         }),
