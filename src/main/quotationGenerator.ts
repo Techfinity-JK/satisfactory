@@ -87,6 +87,7 @@ export interface QuotationItem {
   promoPrice: number;
   totalPrice: number;
   warrantyMonths?: number;
+  withExtras?: boolean;
 }
 
 export interface QuotationGroup {
@@ -572,9 +573,9 @@ function createGroupedTable(items: QuotationItem[], sixColumnMode?: boolean, sho
 
   const allRows: TableRow[] = [headerRow];
 
-  // Only biometric items get software/USB freebies
+  // Items with extras (biometrics) get software/USB freebies
   const biometricQuantity = items
-    .filter((item) => item.category === "Biometrics")
+    .filter((item) => item.category === "Biometrics" || item.withExtras === true)
     .reduce((sum, item) => sum + item.quantity, 0);
 
   // Add rows for each item
@@ -1143,9 +1144,13 @@ function createProductTable(item: QuotationItem): Table {
     ],
   });
 
+  const rows = [headerRow, dataRow];
+  if (item.category === "Biometrics" || item.withExtras === true) {
+    rows.push(softwareRow, usbRow);
+  }
   return new Table({
     width: { size: 100, type: WidthType.PERCENTAGE },
-    rows: [headerRow, dataRow, softwareRow, usbRow],
+    rows,
   });
 }
 

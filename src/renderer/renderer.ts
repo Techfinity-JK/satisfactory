@@ -22,6 +22,7 @@ interface Product {
     currency: "PHP" | "USD" | "EUR";
   };
   withADMS: boolean;
+  withExtras?: boolean;
   dimension?: string;
   warranty?: {
     duration: number;
@@ -63,6 +64,7 @@ interface QuotationItem {
   promoPrice: number;
   totalPrice: number;
   warrantyMonths?: number;
+  withExtras?: boolean;
 }
 
 interface QuotationGroup {
@@ -109,6 +111,7 @@ const productIconMap: { [key: string]: string } = {
   "FA210w": "fa210.png",
   "F04": "f04.png",
   "TF1700": "tf1700.png",
+  "FACEPRO 4": "facepro4.jpeg",
   "XFACE100": "xface100.png",
   "UFACE800": "uface800.png",
   "SPEEDFACEV3L": "speedfacev3l.png",
@@ -596,6 +599,7 @@ const products: Product[] = [
     brand: "GRANDING",
     name: "FA1000",
     category: "Door Access",
+    withExtras: true,
     description: " ~ 4.3 inch Touch Screen\n"+
                  " ~ 1,000 User Capacity\n"+
                  " ~ 500 Face Capacity\n"+
@@ -618,6 +622,7 @@ const products: Product[] = [
     brand: "GRANDING",
     name: "FA110",
     category: "Door Access",
+    withExtras: true,
     description: " ~ 2.8 Inch TFT Screen\n"+
                  " ~ 500 Face Capacity\n"+
                  " ~ 500 fingerprint templates capacity\n"+
@@ -641,6 +646,7 @@ const products: Product[] = [
     brand: "GRANDING",
     name: "F04",
     category: "Door Access",
+    withExtras: true,
     description: " ~ 1500 Fingerprint Templates Capacity\n"+
                  " ~ 5000 Card Capacity\n"+
                  " ~ 100,000 Transaction logs Capacity\n"+
@@ -660,6 +666,7 @@ const products: Product[] = [
     brand: "ZKTECO",
     name: "SF200",
     category: "Door Access",
+    withExtras: true,
     description: " ~ 2000 Fingerprint Templates Capacity\n"+
                  " ~ 5,000 Card Capacity\n"+
                  " ~ 100,000 Transaction logs Capacity\n"+
@@ -680,6 +687,7 @@ const products: Product[] = [
     brand: "ZKTECO",
     name: "F22",
     category: "Door Access",
+    withExtras: true,
     description: " ~ 3000 fingerprint templates\n"+
                  " ~ 5,000 card capacity\n"+
                  " ~ 50,000 transaction logs capacity\n"+
@@ -704,6 +712,7 @@ const products: Product[] = [
     brand: "ZKTECO",
     name: "TF1700",
     category: "Door Access",
+    withExtras: true,
     description: " ~ 1500 fingerprint templates\n"+
                  " ~ 10,000 card capacity\n"+
                  " ~ 100,000 transaction logs capacity\n"+
@@ -728,6 +737,7 @@ const products: Product[] = [
     brand: "ZKTECO",
     name: "MB460",
     category: "Door Access",
+    withExtras: true,
     description: " ~ 1,500 Face Capacity\n"+
                  " ~ 2,000 fingerprint templates capacity\n"+
                  " ~ 5,000 Card Capacity\n"+
@@ -749,6 +759,7 @@ const products: Product[] = [
     brand: "ZKTECO",
     name: "IFACE3",
     category: "Door Access",
+    withExtras: true,
     description: " ~ 1,500 Face Capacity\n"+
                  " ~ 4,000 fingerprint templates capacity\n"+
                  " ~ 5,000 Card Capacity\n"+
@@ -770,6 +781,7 @@ const products: Product[] = [
     brand: "GRANDING",
     name: "FA210",
     category: "Door Access",
+    withExtras: true,
     description: " ~ 1,500 Face Capacity\n"+
                  " ~ 2,000 fingerprint templates capacity\n"+
                  " ~ 2,000 Card Capacity\n"+
@@ -1940,6 +1952,7 @@ async function generateQuotation(): Promise<void> {
         promoPrice: promoPrice,
         totalPrice: promoPrice * item.quantity,
         warrantyMonths: item.product.warranty?.duration ?? 0,
+        withExtras: item.product.withExtras ?? false,
       };
     }
     return null;
