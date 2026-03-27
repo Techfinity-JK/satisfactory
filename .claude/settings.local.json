@@ -5,7 +5,11 @@
       "Bash(npm run build:*)",
       "Bash(del /f \"src\\\\assets\\\\iconMap.ts\")",
       "Bash(del /f \"src\\\\data\\\\index.ts\")",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(python3 -c \":*)",
+      "Bash(mkdir -p \"C:\\\\Users\\\\hi\\\\Documents\\\\GitHub\\\\satisfactory\\\\test\\\\remarks_extracted\")",
+      "Bash(powershell -Command \"Expand-Archive -Path ''Remarks Reference.docx'' -DestinationPath ''remarks_extracted'' -Force\")",
+      "Bash(powershell -Command \":*)"
     ]
   }
 }

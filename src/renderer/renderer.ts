@@ -62,6 +62,7 @@ interface QuotationItem {
   unitPrice: number;
   promoPrice: number;
   totalPrice: number;
+  warrantyMonths?: number;
 }
 
 interface QuotationGroup {
@@ -375,7 +376,13 @@ const products: Product[] = [
     brand: "GENERIC",
     name: "M06",
     category: "Door Access",
-    description: " 125khz RFID",
+    description: " ~ 2000 Users, supports CARDS, PIN, CARD+PIN\n"+
+                 " ~ Strong Zinc Alloy (Shock, Fire and Tamper resistant)\n"+
+                 " ~ Support Magnetic Contact\n"+
+                 " ~ Fast Operation Speed, 20ms with 2000 users\n"+
+                 " ~ 125khz RFID\n"+
+                 " ~ Red, Yellow and Green LED Display\n"+
+                 " ~ No Logs",
     capacity: { fingerprint: 0, card: 2000, face: 0, transaction: 0 },
     download: { lan: false, usb: false, wifi: false },
     price: { fakeAmount: 5700, amount: 5700, currency: "PHP" },
@@ -388,12 +395,61 @@ const products: Product[] = [
     brand: "ZKTECO",
     name: "X6",
     category: "Door Access",
-    description: " 125khz RFID",
+    description: " ~ 500 Fingerprint Templates Capacity\n"+
+                 " ~ 500 Card Capacity\n"+
+                 " ~ Read Fingerprint/password/RFID Card\n"+
+                 " ~ Rugged and Elegant Design\n"+
+                 " ~ support magnetic contact\n"+
+                 " ~ 125khz RFID\n"+
+                 " ~ No Logs",
     capacity: { fingerprint: 500, card: 500, face: 0, transaction: 0 },
     download: { lan: false, usb: false, wifi: false },
     price: { fakeAmount: 7900, amount: 7900, currency: "PHP" },
     withADMS: false,
     warranty: { duration: 12, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "gt-f04",
+    brand: "GRANDING",
+    name: "F04",
+    category: "Door Access",
+    description: " ~ 1500 Fingerprint Templates Capacity\n"+
+                 " ~ 5000 Card Capacity\n"+
+                 " ~ 100,000 Transaction logs Capacity\n"+
+                 " ~ Network Connectivity\n"+
+                 " ~ USB host\n"+
+                 " ~ support magnetic contact\n"+
+                 " ~ 125khz RFID",
+    capacity: { fingerprint: 1500, card: 5000, face: 0, transaction: 100000 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 14300, amount: 14300, currency: "PHP" },
+    withADMS: false,
+    warranty: { duration: 12, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "zk-tf1700",
+    brand: "ZKTECO",
+    name: "TF1700",
+    category: "Door Access",
+    description: " ~ 1500 fingerprint templates\n"+
+                 " ~ 10,000 card capacity\n"+
+                 " ~ 100,000 transaction logs capacity\n"+
+                 " ~ built-in EM card reader\n"+
+                 " ~ network/USB flash disk download\n"+
+                 " ~ support magnetic contact\n"+
+                 " ~ support magnetic contact (door left open alarm)\n"+
+                 " ~ embedded door bell button\n"+
+                 " ~ Wiegand support\n"+
+                 " ~ Anti-Passback function\n"+
+                 " ~ IP65 Rating Waterproof and Dustproof\n"+
+                 " ~ 125khz RFID\n",
+    capacity: { fingerprint: 1500, card: 10000, face: 0, transaction: 100000 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 19700, amount: 19700, currency: "PHP" },
+    withADMS: false,
+    warranty: { duration: 36, unit: "months" },
     isActive: true,
   },
   {
@@ -703,6 +759,77 @@ const products: Product[] = [
     warranty: { duration: 0, unit: "months" },
     isActive: true,
   },
+  // CCTV (Dahua)
+  {
+    id: "dahua-ipc-placeholder-1",
+    brand: "Dahua",
+    name: "IPC-HDW2831T-AS",
+    category: "CCTV",
+    description: "8MP IR Fixed-focal Eyeball Network Camera\n4K resolution\nBuilt-in mic\nIR night vision up to 30m\nIP67 weatherproof",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: true, usb: false, wifi: false },
+    price: { fakeAmount: 0, amount: 0, currency: "PHP" },
+    withADMS: false,
+    dimension: "WxHxDmm",
+    warranty: { duration: 24, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "dahua-ipc-placeholder-2",
+    brand: "Dahua",
+    name: "IPC-HFW2849S-S-IL",
+    category: "CCTV",
+    description: "8MP Smart Dual Light Fixed-focal Bullet Network Camera\n4K resolution\nDual light: IR + warm light\nIP67 weatherproof\nBuilt-in mic",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: true, usb: false, wifi: false },
+    price: { fakeAmount: 0, amount: 0, currency: "PHP" },
+    withADMS: false,
+    dimension: "WxHxDmm",
+    warranty: { duration: 24, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "dahua-nvr-placeholder-1",
+    brand: "Dahua",
+    name: "NVR4108HS-8P-EI",
+    category: "CCTV",
+    description: "8-channel 1U 8PoE AI Network Video Recorder\nSupports up to 8MP resolution\n8 PoE ports\n1 SATA HDD slot (up to 10TB)",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: true, usb: false, wifi: false },
+    price: { fakeAmount: 0, amount: 0, currency: "PHP" },
+    withADMS: false,
+    dimension: "WxHxDmm",
+    warranty: { duration: 24, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "dahua-nvr-placeholder-2",
+    brand: "Dahua",
+    name: "NVR4116HS-EI",
+    category: "CCTV",
+    description: "16-channel 1U AI Network Video Recorder\nSupports up to 8MP resolution\n2 SATA HDD slots (up to 10TB each)",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: true, usb: false, wifi: false },
+    price: { fakeAmount: 0, amount: 0, currency: "PHP" },
+    withADMS: false,
+    dimension: "WxHxDmm",
+    warranty: { duration: 24, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "dahua-hdd-placeholder-1",
+    brand: "Dahua",
+    name: "HDD-2TB",
+    category: "CCTV",
+    description: "2TB Surveillance Hard Disk Drive\nOptimized for 24/7 continuous recording\nCompatible with Dahua NVR/DVR",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 0, amount: 0, currency: "PHP" },
+    withADMS: false,
+    dimension: "WxHxDmm",
+    warranty: { duration: 12, unit: "months" },
+    isActive: true,
+  },
 ];
 
 // Services data
@@ -737,7 +864,9 @@ const installationCostInputEl = document.getElementById("installationCostInput")
 const vatRowEl = document.getElementById("vatRow") as HTMLTableRowElement;
 const vatTotalEl = document.getElementById("vatTotal") as HTMLTableCellElement;
 const grandTotalEl = document.getElementById("grandTotal") as HTMLTableCellElement;
-const quoteRefNoEl = document.getElementById("quoteRefNo") as HTMLInputElement;
+const quoteRefPrefixEl = document.getElementById("quoteRefPrefix") as HTMLSpanElement;
+const quoteRefSepEl = document.getElementById("quoteRefSep") as HTMLSpanElement;
+const quoteRefSeqEl = document.getElementById("quoteRefSeq") as HTMLInputElement;
 const companyNameEl = document.getElementById("companyName") as HTMLInputElement;
 const companyAddressEl = document.getElementById("companyAddress") as HTMLTextAreaElement;
 const contactPersonEl = document.getElementById("contactPerson") as HTMLInputElement;
@@ -751,6 +880,26 @@ const clearBtnEl = document.getElementById("clearBtn") as HTMLButtonElement;
 const sixColumnModeEl = document.getElementById("sixColumnMode") as HTMLInputElement;
 const showPesoSignEl = document.getElementById("showPesoSign") as HTMLInputElement;
 const agentSelectEl = document.getElementById("agentSelect") as HTMLSelectElement;
+
+const AGENT_CODES: Record<string, string> = {
+  jk: "JK",
+  shae: "S",
+  jhel: "J",
+  cle: "C",
+};
+
+function getQuoteRefPrefix(): string {
+  const year = new Date().getFullYear();
+  const code = AGENT_CODES[agentSelectEl.value] ?? agentSelectEl.value.toUpperCase();
+  return `${year}-${code}`;
+}
+
+function updateQuoteRefPrefix(): void {
+  const prefix = getQuoteRefPrefix();
+  quoteRefPrefixEl.textContent = prefix;
+  const hasSeq = quoteRefSeqEl.value.trim() !== "";
+  quoteRefSepEl.classList.toggle("hidden", !hasSeq);
+}
 
 // Render products
 function renderProducts(): void {
@@ -797,6 +946,8 @@ function switchCategory(category: string): void {
     if (tabCategory === "biometrics" && category === "Biometrics") {
       tab.classList.add("active");
     } else if (tabCategory === "door-access" && category === "Door Access") {
+      tab.classList.add("active");
+    } else if (tabCategory === "cctv" && category === "CCTV") {
       tab.classList.add("active");
     } else {
       tab.classList.remove("active");
@@ -1418,13 +1569,9 @@ function buildProductSpecs(product: Product): string[] {
 
 // Generate quotation
 async function generateQuotation(): Promise<void> {
-  const quoteRefNo = quoteRefNoEl.value.trim();
+  const seq = quoteRefSeqEl.value.trim();
+  const quoteRefNo = seq ? `${getQuoteRefPrefix()}-${seq}` : getQuoteRefPrefix();
   const companyName = companyNameEl.value.trim();
-
-  if (!quoteRefNo) {
-    alert("Please enter Quote Ref No");
-    return;
-  }
 
   if (!companyName) {
     alert("Please enter company name");
@@ -1456,6 +1603,7 @@ async function generateQuotation(): Promise<void> {
         unitPrice: item.product.price.fakeAmount,
         promoPrice: promoPrice,
         totalPrice: promoPrice * item.quantity,
+        warrantyMonths: item.product.warranty?.duration ?? 0,
       };
     }
     return null;
@@ -1544,7 +1692,8 @@ function clearAll(): void {
   ungroupedItemOrder = [];
   groupIdCounter = 0;
   productInstanceCounter = 0;
-  quoteRefNoEl.value = "";
+  quoteRefSeqEl.value = "";
+  updateQuoteRefPrefix();
   companyNameEl.value = "";
   companyAddressEl.value = "";
   contactPersonEl.value = "";
@@ -1586,6 +1735,19 @@ discountInputEl.addEventListener("input", () => {
 installationCostInputEl.addEventListener("input", () => {
   updateGrandTotal();
 });
+
+// Agent change — update quote ref prefix
+agentSelectEl.addEventListener("change", () => {
+  updateQuoteRefPrefix();
+});
+
+// Sequence input — show/hide separator
+quoteRefSeqEl.addEventListener("input", () => {
+  updateQuoteRefPrefix();
+});
+
+// Initialize quote ref prefix
+updateQuoteRefPrefix();
 
 // Settings Modal
 const settingsBtnEl = document.getElementById("settingsBtn") as HTMLButtonElement;
@@ -1669,6 +1831,8 @@ productTabs.forEach((tab) => {
       switchCategory("Biometrics");
     } else if (category === "door-access") {
       switchCategory("Door Access");
+    } else if (category === "cctv") {
+      switchCategory("CCTV");
     }
   });
 });

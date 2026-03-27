@@ -86,6 +86,7 @@ export interface QuotationItem {
   unitPrice: number;
   promoPrice: number;
   totalPrice: number;
+  warrantyMonths?: number;
 }
 
 export interface QuotationGroup {
@@ -93,7 +94,7 @@ export interface QuotationGroup {
   name: string;
   items: QuotationItem[];
 }
-
+//I hope Andrey achieves all of her dreams
 export interface QuotationData {
   quoteRefNo: string;
   companyName: string;
@@ -208,8 +209,11 @@ export async function generateQuotation(
               ]
             : []),
 
+          // Remarks & Conforme
+          ...createRemarksSection(),
+
           // Terms and Conditions
-          ...createTermsAndConditions(data.vatInclusive),
+          ...createTermsAndConditions(data.vatInclusive, data.installationCost, getMaxWarrantyMonths(data)),
 
           // Signature
           ...createSignatureSection(),
@@ -279,7 +283,7 @@ function createInfoLabelCell(text: string, cellWidth: number, borders: object): 
       new Paragraph({
         children: [
           new TextRun({
-            text,
+            text: ` ${text}`,
             font: FONT_FAMILY,
             bold: true,
             size: FONT_SIZE,
@@ -299,7 +303,7 @@ function createInfoValueCell(text: string, cellWidth: number, borders: object): 
       new Paragraph({
         children: [
           new TextRun({
-            text,
+            text: ` ${text}`,
             font: FONT_FAMILY,
             size: FONT_SIZE,
           }),
@@ -1209,7 +1213,28 @@ function createProductHeaderCell(
   });
 }
 
-function createTermsAndConditions(vatInclusive?: boolean): (Paragraph | Table)[] {
+function getMaxWarrantyMonths(data: QuotationData): number {
+  const allItems = [
+    ...data.items,
+    ...(data.groups ?? []).flatMap((g) => g.items),
+  ];
+  return allItems.reduce((max, item) => Math.max(max, item.warrantyMonths ?? 0), 0);
+}
+
+function warrantyToText(months: number): string {
+  if (months <= 0) return "one (1) year";
+  if (months % 12 === 0) {
+    const years = months / 12;
+    const words: Record<number, string> = { 1: "one", 2: "two", 3: "three", 4: "four", 5: "five" };
+    const word = words[years] ?? `${years}`;
+    return `${word} (${years}) ${years === 1 ? "year" : "years"}`;
+  }
+  const words: Record<number, string> = { 6: "six", 18: "eighteen" };
+  const word = words[months] ?? `${months}`;
+  return `${word} (${months}) months`;
+}
+
+function createTermsAndConditions(vatInclusive?: boolean, installationCost?: number, maxWarrantyMonths?: number): (Paragraph | Table)[] {
   const borderStyle = {
     style: BorderStyle.SINGLE,
     size: 6,
@@ -1223,48 +1248,33 @@ function createTermsAndConditions(vatInclusive?: boolean): (Paragraph | Table)[]
     right: borderStyle,
   };
 
-  const terms = [
+  const termEntries: { text: string; highlight?: string; bold?: string; rest?: string }[] = [];
+
+  if ((installationCost ?? 0) > 0) {
+    termEntries.push({ text: "INSTALLATION SERVICE & COST INCLUDED" });
+  }
+
+  termEntries.push(
     {
-      num: "1.)",
       text: "Prices quoted above are ",
       highlight: vatInclusive ? "VAT Inclusive" : "VAT Exclusive",
       rest: ". Email or fax certification if your company is vat exempt and zero rated for billing preparation.",
     },
+    { text: "Prices are subject to change without prior notice. Validity for this quotation is 15 days from the date stated above." },
+    { text: "Payment terms is Fifty Percent (50%) upon P.O. or signing of this CONFORME. Remaining balance shall be paid upon receive of items or after the installation." },
     {
-      num: "2.)",
-      text: "Prices are subject to change without prior notice. Validity for this quotation is 15 days from the date stated above.",
-    },
-    {
-      num: "3.)",
-      text: "Payment terms is Fifty Percent (50%) upon P.O. or signing of this CONFORME. Remaining balance shall be paid upon receive of items or after the installation.",
-    },
-    {
-      num: "4.)",
       text: "Payment will be accepted in COD, CASH, and Dated check or thru Bank Transfer payable to ",
       bold: "TECHFINITY SECURITY DEVICE TRADING",
       rest: ".",
     },
-    {
-      num: "5.)",
-      text: "FREE DELIVERY for purchases above Php10,000 within Metro Manila.",
-    },
-    {
-      num: "6.)",
-      text: "Cancelled orders are subject to a cancellation charge of Fifty Percent (50%).",
-    },
-    {
-      num: "7.)",
-      text: "Up to three (3) years limited warranty in service and parts will be given for main equipment from date of purchase/delivery/installation. Accessories such as power supply, adaptor, magnetic lock, exit button have six (6) months warranty. The warranty covers the parts cause of factory defect not including upgrades and relocation. Unauthorized repair will void its warranty. Warranty claims is strictly carry in basis, client must send the item to our office for repair. For those with installation, we will do the onsite checking and troubleshooting for free within metro manila, for outside metro manila client will pay for the mobilization/demobilization cost.",
-    },
-    {
-      num: "8.)",
-      text: "Should client will require service unit while defective device is under repair; client must pay a service unit fee but depends on the availability of the service unit.",
-    },
-    {
-      num: "9.)",
-      text: "After sales support is from Monday – Friday 8:30 – 5:30 pm",
-    },
-  ];
+    { text: "FREE DELIVERY for purchases above Php10,000 within Metro Manila." },
+    { text: "Cancelled orders are subject to a cancellation charge of Fifty Percent (50%)." },
+    { text: `Up to ${warrantyToText(maxWarrantyMonths ?? 0)} limited warranty in service and parts will be given for main equipment from date of purchase/delivery/installation. Accessories such as power supply, adaptor, magnetic lock, exit button have six (6) months warranty. The warranty covers the parts cause of factory defect not including upgrades and relocation. Unauthorized repair will void its warranty. Warranty claims is strictly carry in basis, client must send the item to our office for repair. For those with installation, we will do the onsite checking and troubleshooting for free within metro manila, for outside metro manila client will pay for the mobilization/demobilization cost.` },
+    { text: "Should client will require service unit while defective device is under repair; client must pay a service unit fee but depends on the availability of the service unit." },
+    { text: "After sales support is from Monday – Friday 8:30 – 5:30 pm" }
+  );
+
+  const terms = termEntries.map((entry, i) => ({ num: `${i + 1}.)`, ...entry }));
 
   const termsParagraphs: Paragraph[] = [];
 
@@ -1365,6 +1375,192 @@ function createTermsAndConditions(vatInclusive?: boolean): (Paragraph | Table)[]
   return [
     new Paragraph({ spacing: { before: 300 } }),
     termsTable,
+  ];
+}
+
+function createRemarksSection(): (Paragraph | Table)[] {
+  const noBorder = { style: BorderStyle.NONE, size: 0, color: "FFFFFF" };
+  const noBorders = { top: noBorder, bottom: noBorder, left: noBorder, right: noBorder };
+  const boxBorder = { style: BorderStyle.SINGLE, size: 8, color: "000000" };
+  const allBoxBorders = { top: boxBorder, bottom: boxBorder, left: boxBorder, right: boxBorder };
+  const sigLineBorder = { style: BorderStyle.SINGLE, size: 4, color: "000000" };
+
+  // Left nested table: REMARKS label + bordered text box
+  const leftTable = new Table({
+    width: { size: 0, type: WidthType.AUTO },
+    columnWidths: [30, 4869],
+    rows: [
+      new TableRow({
+        children: [
+          new TableCell({
+            width: { size: 30, type: WidthType.DXA },
+            borders: noBorders,
+            children: [new Paragraph({ children: [] })],
+          }),
+          new TableCell({
+            width: { size: 4869, type: WidthType.DXA },
+            borders: noBorders,
+            verticalAlign: VerticalAlign.CENTER,
+            children: [
+              new Paragraph({
+                children: [new TextRun({ text: "REMARKS", font: FONT_FAMILY, size: FONT_SIZE })],
+              }),
+            ],
+          }),
+        ],
+      }),
+      new TableRow({
+        children: [
+          new TableCell({
+            columnSpan: 2,
+            width: { size: 4899, type: WidthType.DXA },
+            borders: allBoxBorders,
+            verticalAlign: VerticalAlign.CENTER,
+            children: [
+              new Paragraph({
+                children: [
+                  new TextRun({ text: " ", font: FONT_FAMILY, size: FONT_SIZE }),
+                  new TextRun({
+                    text: "Prices of labor and material costs such as supply/installation conduit, coaxial cable, power cable, connectors, metal plates and any other hardware necessary to complete the system installation is not part of the package",
+                    font: FONT_FAMILY,
+                    size: FONT_SIZE,
+                  }),
+                ],
+              }),
+            ],
+          }),
+        ],
+      }),
+    ],
+  });
+
+  // Right nested table: CONFORME / BY + signature line / label
+  const rightTable = new Table({
+    width: { size: 0, type: WidthType.AUTO },
+    columnWidths: [387, 3437],
+    rows: [
+      // CONFORME
+      new TableRow({
+        children: [
+          new TableCell({
+            columnSpan: 2,
+            width: { size: 3824, type: WidthType.DXA },
+            borders: noBorders,
+            verticalAlign: VerticalAlign.CENTER,
+            children: [
+              new Paragraph({
+                children: [new TextRun({ text: "CONFORME", font: FONT_FAMILY, size: FONT_SIZE })],
+              }),
+            ],
+          }),
+        ],
+      }),
+      // Empty spacer rows (3 total for spacing below CONFORME)
+      new TableRow({
+        children: [
+          new TableCell({
+            columnSpan: 2,
+            width: { size: 3824, type: WidthType.DXA },
+            borders: noBorders,
+            children: [new Paragraph({ children: [] })],
+          }),
+        ],
+      }),
+      new TableRow({
+        children: [
+          new TableCell({
+            columnSpan: 2,
+            width: { size: 3824, type: WidthType.DXA },
+            borders: noBorders,
+            children: [new Paragraph({ children: [] })],
+          }),
+        ],
+      }),
+      new TableRow({
+        children: [
+          new TableCell({
+            columnSpan: 2,
+            width: { size: 3824, type: WidthType.DXA },
+            borders: noBorders,
+            children: [new Paragraph({ children: [] })],
+          }),
+        ],
+      }),
+      // BY | signature underline
+      new TableRow({
+        children: [
+          new TableCell({
+            width: { size: 387, type: WidthType.DXA },
+            borders: noBorders,
+            verticalAlign: VerticalAlign.CENTER,
+            children: [
+              new Paragraph({
+                children: [new TextRun({ text: "BY", font: FONT_FAMILY, size: FONT_SIZE })],
+              }),
+            ],
+          }),
+          new TableCell({
+            width: { size: 3437, type: WidthType.DXA },
+            borders: { top: noBorder, left: noBorder, right: noBorder, bottom: sigLineBorder },
+            verticalAlign: VerticalAlign.CENTER,
+            children: [new Paragraph({ children: [new TextRun({ text: " ", font: FONT_FAMILY, size: FONT_SIZE })] })],
+          }),
+        ],
+      }),
+      // Signature Over Printed Name/Date — centered
+      new TableRow({
+        children: [
+          new TableCell({
+            columnSpan: 2,
+            width: { size: 3824, type: WidthType.DXA },
+            borders: noBorders,
+            verticalAlign: VerticalAlign.CENTER,
+            children: [
+              new Paragraph({
+                alignment: AlignmentType.CENTER,
+                children: [
+                  new TextRun({
+                    text: "Signature Over Printed Name/Date",
+                    font: FONT_FAMILY,
+                    size: FONT_SIZE,
+                  }),
+                ],
+              }),
+            ],
+          }),
+        ],
+      }),
+    ],
+  });
+
+  // Outer table: left (REMARKS) | spacer | right (CONFORME)
+  return [
+    new Table({
+      width: { size: 100, type: WidthType.PERCENTAGE },
+      rows: [
+        new TableRow({
+          children: [
+            new TableCell({
+              width: { size: 4899, type: WidthType.DXA },
+              borders: noBorders,
+              verticalAlign: VerticalAlign.CENTER,
+              children: [leftTable, new Paragraph({ children: [] })],
+            }),
+            new TableCell({
+              width: { size: 300, type: WidthType.DXA },
+              borders: noBorders,
+              children: [new Paragraph({ children: [new TextRun({ text: " ", font: FONT_FAMILY, size: FONT_SIZE })] })],
+            }),
+            new TableCell({
+              width: { size: 4799, type: WidthType.DXA },
+              borders: noBorders,
+              verticalAlign: VerticalAlign.CENTER,
+              children: [rightTable, new Paragraph({ children: [] })],
+            }),
+          ],
+        }),
+      ],
+    }),
   ];
 }
 

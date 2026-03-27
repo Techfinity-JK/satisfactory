@@ -58,8 +58,12 @@
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label for="quoteRefNo">Quote Ref No:</label>
-            <input type="text" id="quoteRefNo" placeholder="e.g. 2025-JK-001">
+            <label>Quote Ref No:</label>
+            <div class="quote-ref-row">
+              <span id="quoteRefPrefix" class="quote-ref-prefix">2026-JK</span>
+              <span class="quote-ref-sep hidden" id="quoteRefSep">-</span>
+              <input type="text" id="quoteRefSeq" placeholder="001" class="quote-ref-seq">
+            </div>
           </div>
           <div class="form-group">
             <label for="companyName">Company Name:</label>
@@ -94,6 +98,7 @@
           <div class="product-tabs">
             <button class="product-tab active" data-category="biometrics">Biometrics</button>
             <button class="product-tab" data-category="door-access">Door Access</button>
+            <button class="product-tab" data-category="cctv">CCTV (Dahua)</button>
           </div>
           <input type="text" id="productSearch" class="product-search" placeholder="Search products...">
         </div>

@@ -338,6 +338,41 @@ h2 {
   resize: vertical;
 }
 
+/* Quote Ref No */
+.quote-ref-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.quote-ref-prefix {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-color);
+  white-space: nowrap;
+}
+
+.quote-ref-sep {
+  font-size: 14px;
+  color: var(--text-color);
+}
+
+.quote-ref-seq {
+  width: 80px;
+  padding: 8px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--input-bg);
+  color: var(--text-color);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.quote-ref-seq:focus {
+  border-color: var(--accent-color);
+}
+
 /* Product Tabs */
 .product-tabs-row {
   display: flex;
