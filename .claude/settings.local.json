@@ -11,7 +11,12 @@
       "Bash(powershell -Command \"Expand-Archive -Path ''Remarks Reference.docx'' -DestinationPath ''remarks_extracted'' -Force\")",
       "Bash(powershell -Command \":*)",
       "Bash(ls \"C:\\\\Users\\\\hi\\\\Documents\\\\GitHub\\\\satisfactory\\\\assets\\\\images 2>/dev/null || ls C:UsershiDocumentsGitHubsatisfactorysrcassets\")",
-      "Bash(find C:UsershiDocumentsGitHubsatisfactory -name *.png -o -name *.jpg -o -name *.jpeg -o -name *.webp)"
+      "Bash(find C:UsershiDocumentsGitHubsatisfactory -name *.png -o -name *.jpg -o -name *.jpeg -o -name *.webp)",
+      "Bash(mkdir -p \"E:\\\\Visual Code\\\\satisfactory\\\\src\\\\assets\\\\fonts\")",
+      "Bash(curl -L -o Inter.zip \"https://github.com/rsms/inter/releases/download/v4.1/Inter-4.1.zip\")",
+      "Bash(unzip -l Inter.zip)",
+      "Bash(unzip -j Inter.zip \"extras/woff-hinted/Inter-Regular.woff2\" \"extras/woff-hinted/Inter-Medium.woff2\" \"extras/woff-hinted/Inter-SemiBold.woff2\" \"extras/woff-hinted/Inter-Bold.woff2\")",
+      "Bash(rm Inter.zip)"
     ]
   }
 }

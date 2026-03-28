@@ -37,6 +37,7 @@ export type Product = {
 
   sku?: string;
   isActive: boolean;
+  isDeprecated?: boolean;
 };
 
 export const products: Product[] = [
@@ -385,7 +386,7 @@ export const products: Product[] = [
       usb: false,
       wifi: true,
     },
-    
+
     price: {
       fakeAmount: 15700,
       amount: 11500,
@@ -400,7 +401,8 @@ export const products: Product[] = [
     },
 
     isActive: true,
-  }, 
+    isDeprecated: true,
+  },
 //IFACE3
 {
     id: "zk-iface3",
@@ -457,7 +459,7 @@ export const products: Product[] = [
       usb: true,
       wifi: false,
     },
-    
+
     price: {
       fakeAmount: 21200,
       amount: 14800,
@@ -472,7 +474,8 @@ export const products: Product[] = [
     },
 
     isActive: true,
-  }, 
+    isDeprecated: true,
+  },
 //FA210
 {
     id: "gt-fa210",
@@ -637,7 +640,7 @@ export const products: Product[] = [
       usb: false,
       wifi: true,
     },
-    
+
     price: {
       fakeAmount: 18500,
       amount: 12900,
@@ -652,7 +655,8 @@ export const products: Product[] = [
     },
 
     isActive: true,
-  }, 
+    isDeprecated: true,
+  },
 ];
 
 export function getProductById(id: string): Product | undefined {

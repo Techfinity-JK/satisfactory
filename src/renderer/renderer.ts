@@ -29,6 +29,7 @@ interface Product {
     unit: "months" | "years";
   };
   isActive: boolean;
+  isDeprecated?: boolean;
 }
 
 interface SelectedItem {
@@ -90,6 +91,7 @@ interface QuotationData {
   showPesoSign?: boolean;
   agent?: string;
   notes?: string;
+  longDateFormat?: boolean;
 }
 
 // Map product names to icon filenames
@@ -114,7 +116,7 @@ const productIconMap: { [key: string]: string } = {
   "FACEPRO 4": "facepro4.jpeg",
   "XFACE100": "xface100.png",
   "UFACE800": "uface800.png",
-  "SPEEDFACEV3L": "speedfacev3l.png",
+  "SPEEDFACE V3L": "speedfacev3l.png",
   // Door Access
   "M06": "m06.jpg",
   "X6": "x6.jpg",
@@ -298,6 +300,7 @@ const products: Product[] = [
     dimension: "",
     warranty: { duration: 18, unit: "months" },
     isActive: true,
+    isDeprecated: true,
   },
   {
     id: "gt-fa110",
@@ -365,6 +368,7 @@ const products: Product[] = [
     dimension: "",
     warranty: { duration: 36, unit: "months" },
     isActive: true,
+    isDeprecated: true,
   },
   {
     id: "zk-iface3",
@@ -407,6 +411,7 @@ const products: Product[] = [
     dimension: "167x148x32mm",
     warranty: { duration: 36, unit: "months" },
     isActive: true,
+    isDeprecated: true,
   },
   {
     id: "gt-fa210",
@@ -516,7 +521,7 @@ const products: Product[] = [
   {
     id: "zk-speedfacev3l",
     brand: "ZKTECO",
-    name: "SPEEDFACEV3L",
+    name: "SPEEDFACE V3L",
     category: "Biometrics",
     description: " ~ 2.4-inch touch Screen\n"+
                  " ~ 3,000 card templates capacity\n"+
@@ -534,6 +539,7 @@ const products: Product[] = [
     dimension: "185x59x20mm",
     warranty: { duration: 12, unit: "months" },
     isActive: true,
+    isDeprecated: true,
   },
   
   // Door Access Products
@@ -681,6 +687,7 @@ const products: Product[] = [
     dimension: "",
     warranty: { duration: 36, unit: "months" },
     isActive: true,
+    isDeprecated: true,
   },
   {
     id: "zk-f22",
@@ -1008,7 +1015,7 @@ const products: Product[] = [
                  " AC110-220V to 12VDC Power Supply Control",
     capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
     download: { lan: false, usb: false, wifi: false },
-    price: { fakeAmount: 4500, amount: 4500, currency: "PHP" },
+    price: { fakeAmount: 3800, amount: 3800, currency: "PHP" },
     withADMS: false,
     warranty: { duration: 6, unit: "months" },
     isActive: true,
@@ -1208,7 +1215,7 @@ const discountInputEl = document.getElementById("discountInput") as HTMLInputEle
 const installationCostInputEl = document.getElementById("installationCostInput") as HTMLInputElement;
 const vatRowEl = document.getElementById("vatRow") as HTMLTableRowElement;
 const vatTotalEl = document.getElementById("vatTotal") as HTMLTableCellElement;
-const grandTotalEl = document.getElementById("grandTotal") as HTMLTableCellElement;
+const grandTotalEl = document.getElementById("grandTotal") as HTMLInputElement;
 const quoteRefPrefixEl = document.getElementById("quoteRefPrefix") as HTMLSpanElement;
 const quoteRefSepEl = document.getElementById("quoteRefSep") as HTMLSpanElement;
 const quoteRefSeqEl = document.getElementById("quoteRefSeq") as HTMLInputElement;
@@ -1224,6 +1231,7 @@ const generateBtnEl = document.getElementById("generateBtn") as HTMLButtonElemen
 const clearBtnEl = document.getElementById("clearBtn") as HTMLButtonElement;
 const sixColumnModeEl = document.getElementById("sixColumnMode") as HTMLInputElement;
 const showPesoSignEl = document.getElementById("showPesoSign") as HTMLInputElement;
+const longDateFormatEl = document.getElementById("longDateFormat") as HTMLInputElement;
 const agentSelectEl = document.getElementById("agentSelect") as HTMLSelectElement;
 
 const AGENT_CODES: Record<string, string> = {
@@ -1267,9 +1275,23 @@ function renderProducts(): void {
       (item) => item.product.id === product.id
     ).length;
 
+    const iconFile = productIconMap[product.name];
+    const iconHtml = iconFile
+      ? `<img class="product-card-icon" src="../../src/assets/icons/${iconFile}" alt="${product.name}">`
+      : '';
+    const deprecatedHtml = product.isDeprecated
+      ? `<div class="deprecated-badge">&#9888;<span class="deprecated-tooltip">Item only available on special orders</span></div>`
+      : '';
+
     card.innerHTML = `
-      <div class="brand">${product.brand}</div>
-      <div class="name">${product.name}</div>
+      ${deprecatedHtml}
+      <div class="product-card-top">
+        <div class="product-card-info">
+          <div class="brand">${product.brand}</div>
+          <div class="name">${product.name}</div>
+        </div>
+        ${iconHtml}
+      </div>
       <div class="original-price">PHP ${product.price.fakeAmount.toLocaleString()}</div>
       <div class="price">PHP ${product.price.amount.toLocaleString()}</div>
       ${instanceCount > 0 ? `<div class="instance-badge">${instanceCount} added</div>` : '<div class="add-hint">Click to add</div>'}
@@ -1477,13 +1499,17 @@ function createProductRow(item: SelectedItem, productId: string, groupId: string
 
   row.innerHTML = `
     <td class="drag-handle" title="Drag to reorder">${dragHandleSvg}</td>
-    <td>${item.product.brand}</td>
+    <td class="item-icon-cell">${(() => { const icon = productIconMap[item.product.name]; return icon ? `<img class="item-icon" src="../../src/assets/icons/${icon}" alt="${item.product.name}">` : item.product.brand; })()}</td>
     <td>${item.product.name}</td>
     <td>
       <input type="number" class="price-input" value="${unitPrice}" min="0" data-product-id="${productId}">
     </td>
     <td>
-      <input type="number" class="qty-input" value="${item.quantity}" min="1" data-product-id="${productId}">
+      <div class="qty-control">
+        <button class="qty-btn qty-minus" data-product-id="${productId}">−</button>
+        <span class="qty-value" data-product-id="${productId}">${item.quantity}</span>
+        <button class="qty-btn qty-plus" data-product-id="${productId}">+</button>
+      </div>
     </td>
     <td>PHP ${total.toLocaleString()}</td>
     <td class="action-cell">
@@ -1609,20 +1635,41 @@ function renderSelectedItems(): void {
         } else {
           item.customPrice = undefined;
         }
+
+        // Update the service's base price so future additions use the new price
+        if (item.product.category === "Service") {
+          const service = services.find((s) => s.id === item.product.id);
+          if (service) {
+            service.price = newPrice;
+            item.product.price.fakeAmount = newPrice;
+            item.product.price.amount = newPrice;
+            item.customPrice = undefined;
+          }
+        }
+
         renderSelectedItems();
       }
     });
   });
 
-  // Add event listeners for quantity inputs
-  document.querySelectorAll(".qty-input").forEach((input) => {
-    input.addEventListener("change", (e) => {
-      const target = e.target as HTMLInputElement;
-      const productId = target.dataset.productId!;
-      const newQty = parseInt(target.value, 10);
+  // Add event listeners for quantity buttons
+  document.querySelectorAll(".qty-minus").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const productId = (btn as HTMLElement).dataset.productId!;
+      const item = selectedItems.get(productId);
+      if (item && item.quantity > 1) {
+        item.quantity--;
+        renderSelectedItems();
+      }
+    });
+  });
 
-      if (newQty > 0 && selectedItems.has(productId)) {
-        selectedItems.get(productId)!.quantity = newQty;
+  document.querySelectorAll(".qty-plus").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const productId = (btn as HTMLElement).dataset.productId!;
+      const item = selectedItems.get(productId);
+      if (item) {
+        item.quantity++;
         renderSelectedItems();
       }
     });
@@ -1867,7 +1914,7 @@ function updateGrandTotal(): void {
 
   // 6. Calculate Total Investment Cost
   const totalInvestment = subtotal + vatAmount;
-  grandTotalEl.textContent = `PHP ${totalInvestment.toLocaleString()}`;
+  grandTotalEl.value = String(Math.round(totalInvestment));
 }
 
 // Build product specs from product data
@@ -1920,11 +1967,6 @@ async function generateQuotation(): Promise<void> {
   const seq = quoteRefSeqEl.value.trim();
   const quoteRefNo = seq ? `${getQuoteRefPrefix()}-${seq}` : getQuoteRefPrefix();
   const companyName = companyNameEl.value.trim();
-
-  if (!companyName) {
-    alert("Please enter company name");
-    return;
-  }
 
   if (selectedItems.size === 0) {
     alert("Please select at least one product");
@@ -2009,6 +2051,7 @@ async function generateQuotation(): Promise<void> {
     showPesoSign: showPesoSignEl.checked,
     agent: agentSelectEl.value,
     notes: notesEl.value.trim() || undefined,
+    longDateFormat: longDateFormatEl.checked,
   };
 
   generateBtnEl.disabled = true;
@@ -2095,6 +2138,20 @@ installationCostInputEl.addEventListener("input", () => {
   updateGrandTotal();
 });
 
+// Grand total input listener - back-calculate discount from custom total
+grandTotalEl.addEventListener("change", () => {
+  const desiredTotal = parseInt(grandTotalEl.value, 10) || 0;
+  const installationCost = parseInt(installationCostInputEl.value, 10) || 0;
+
+  // Reverse: Total = (Equipment - Discount + Installation) * (1 + vatRate)
+  const vatRate = vatInclusiveEl.checked ? 0.12 : 0;
+  const subtotalNeeded = desiredTotal / (1 + vatRate);
+  const discount = Math.round(currentEquipmentCost + installationCost - subtotalNeeded);
+
+  discountInputEl.value = String(Math.max(0, discount));
+  updateGrandTotal();
+});
+
 // Agent change — update quote ref prefix
 agentSelectEl.addEventListener("change", () => {
   updateQuoteRefPrefix();
@@ -2167,6 +2224,12 @@ themeCircles.forEach((circle) => {
       setTheme(theme);
     }
   });
+});
+
+// Long date format setting
+longDateFormatEl.checked = localStorage.getItem("longDateFormat") === "true";
+longDateFormatEl.addEventListener("change", () => {
+  localStorage.setItem("longDateFormat", String(longDateFormatEl.checked));
 });
 
 // Service card click — add instance like products

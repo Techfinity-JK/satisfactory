@@ -113,6 +113,7 @@ export interface QuotationData {
   showPesoSign?: boolean;
   agent?: string;
   notes?: string;
+  longDateFormat?: boolean;
 }
 
 export async function generateQuotation(
@@ -228,11 +229,9 @@ export async function generateQuotation(
 }
 
 function createCustomerInfoTable(data: QuotationData): Table {
-  const today = new Date().toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  const today = data.longDateFormat
+    ? new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
+    : new Date().toLocaleDateString("en-US");
 
   const borderStyle = {
     style: BorderStyle.SINGLE,

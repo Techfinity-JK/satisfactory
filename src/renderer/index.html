@@ -38,6 +38,12 @@
             <button class="theme-circle" data-theme="teal" title="Teal" style="background: linear-gradient(135deg, #134e4a, #14b8a6);"></button>
             <button class="theme-circle" data-theme="rose" title="Rose" style="background: linear-gradient(135deg, #4c0519, #e11d48);"></button>
           </div>
+          <h3>Date Format</h3>
+          <label class="checkbox-label">
+            <input type="checkbox" id="longDateFormat">
+            <span>Use long date format</span>
+            <span class="checkbox-hint">(March 28, 2026)</span>
+          </label>
         </div>
       </div>
     </div>
@@ -157,7 +163,7 @@
           <thead>
             <tr>
               <th class="drag-handle-header"></th>
-              <th>Brand</th>
+              <th></th>
               <th>Product</th>
               <th>Unit Price</th>
               <th>Qty</th>
@@ -181,11 +187,9 @@
               <td class="total-amount">
                 <div class="discount-field">
                   <input type="number" class="discount-input" id="discountInput" value="0" min="0">
-                  <div class="discount-pct-btns">
-                    <button class="discount-pct-btn" data-pct="25">25%</button>
-                    <button class="discount-pct-btn" data-pct="27">27%</button>
-                    <button class="discount-pct-btn" data-pct="30">30%</button>
-                  </div>
+                  <button class="discount-pct-btn" data-pct="25">25%</button>
+                  <button class="discount-pct-btn" data-pct="27">27%</button>
+                  <button class="discount-pct-btn" data-pct="30">30%</button>
                 </div>
               </td>
               <td></td>
@@ -213,7 +217,9 @@
             <tr class="grand-total-row">
               <td></td>
               <td colspan="4" class="total-label">Total Investment Cost:</td>
-              <td id="grandTotal" class="total-amount grand-total">PHP 0</td>
+              <td class="total-amount grand-total">
+                <input type="number" class="grand-total-input" id="grandTotal" value="0" min="0">
+              </td>
               <td></td>
             </tr>
           </tfoot>
