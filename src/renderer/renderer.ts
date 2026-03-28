@@ -1371,7 +1371,7 @@ function renderServices(): void {
       badge.textContent = `${count} added`;
     } else {
       badge.className = "add-hint";
-      badge.textContent = "Click to add";
+      badge.textContent = "";
     }
   });
 }
@@ -1623,6 +1623,9 @@ function renderSelectedItems(): void {
 
   // Add event listeners for price inputs
   document.querySelectorAll(".price-input").forEach((input) => {
+    input.addEventListener("focus", () => {
+      (input as HTMLInputElement).select();
+    });
     input.addEventListener("change", (e) => {
       const target = e.target as HTMLInputElement;
       const productId = target.dataset.productId!;
@@ -1875,6 +1878,10 @@ function reorderItems(
 
 let currentEquipmentCost = 0;
 
+function formatPeso(amount: number): string {
+  return `PHP ${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
 // Update grand total
 function updateGrandTotal(): void {
   // 1. Calculate Total Cost (all selected items)
@@ -1884,16 +1891,16 @@ function updateGrandTotal(): void {
     equipmentCost += unitPrice * item.quantity;
   });
   currentEquipmentCost = equipmentCost;
-  equipmentCostTotalEl.textContent = `PHP ${equipmentCost.toLocaleString()}`;
+  equipmentCostTotalEl.textContent = formatPeso(equipmentCost);
 
   // 2. Get discount and installation cost
-  const discount = parseInt(discountInputEl.value, 10) || 0;
-  const installationCost = parseInt(installationCostInputEl.value, 10) || 0;
+  const discount = parseFloat(discountInputEl.value) || 0;
+  const installationCost = parseFloat(installationCostInputEl.value) || 0;
 
   // 3. Total Equipment Cost (after discount) — only show when discount is applied
   const totalAfterDiscount = equipmentCost - discount;
   if (discount > 0) {
-    totalEquipmentCostEl.textContent = `PHP ${totalAfterDiscount.toLocaleString()}`;
+    totalEquipmentCostEl.textContent = formatPeso(totalAfterDiscount);
     totalEquipmentCostRowEl.classList.remove("hidden");
   } else {
     totalEquipmentCostRowEl.classList.add("hidden");
@@ -1905,16 +1912,16 @@ function updateGrandTotal(): void {
   // 5. Calculate VAT if inclusive
   let vatAmount = 0;
   if (vatInclusiveEl.checked) {
-    vatAmount = subtotal * 0.12;
+    vatAmount = Math.ceil(subtotal * 0.12 * 100) / 100;
     vatRowEl.classList.remove("hidden");
-    vatTotalEl.textContent = `PHP ${vatAmount.toLocaleString()}`;
+    vatTotalEl.textContent = formatPeso(vatAmount);
   } else {
     vatRowEl.classList.add("hidden");
   }
 
   // 6. Calculate Total Investment Cost
-  const totalInvestment = subtotal + vatAmount;
-  grandTotalEl.value = String(Math.round(totalInvestment));
+  const totalInvestment = Math.round((subtotal + vatAmount) * 100) / 100;
+  grandTotalEl.value = totalInvestment.toFixed(2);
 }
 
 // Build product specs from product data
@@ -2031,8 +2038,8 @@ async function generateQuotation(): Promise<void> {
     ...groups.flatMap((g) => g.items),
   ];
 
-  const discount = parseInt(discountInputEl.value, 10) || 0;
-  const installationCost = parseInt(installationCostInputEl.value, 10) || 0;
+  const discount = parseFloat(discountInputEl.value) || 0;
+  const installationCost = parseFloat(installationCostInputEl.value) || 0;
 
   const data: QuotationData = {
     quoteRefNo,
@@ -2113,10 +2120,21 @@ addGroupBtnEl.addEventListener("click", () => {
   renderSelectedItems();
 });
 
+// Brochure Only checkbox listener - hide/show pricing footer
+const tableTfootEl = document.getElementById("tableTfoot") as HTMLElement;
+brochureOnlyEl.addEventListener("change", () => {
+  tableTfootEl.classList.toggle("hidden", brochureOnlyEl.checked);
+});
+
 // VAT checkbox listener - update totals when changed
 vatInclusiveEl.addEventListener("change", () => {
   updateGrandTotal();
 });
+
+// Select all on focus for discount, installation cost, and grand total
+discountInputEl.addEventListener("focus", () => discountInputEl.select());
+installationCostInputEl.addEventListener("focus", () => installationCostInputEl.select());
+grandTotalEl.addEventListener("focus", () => grandTotalEl.select());
 
 // Discount input listener - update totals when changed
 discountInputEl.addEventListener("input", () => {
@@ -2127,8 +2145,8 @@ discountInputEl.addEventListener("input", () => {
 document.querySelectorAll<HTMLButtonElement>(".discount-pct-btn").forEach((btn) => {
   btn.addEventListener("click", () => {
     const pct = parseInt(btn.dataset.pct ?? "0", 10);
-    const discountAmount = Math.round(currentEquipmentCost * pct / 100);
-    discountInputEl.value = String(discountAmount);
+    const discountAmount = currentEquipmentCost * pct / 100;
+    discountInputEl.value = discountAmount.toFixed(2);
     updateGrandTotal();
   });
 });
@@ -2140,15 +2158,34 @@ installationCostInputEl.addEventListener("input", () => {
 
 // Grand total input listener - back-calculate discount from custom total
 grandTotalEl.addEventListener("change", () => {
-  const desiredTotal = parseInt(grandTotalEl.value, 10) || 0;
-  const installationCost = parseInt(installationCostInputEl.value, 10) || 0;
+  const desiredTotal = parseFloat(grandTotalEl.value) || 0;
+  const installationCost = parseFloat(installationCostInputEl.value) || 0;
+  const vatEnabled = vatInclusiveEl.checked;
 
-  // Reverse: Total = (Equipment - Discount + Installation) * (1 + vatRate)
-  const vatRate = vatInclusiveEl.checked ? 0.12 : 0;
-  const subtotalNeeded = desiredTotal / (1 + vatRate);
-  const discount = Math.round(currentEquipmentCost + installationCost - subtotalNeeded);
+  // Reverse-solve: find discount so that the final total (with ceiling VAT) equals desiredTotal
+  // Start with an estimate, then adjust to account for Math.ceil on VAT
+  const vatRate = vatEnabled ? 0.12 : 0;
+  let discount = Math.round((currentEquipmentCost + installationCost - desiredTotal / (1 + vatRate)) * 100) / 100;
+  discount = Math.max(0, discount);
 
-  discountInputEl.value = String(Math.max(0, discount));
+  // Fine-tune: compute forward and adjust if off by a cent due to ceiling
+  const computeTotal = (d: number): number => {
+    const subtotal = (currentEquipmentCost - d) + installationCost;
+    const vat = vatEnabled ? Math.ceil(subtotal * 0.12 * 100) / 100 : 0;
+    return Math.round((subtotal + vat) * 100) / 100;
+  };
+
+  let total = computeTotal(discount);
+  if (total > desiredTotal) {
+    discount = Math.round((discount + (total - desiredTotal)) * 100) / 100;
+    total = computeTotal(discount);
+  }
+  if (total < desiredTotal) {
+    discount = Math.round((discount - (desiredTotal - total)) * 100) / 100;
+  }
+  discount = Math.max(0, discount);
+
+  discountInputEl.value = discount.toFixed(2);
   updateGrandTotal();
 });
 
@@ -2216,6 +2253,55 @@ settingsModalEl.addEventListener("click", (e) => {
   }
 });
 
+// Background picker
+const bgPreviewEl = document.getElementById("bgPreview") as HTMLDivElement;
+const bgPickBtnEl = document.getElementById("bgPickBtn") as HTMLButtonElement;
+const bgClearBtnEl = document.getElementById("bgClearBtn") as HTMLButtonElement;
+const bgImageEl = document.getElementById("bgImage") as HTMLImageElement;
+const bgFileInput = document.createElement("input");
+bgFileInput.type = "file";
+bgFileInput.accept = "image/*";
+
+function applyBackground(dataUrl: string | null): void {
+  if (dataUrl) {
+    bgImageEl.src = dataUrl;
+    bgImageEl.classList.add("active");
+    bgPreviewEl.innerHTML = `<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover;">`;
+  } else {
+    bgImageEl.src = "";
+    bgImageEl.classList.remove("active");
+    bgPreviewEl.innerHTML = "No background set";
+  }
+}
+
+// Load saved background
+const savedBg = localStorage.getItem("customBackground");
+if (savedBg) applyBackground(savedBg);
+
+bgPickBtnEl.addEventListener("click", () => bgFileInput.click());
+
+bgFileInput.addEventListener("change", () => {
+  const file = bgFileInput.files?.[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const dataUrl = reader.result as string;
+    try {
+      localStorage.setItem("customBackground", dataUrl);
+    } catch (_) {
+      // Image too large for localStorage — still apply for this session
+    }
+    applyBackground(dataUrl);
+  };
+  reader.readAsDataURL(file);
+  bgFileInput.value = "";
+});
+
+bgClearBtnEl.addEventListener("click", () => {
+  localStorage.removeItem("customBackground");
+  applyBackground(null);
+});
+
 // Theme selection
 themeCircles.forEach((circle) => {
   circle.addEventListener("click", () => {
@@ -2224,6 +2310,12 @@ themeCircles.forEach((circle) => {
       setTheme(theme);
     }
   });
+});
+
+// Show peso sign setting
+showPesoSignEl.checked = localStorage.getItem("showPesoSign") === "true";
+showPesoSignEl.addEventListener("change", () => {
+  localStorage.setItem("showPesoSign", String(showPesoSignEl.checked));
 });
 
 // Long date format setting

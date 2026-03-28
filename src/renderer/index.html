@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: file:">
   <title>Quotation Generator</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <img id="bgImage" class="bg-image" alt="">
   <div class="container">
     <header>
       <h1>Quotation Generator</h1>
@@ -27,6 +28,14 @@
           <button id="closeSettingsBtn" class="close-btn">&times;</button>
         </div>
         <div class="modal-body">
+          <h3>Background</h3>
+          <div class="bg-picker">
+            <div id="bgPreview" class="bg-preview">No background set</div>
+            <div class="bg-actions">
+              <button id="bgPickBtn" class="btn-bg-pick">Choose Image</button>
+              <button id="bgClearBtn" class="btn-bg-clear">Clear</button>
+            </div>
+          </div>
           <h3>Color Theme</h3>
           <div class="theme-options">
             <button class="theme-circle" data-theme="night" title="Night Mode" style="background: linear-gradient(135deg, #1a1a2e, #16213e);"></button>
@@ -38,7 +47,11 @@
             <button class="theme-circle" data-theme="teal" title="Teal" style="background: linear-gradient(135deg, #134e4a, #14b8a6);"></button>
             <button class="theme-circle" data-theme="rose" title="Rose" style="background: linear-gradient(135deg, #4c0519, #e11d48);"></button>
           </div>
-          <h3>Date Format</h3>
+          <h3>Output</h3>
+          <label class="checkbox-label">
+            <input type="checkbox" id="showPesoSign">
+            <span>Show ₱ Sign</span>
+          </label>
           <label class="checkbox-label">
             <input type="checkbox" id="longDateFormat">
             <span>Use long date format</span>
@@ -140,21 +153,17 @@
             <label class="checkbox-label">
               <input type="checkbox" id="brochureOnly">
               <span>Brochure Only</span>
-              <span class="checkbox-hint">(Hides Grand Total)</span>
+              <span class="info-icon">&#9432;<span class="info-tooltip">Hides Total Equipment Cost, use this if you are going to make a biometrics brochure.</span></span>
             </label>
             <label class="checkbox-label">
               <input type="checkbox" id="vatInclusive">
               <span>VAT Inclusive</span>
-              <span class="checkbox-hint">(Adds 12% VAT)</span>
+              <span class="info-icon">&#9432;<span class="info-tooltip">Adds 12% VAT for Sales Invoice.</span></span>
             </label>
             <label class="checkbox-label">
-              <input type="checkbox" id="showPesoSign">
-              <span>Show ₱ Sign</span>
-            </label>
-            <label class="toggle-label">
               <input type="checkbox" id="sixColumnMode">
-              <span class="toggle-track"><span class="toggle-thumb"></span></span>
               <span>7-Column Output</span>
+              <span class="info-icon">&#9432;<span class="info-tooltip">Additional column with the promo amount pricing. Use this for multiple biometrics orders.</span></span>
             </label>
             <button id="addGroupBtn" class="btn-add-group">+ Add Group</button>
           </div>
@@ -186,7 +195,7 @@
               <td colspan="4" class="total-label">Less Discount:</td>
               <td class="total-amount">
                 <div class="discount-field">
-                  <input type="number" class="discount-input" id="discountInput" value="0" min="0">
+                  <input type="number" class="discount-input" id="discountInput" value="0" min="0" step="0.01">
                   <button class="discount-pct-btn" data-pct="25">25%</button>
                   <button class="discount-pct-btn" data-pct="27">27%</button>
                   <button class="discount-pct-btn" data-pct="30">30%</button>
@@ -218,7 +227,7 @@
               <td></td>
               <td colspan="4" class="total-label">Total Investment Cost:</td>
               <td class="total-amount grand-total">
-                <input type="number" class="grand-total-input" id="grandTotal" value="0" min="0">
+                <input type="number" class="grand-total-input" id="grandTotal" value="0.00" min="0" step="0.01">
               </td>
               <td></td>
             </tr>

@@ -320,6 +320,12 @@ function createProductSections(items: QuotationItem[], groups?: QuotationGroup[]
   const sections: (Paragraph | Table)[] = [];
   const curr = showPesoSign ? "₱" : "";
 
+  // Helper to render a single item as its own table with its own freebies (for brochure mode)
+  const renderBrochureItem = (item: QuotationItem): void => {
+    sections.push(createGroupedTable([item], sixColumnMode, showPesoSign));
+    sections.push(new Paragraph({ children: [], spacing: { after: 200 } }));
+  };
+
   // Helper to render items as a single table and return subtotal
   const renderItemsSection = (sectionItems: QuotationItem[], groupName?: string): number => {
     if (sectionItems.length === 0) return 0;
@@ -343,9 +349,20 @@ function createProductSections(items: QuotationItem[], groups?: QuotationGroup[]
       );
     }
 
-    // Create a single table containing all items
-    sections.push(createGroupedTable(sectionItems, sixColumnMode, showPesoSign));
+    if (brochureOnly) {
+      // In brochure mode, each biometric item gets its own table with freebies
+      const biometricItems = sectionItems.filter((item) => item.category === "Biometrics" || item.withExtras === true);
+      const otherItems = sectionItems.filter((item) => item.category !== "Biometrics" && item.withExtras !== true);
 
+      biometricItems.forEach((item) => renderBrochureItem(item));
+
+      if (otherItems.length > 0) {
+        sections.push(createGroupedTable(otherItems, sixColumnMode, showPesoSign));
+      }
+    } else {
+      // Create a single table containing all items
+      sections.push(createGroupedTable(sectionItems, sixColumnMode, showPesoSign));
+    }
 
     return subtotal;
   };
@@ -373,7 +390,7 @@ function createProductSections(items: QuotationItem[], groups?: QuotationGroup[]
     // Group 1: EQUIPMENT PRICE [+ LESS DISCOUNT + TOTAL EQUIPMENT COST] — soft line breaks, no space between
     const priceGroupChildren: TextRun[] = [
       new TextRun({
-        text: `EQUIPMENT PRICE = ${curr}${totalEquipmentCost.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
+        text: `EQUIPMENT PRICE = ${curr}${totalEquipmentCost.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
         font: FONT_FAMILY,
         bold: true,
         size: FONT_SIZE,
@@ -383,7 +400,7 @@ function createProductSections(items: QuotationItem[], groups?: QuotationGroup[]
       priceGroupChildren.push(new TextRun({ break: 1 }));
       priceGroupChildren.push(
         new TextRun({
-          text: `LESS DISCOUNT = ${curr}${discountAmount.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
+          text: `LESS DISCOUNT = ${curr}${discountAmount.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
           font: FONT_FAMILY,
           bold: true,
           size: FONT_SIZE,
@@ -392,7 +409,7 @@ function createProductSections(items: QuotationItem[], groups?: QuotationGroup[]
       priceGroupChildren.push(new TextRun({ break: 1 }));
       priceGroupChildren.push(
         new TextRun({
-          text: `TOTAL EQUIPMENT COST = ${curr}${totalAfterDiscount.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
+          text: `TOTAL EQUIPMENT COST = ${curr}${totalAfterDiscount.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
           font: FONT_FAMILY,
           bold: true,
           size: FONT_SIZE,
@@ -413,14 +430,14 @@ function createProductSections(items: QuotationItem[], groups?: QuotationGroup[]
     // Group 2: INSTALLATION COST + PLUS 12% VAT — soft line breaks, no space between
     let vatAmount = 0;
     if (vatInclusive) {
-      vatAmount = subtotal * 0.12;
+      vatAmount = Math.ceil(subtotal * 0.12 * 100) / 100;
     }
     if (installationAmount > 0 || vatAmount > 0) {
       const extraGroupChildren: TextRun[] = [];
       if (installationAmount > 0) {
         extraGroupChildren.push(
           new TextRun({
-            text: `INSTALLATION COST = ${curr}${installationAmount.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
+            text: `INSTALLATION COST = ${curr}${installationAmount.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
             font: FONT_FAMILY,
             bold: true,
             size: FONT_SIZE,
@@ -431,7 +448,7 @@ function createProductSections(items: QuotationItem[], groups?: QuotationGroup[]
         if (extraGroupChildren.length > 0) extraGroupChildren.push(new TextRun({ break: 1 }));
         extraGroupChildren.push(
           new TextRun({
-            text: `PLUS 12% VAT = ${curr}${vatAmount.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
+            text: `PLUS 12% VAT = ${curr}${vatAmount.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
             font: FONT_FAMILY,
             bold: true,
             size: FONT_SIZE,
@@ -453,7 +470,7 @@ function createProductSections(items: QuotationItem[], groups?: QuotationGroup[]
       new Paragraph({
         children: [
           new TextRun({
-            text: `TOTAL INVESTMENT COST = ${curr}${totalInvestment.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
+            text: `TOTAL INVESTMENT COST = ${curr}${totalInvestment.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
             font: FONT_FAMILY,
             bold: true,
             underline: {},
@@ -602,6 +619,24 @@ function createGroupedTable(items: QuotationItem[], sixColumnMode?: boolean, sho
       });
     }
 
+    if (item.warrantyMonths && item.warrantyMonths > 0) {
+      const warrantyText = item.warrantyMonths >= 12 && item.warrantyMonths % 12 === 0
+        ? `~ ${item.warrantyMonths / 12} YEAR${item.warrantyMonths / 12 > 1 ? "S" : ""} WARRANTY`
+        : `~ ${item.warrantyMonths} MONTHS WARRANTY`;
+      descriptionParagraphs.push(
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: warrantyText,
+              font: FONT_FAMILY,
+              size: FONT_SIZE,
+              bold: true,
+            }),
+          ],
+        })
+      );
+    }
+
     // Build model cell content with image
     const modelCellChildren: Paragraph[] = [];
 
@@ -655,15 +690,15 @@ function createGroupedTable(items: QuotationItem[], sixColumnMode?: boolean, sho
         borders, verticalAlign: VerticalAlign.CENTER,
       }),
       new TableCell({
-        children: [new Paragraph({ children: [new TextRun({ text: `${curr}${item.unitPrice.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`, font: FONT_FAMILY, size: FONT_SIZE })], alignment: AlignmentType.CENTER })],
+        children: [new Paragraph({ children: [new TextRun({ text: `${curr}${item.unitPrice.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, font: FONT_FAMILY, size: FONT_SIZE })], alignment: AlignmentType.CENTER })],
         borders, verticalAlign: VerticalAlign.CENTER,
       }),
       ...(!sixColumnMode ? [new TableCell({
-        children: [new Paragraph({ children: [new TextRun({ text: `${curr}${item.promoPrice.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`, font: FONT_FAMILY, size: FONT_SIZE })], alignment: AlignmentType.CENTER })],
+        children: [new Paragraph({ children: [new TextRun({ text: `${curr}${item.promoPrice.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, font: FONT_FAMILY, size: FONT_SIZE })], alignment: AlignmentType.CENTER })],
         borders, verticalAlign: VerticalAlign.CENTER,
       })] : []),
       new TableCell({
-        children: [new Paragraph({ children: [new TextRun({ text: `${curr}${item.totalPrice.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`, font: FONT_FAMILY, bold: true, size: FONT_SIZE })], alignment: AlignmentType.CENTER })],
+        children: [new Paragraph({ children: [new TextRun({ text: `${curr}${item.totalPrice.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, font: FONT_FAMILY, bold: true, size: FONT_SIZE })], alignment: AlignmentType.CENTER })],
         borders, verticalAlign: VerticalAlign.CENTER,
       }),
     ];
@@ -742,6 +777,24 @@ function createProductTable(item: QuotationItem): Table {
         );
       }
     });
+  }
+
+  if (item.warrantyMonths && item.warrantyMonths > 0) {
+    const warrantyText = item.warrantyMonths >= 12 && item.warrantyMonths % 12 === 0
+      ? `${item.warrantyMonths / 12} YEAR${item.warrantyMonths / 12 > 1 ? "S" : ""} WARRANTY`
+      : `${item.warrantyMonths} MONTHS WARRANTY`;
+    descriptionParagraphs.push(
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: warrantyText,
+            font: FONT_FAMILY,
+            size: FONT_SIZE,
+            bold: true,
+          }),
+        ],
+      })
+    );
   }
 
   // Build model cell content with image
@@ -845,7 +898,7 @@ function createProductTable(item: QuotationItem): Table {
           new Paragraph({
             children: [
               new TextRun({
-                text: `₱${item.unitPrice.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
+                text: `₱${item.unitPrice.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
                 font: FONT_FAMILY,
                 size: FONT_SIZE,
               }),
@@ -862,7 +915,7 @@ function createProductTable(item: QuotationItem): Table {
           new Paragraph({
             children: [
               new TextRun({
-                text: `₱${item.promoPrice.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
+                text: `₱${item.promoPrice.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
                 font: FONT_FAMILY,
                 size: FONT_SIZE,
               }),
@@ -879,7 +932,7 @@ function createProductTable(item: QuotationItem): Table {
           new Paragraph({
             children: [
               new TextRun({
-                text: `₱${item.totalPrice.toLocaleString("en-PH", { minimumFractionDigits: 2 })}`,
+                text: `₱${item.totalPrice.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
                 font: FONT_FAMILY,
                 bold: true,
                 size: FONT_SIZE,
