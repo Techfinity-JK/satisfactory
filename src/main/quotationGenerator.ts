@@ -251,26 +251,26 @@ function createCustomerInfoTable(data: QuotationData): Table {
     rows: [
       new TableRow({
         children: [
-          createInfoLabelCell("Date", 10, borders),
-          createInfoValueCell(today, 40, borders),
-          createInfoLabelCell("Contact Person", 10, borders),
-          createInfoValueCell(data.contactPerson || "", 40, borders),
+          createInfoLabelCell("Date", 8, borders),
+          createInfoValueCell(today, 53, borders),
+          createInfoLabelCell("Contact Person", 15, borders),
+          createInfoValueCell(data.contactPerson || "", 24, borders),
         ],
       }),
       new TableRow({
         children: [
-          createInfoLabelCell("Client", 10, borders),
-          createInfoValueCell(data.companyName, 40, borders),
+          createInfoLabelCell("Client", 8, borders),
+          createInfoValueCell(data.companyName, 53, borders),
           createInfoLabelCell("Contact Number", 15, borders),
-          createInfoValueCell(data.contactNumber || "", 35, borders),
+          createInfoValueCell(data.contactNumber || "", 24, borders),
         ],
       }),
       new TableRow({
         children: [
-          createInfoLabelCell("Address", 15, borders),
-          createInfoValueCell(data.companyAddress || "", 35, borders),
+          createInfoLabelCell("Address", 8, borders),
+          createInfoValueCell(data.companyAddress || "", 53, borders),
           createInfoLabelCell("Email", 15, borders),
-          createInfoValueCell(data.emailAddress || "", 35, borders),
+          createInfoValueCell(data.emailAddress || "", 24, borders),
         ],
       }),
     ],
@@ -305,6 +305,7 @@ function createInfoValueCell(text: string, cellWidth: number, borders: object): 
           new TextRun({
             text: ` ${text}`,
             font: FONT_FAMILY,
+            bold: true,
             size: FONT_SIZE,
           }),
         ],
@@ -484,7 +485,11 @@ function createProductSections(items: QuotationItem[], groups?: QuotationGroup[]
     );
 
     // 6. MANDATORY NOTES
+    const allItems = [...items, ...(groups || []).flatMap((g) => g.items)];
+    const hasDoorAccess = allItems.some((item) => item.category === "Door Access");
     const vatText = vatInclusive ? "VAT INCLUSIVE PRICE" : "VAT EXCLUSIVE PRICE";
+
+    let noteNum = 1;
     sections.push(
       new Paragraph({
         children: [
@@ -500,11 +505,29 @@ function createProductSections(items: QuotationItem[], groups?: QuotationGroup[]
         spacing: { before: 100, after: 50 },
       })
     );
+    if (hasDoorAccess) {
+      sections.push(
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: `${noteNum}. INSTALLATION SERVICE NOT YET INCLUDED (NEED SITE SURVEY)`,
+              font: FONT_FAMILY,
+              bold: true,
+              size: FONT_SIZE,
+              highlight: "yellow",
+            }),
+          ],
+          alignment: AlignmentType.LEFT,
+          spacing: { after: 50 },
+        })
+      );
+      noteNum++;
+    }
     sections.push(
       new Paragraph({
         children: [
           new TextRun({
-            text: "1. INSTALLATION SERVICE NOT YET INCLUDED (NEED SITE SURVEY)",
+            text: `${noteNum}. ${vatText}`,
             font: FONT_FAMILY,
             bold: true,
             size: FONT_SIZE,
@@ -515,11 +538,12 @@ function createProductSections(items: QuotationItem[], groups?: QuotationGroup[]
         spacing: { after: 50 },
       })
     );
+    noteNum++;
     sections.push(
       new Paragraph({
         children: [
           new TextRun({
-            text: `2. ${vatText}`,
+            text: `${noteNum}. USER ORIENTATION HOW TO USE DEVICE VIA VIRTUAL GOOGLE MEET`,
             font: FONT_FAMILY,
             bold: true,
             size: FONT_SIZE,
@@ -527,24 +551,27 @@ function createProductSections(items: QuotationItem[], groups?: QuotationGroup[]
           }),
         ],
         alignment: AlignmentType.LEFT,
-        spacing: { after: 50 },
+        spacing: { after: totalInvestment < 10000 ? 50 : 200 },
       })
     );
-    sections.push(
-      new Paragraph({
-        children: [
-          new TextRun({
-            text: "3. USER ORIENTATION HOW TO USE DEVICE VIA VIRTUAL GOOGLE MEET",
-            font: FONT_FAMILY,
-            bold: true,
-            size: FONT_SIZE,
-            highlight: "yellow",
-          }),
-        ],
-        alignment: AlignmentType.LEFT,
-        spacing: { after: 200 },
-      })
-    );
+    if (totalInvestment < 10000) {
+      noteNum++;
+      sections.push(
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: `${noteNum}. DELIVERY FEE CARE OF CLIENT`,
+              font: FONT_FAMILY,
+              bold: true,
+              size: FONT_SIZE,
+              highlight: "yellow",
+            }),
+          ],
+          alignment: AlignmentType.LEFT,
+          spacing: { after: 200 },
+        })
+      );
+    }
   }
 
   return sections;
@@ -568,8 +595,8 @@ function createGroupedTable(items: QuotationItem[], sixColumnMode?: boolean, sho
 
   // Column widths: redistribute promo column (13%) across remaining cols when in 6-col mode
   const w = sixColumnMode
-    ? { model: 17, desc: 49, qty: 5, unit: 5, unitPrice: 12, amount: 12 }
-    : { model: 17, desc: 36, qty: 5, unit: 5, unitPrice: 12, promo: 13, amount: 12 };
+    ? { model: 17, desc: 45, qty: 7, unit: 7, unitPrice: 12, amount: 12 }
+    : { model: 17, desc: 32, qty: 7, unit: 7, unitPrice: 12, promo: 13, amount: 12 };
 
   // Header row
   const headerChildren = [
@@ -1298,6 +1325,8 @@ function createTermsAndConditions(vatInclusive?: boolean, installationCost?: num
 
   const termsParagraphs: Paragraph[] = [];
 
+  const tcLineSpacing = { line: 259 };
+
   // Header
   termsParagraphs.push(
     new Paragraph({
@@ -1309,6 +1338,7 @@ function createTermsAndConditions(vatInclusive?: boolean, installationCost?: num
           size: FONT_SIZE,
         }),
       ],
+      spacing: tcLineSpacing,
     })
   );
 
@@ -1373,6 +1403,7 @@ function createTermsAndConditions(vatInclusive?: boolean, installationCost?: num
     termsParagraphs.push(
       new Paragraph({
         children,
+        spacing: tcLineSpacing,
       })
     );
   });

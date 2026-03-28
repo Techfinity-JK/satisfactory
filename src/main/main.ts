@@ -46,7 +46,7 @@ ipcMain.handle("generate-quotation", async (_event, data) => {
   try {
     const { filePath } = await dialog.showSaveDialog({
       title: "Save Quotation",
-      defaultPath: `Quotation-${Date.now()}.docx`,
+      defaultPath: data.companyName ? `${data.companyName} - IQ.docx` : `Quotation-${Date.now()}.docx`,
       filters: [{ name: "Word Documents", extensions: ["docx"] }],
     });
 

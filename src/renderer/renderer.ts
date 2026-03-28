@@ -1544,6 +1544,12 @@ function renderSelectedItems(): void {
   selectedItemsBodyEl.innerHTML = "";
   syncUngroupedOrder();
 
+  if (selectedItems.size === 0) {
+    const emptyRow = document.createElement("tr");
+    emptyRow.innerHTML = `<td colspan="7" class="empty-message">No items selected</td>`;
+    selectedItemsBodyEl.appendChild(emptyRow);
+  }
+
   // Render ungrouped items first
   ungroupedItemOrder.forEach((itemId) => {
     if (selectedItems.has(itemId)) {
@@ -1914,9 +1920,14 @@ function updateGrandTotal(): void {
   if (vatInclusiveEl.checked) {
     vatAmount = Math.ceil(subtotal * 0.12 * 100) / 100;
     vatRowEl.classList.remove("hidden");
+    void vatRowEl.offsetHeight;
+    vatRowEl.classList.remove("fade-out");
     vatTotalEl.textContent = formatPeso(vatAmount);
   } else {
-    vatRowEl.classList.add("hidden");
+    vatRowEl.classList.add("fade-out");
+    vatRowEl.addEventListener("transitionend", () => {
+      if (!vatInclusiveEl.checked) vatRowEl.classList.add("hidden");
+    }, { once: true });
   }
 
   // 6. Calculate Total Investment Cost
@@ -2123,7 +2134,17 @@ addGroupBtnEl.addEventListener("click", () => {
 // Brochure Only checkbox listener - hide/show pricing footer
 const tableTfootEl = document.getElementById("tableTfoot") as HTMLElement;
 brochureOnlyEl.addEventListener("change", () => {
-  tableTfootEl.classList.toggle("hidden", brochureOnlyEl.checked);
+  if (brochureOnlyEl.checked) {
+    tableTfootEl.classList.add("fade-out");
+    tableTfootEl.addEventListener("transitionend", () => {
+      if (brochureOnlyEl.checked) tableTfootEl.classList.add("hidden");
+    }, { once: true });
+  } else {
+    tableTfootEl.classList.remove("hidden");
+    // Force reflow so the transition plays
+    void tableTfootEl.offsetHeight;
+    tableTfootEl.classList.remove("fade-out");
+  }
 });
 
 // VAT checkbox listener - update totals when changed
