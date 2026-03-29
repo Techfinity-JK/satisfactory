@@ -586,6 +586,7 @@ const products: Product[] = [
     brand: "ZKTECO",
     name: "SC700",
     category: "Door Access",
+    withExtras: true,
     description: " ~ 30,000 Card Capacity\n"+
                  " ~ 100,000 Logs Capacity\n"+
                  " ~ Network Connectivity/ USB Host\n"+
@@ -2119,8 +2120,26 @@ function clearAll(): void {
   renderSelectedItems();
 }
 
+// Clear selected items only (keep customer info)
+function clearItems(): void {
+  selectedItems.clear();
+  itemGroups.clear();
+  itemToGroup.clear();
+  groupItemOrder.clear();
+  ungroupedItemOrder = [];
+  groupIdCounter = 0;
+  productInstanceCounter = 0;
+  discountInputEl.value = "0";
+  installationCostInputEl.value = "0";
+  renderProducts();
+  renderServices();
+  renderSelectedItems();
+}
+
 // Event listeners
 generateBtnEl.addEventListener("click", generateQuotation);
+const clearItemsBtnEl = document.getElementById("clearItemsBtn") as HTMLButtonElement;
+clearItemsBtnEl.addEventListener("click", clearItems);
 clearBtnEl.addEventListener("click", clearAll);
 
 // Add Group button

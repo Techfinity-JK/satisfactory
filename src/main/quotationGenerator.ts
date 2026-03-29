@@ -321,8 +321,37 @@ function createProductSections(items: QuotationItem[], groups?: QuotationGroup[]
   const sections: (Paragraph | Table)[] = [];
   const curr = showPesoSign ? "₱" : "";
 
+  // Build biometric capabilities string from specs
+  const getBiometricCapabilities = (item: QuotationItem): string => {
+    const caps: string[] = [];
+    if (item.specs) {
+      item.specs.forEach((spec) => {
+        const lower = spec.toLowerCase();
+        if (lower.includes("face capacity") || lower.includes("face")) caps.push("FACE");
+        if (lower.includes("fingerprint capacity") || lower.includes("fingerprint")) caps.push("FINGERPRINT");
+        if (lower.includes("card capacity") || lower.includes("card")) caps.push("RFID");
+      });
+    }
+    // Deduplicate
+    return [...new Set(caps)].join(" & ") || "BIOMETRIC";
+  };
+
   // Helper to render a single item as its own table with its own freebies (for brochure mode)
   const renderBrochureItem = (item: QuotationItem): void => {
+    const capabilities = getBiometricCapabilities(item);
+    sections.push(
+      new Paragraph({
+        children: [
+          new TextRun({
+            text: `\u25CF  ${item.brand} - ${item.name} - ${capabilities}`,
+            font: FONT_FAMILY,
+            bold: true,
+            size: FONT_SIZE,
+          }),
+        ],
+        spacing: { before: 200, after: 100 },
+      })
+    );
     sections.push(createGroupedTable([item], sixColumnMode, showPesoSign));
     sections.push(new Paragraph({ children: [], spacing: { after: 200 } }));
   };
@@ -340,9 +369,9 @@ function createProductSections(items: QuotationItem[], groups?: QuotationGroup[]
           children: [
             new TextRun({
               text: groupName,
-              font: FONT_FAMILY,
+              font: "Century Gothic",
               bold: true,
-              size: 22, // Slightly larger for group headers
+              size: 18,
             }),
           ],
           spacing: { before: 300, after: 150 },
