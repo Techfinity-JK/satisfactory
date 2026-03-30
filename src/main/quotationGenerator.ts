@@ -14,6 +14,7 @@ import {
   convertInchesToTwip,
   UnderlineType,
   HeightRule,
+  LineRuleType,
 } from "docx";
 import * as fs from "fs";
 import * as path from "path";
@@ -212,6 +213,7 @@ export async function generateQuotation(
             : []),
 
           // Remarks & Conforme
+          new Paragraph({ children: [] }),
           ...createRemarksSection(),
 
           // Terms and Conditions
@@ -534,12 +536,15 @@ function createProductSections(items: QuotationItem[], groups?: QuotationGroup[]
         spacing: { before: 100, after: 50 },
       })
     );
-    if (hasDoorAccess) {
+    if ((installationCost ?? 0) > 0 || hasDoorAccess) {
+      const installationNoteText = (installationCost ?? 0) > 0
+        ? `${noteNum}. INSTALLATION SERVICE & COST INCLUDED`
+        : `${noteNum}. INSTALLATION SERVICE NOT YET INCLUDED (NEED SITE SURVEY)`;
       sections.push(
         new Paragraph({
           children: [
             new TextRun({
-              text: `${noteNum}. INSTALLATION SERVICE NOT YET INCLUDED (NEED SITE SURVEY)`,
+              text: installationNoteText,
               font: FONT_FAMILY,
               bold: true,
               size: FONT_SIZE,
@@ -601,6 +606,8 @@ function createProductSections(items: QuotationItem[], groups?: QuotationGroup[]
         })
       );
     }
+    // Blank line after NOTES before Conforme
+    sections.push(new Paragraph({ children: [] }));
   }
 
   return sections;
@@ -1326,10 +1333,6 @@ function createTermsAndConditions(vatInclusive?: boolean, installationCost?: num
 
   const termEntries: { text: string; highlight?: string; bold?: string; rest?: string }[] = [];
 
-  if ((installationCost ?? 0) > 0) {
-    termEntries.push({ text: "INSTALLATION SERVICE & COST INCLUDED" });
-  }
-
   termEntries.push(
     {
       text: "Prices quoted above are ",
@@ -1459,6 +1462,7 @@ function createTermsAndConditions(vatInclusive?: boolean, installationCost?: num
 }
 
 function createRemarksSection(): (Paragraph | Table)[] {
+  const remarksSpacing = { line: 259, lineRule: LineRuleType.AUTO };
   const noBorder = { style: BorderStyle.NONE, size: 0, color: "FFFFFF" };
   const noBorders = { top: noBorder, bottom: noBorder, left: noBorder, right: noBorder };
   const boxBorder = { style: BorderStyle.SINGLE, size: 4, color: "000000" };
@@ -1484,6 +1488,7 @@ function createRemarksSection(): (Paragraph | Table)[] {
             children: [
               new Paragraph({
                 children: [new TextRun({ text: "REMARKS", font: FONT_FAMILY, size: FONT_SIZE })],
+                spacing: remarksSpacing,
               }),
             ],
           }),
@@ -1506,6 +1511,7 @@ function createRemarksSection(): (Paragraph | Table)[] {
                     size: FONT_SIZE,
                   }),
                 ],
+                spacing: remarksSpacing,
               }),
             ],
           }),
@@ -1530,6 +1536,7 @@ function createRemarksSection(): (Paragraph | Table)[] {
             children: [
               new Paragraph({
                 children: [new TextRun({ text: "CONFORME", font: FONT_FAMILY, size: FONT_SIZE })],
+                spacing: remarksSpacing,
               }),
             ],
           }),
@@ -1576,6 +1583,7 @@ function createRemarksSection(): (Paragraph | Table)[] {
             children: [
               new Paragraph({
                 children: [new TextRun({ text: "BY", font: FONT_FAMILY, size: FONT_SIZE })],
+                spacing: remarksSpacing,
               }),
             ],
           }),
@@ -1598,6 +1606,7 @@ function createRemarksSection(): (Paragraph | Table)[] {
             children: [
               new Paragraph({
                 alignment: AlignmentType.CENTER,
+                spacing: remarksSpacing,
                 children: [
                   new TextRun({
                     text: "Signature Over Printed Name/Date",

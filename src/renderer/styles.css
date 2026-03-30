@@ -289,9 +289,13 @@ header h1 {
 .modal-body h3 {
   color: var(--text-secondary);
   font-size: 14px;
-  margin-bottom: 15px;
+  margin: 20px 0 12px;
   text-transform: uppercase;
   letter-spacing: 1px;
+}
+
+.modal-body h3:first-child {
+  margin-top: 0;
 }
 
 /* Background Picker */
@@ -344,6 +348,8 @@ header h1 {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 12px;
+  justify-items: center;
+  margin-bottom: 4px;
 }
 
 .theme-circle {
@@ -531,6 +537,11 @@ h2 {
   font-weight: 500;
   font-size: 13px;
   color: var(--text-primary);
+  margin-bottom: 10px;
+}
+
+.checkbox-label:last-child {
+  margin-bottom: 0;
 }
 
 .checkbox-label input[type="checkbox"] {

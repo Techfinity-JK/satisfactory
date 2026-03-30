@@ -113,21 +113,23 @@ const productIconMap: { [key: string]: string } = {
   "FA210w": "fa210.png",
   "F04": "f04.png",
   "TF1700": "tf1700.png",
-  "FACEPRO 4": "facepro4.jpeg",
+  "FACEPRO 4": "facepro4.png",
+  "SenseFace 2A": "senseface2a.png",
   "XFACE100": "xface100.png",
   "UFACE800": "uface800.png",
   "SPEEDFACE V3L": "speedfacev3l.png",
   // Door Access
-  "M06": "m06.jpg",
-  "X6": "x6.jpg",
+  "M06": "m06.png",
+  "X6": "x6.png",
   "Door Exit Metal Square": "door-exit-metal-square.jpg",
-  "AL-280": "al-280.jpg",
+  "AL-280": "al-280.png",
   "AL-280PZ/PL": "al-280-pzpl.png",
   "RPS": "rps.png",
   "EBG": "ebg.png",
-  "Small Push Button": "small-push-button.jpg",
-  "Slim Push Button": "slim-push-button.jpg",
+  "Small Push Button": "small-push-button.png",
+  "Slim Push Button": "slim-push-button.png",
   "TMD01": "tmd01.png",
+  "TMD95E": "tmd95e.png",
   "LCD Intercom": "intercom.png",
   "Proximity Card": "proximity-card.png",
   "U-Bracket": "u-bracket.png",
@@ -135,13 +137,14 @@ const productIconMap: { [key: string]: string } = {
   "Aluminum U-Bracket**": "al-u-bracket.png",
   "Drop Bolt": "drop-bolt.png",
   "RPS w/ BB": "rps-bb.png",
-  "RPS deviceless": "rps-deviceless.jpg",
+  "RPS deviceless": "rps-deviceless.png",
   "FR1200": "fr1200.png",
   "K1": "k1.png",
+  "MB560VL": "mb560vl.png",
   "Wireless Remote": "wireless-remote.png",
   "Emergency Key Switch": "emergency-key-switch.png",
   "Door Buzzer": "door-buzzer.png",
-  "Battery": "battery.jpg",
+  "Battery": "battery.png",
 };
 
 function getProductImagePath(productName: string): string | undefined {
@@ -323,6 +326,30 @@ const products: Product[] = [
     withADMS: true,
     dimension: "161x93x152mm",
     warranty: { duration: 36, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "zk-senseface2a",
+    brand: "ZKTECO",
+    name: "SenseFace 2A",
+    category: "Biometrics",
+    withExtras: true,
+    description: " ~ Display: 2.4-inch Display with a Physical Keypad\n"+
+                 " ~ 1000 Face Capacity\n"+
+                 " ~ 1000 fingerprint templates capacity\n"+
+                 " ~ 1000 Card capacity\n"+
+                 " ~ 100,000 transaction logs capacity\n"+
+                 " ~ Communication: TCP/IP、USB Host, Wi-Fi (optional)\n"+
+                 " ~ Memory: 512MB RAM / 8GB ROM\n"+
+                 " ~ DST, Photo Capture, Event Photo Capture, Up to 14-digit User ID\n"+
+                 " ~ Adms\n"+
+                 " ~ Dimension: 205.20*74.19*33.30mm",
+    capacity: { fingerprint: 1000, card: 1000, face: 1000, transaction: 50000 },
+    download: { lan: true, usb: true, wifi: true },
+    price: { fakeAmount: 13000, amount: 10000, currency: "PHP" },
+    withADMS: true,
+    dimension: "205.20*74.19*33.30mm",
+    warranty: { duration: 18, unit: "months" },
     isActive: true,
   },
   {
@@ -646,6 +673,30 @@ const products: Product[] = [
     withADMS: true,
     dimension: "161x93x152mm",
     warranty: { duration: 36, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "zk-senseface2a",
+    brand: "ZKTECO",
+    name: "SenseFace 2A",
+    category: "Door Access",
+    withExtras: true,
+    description: " ~ Display: 2.4-inch Display with a Physical Keypad\n"+
+                 " ~ 1000 Face Capacity\n"+
+                 " ~ 1000 fingerprint templates capacity\n"+
+                 " ~ 1000 Card capacity\n"+
+                 " ~ 100,000 transaction logs capacity\n"+
+                 " ~ Communication: TCP/IP、USB Host, Wi-Fi (optional)\n"+
+                 " ~ Memory: 512MB RAM / 8GB ROM\n"+
+                 " ~ DST, Photo Capture, Event Photo Capture, Up to 14-digit User ID\n"+
+                 " ~ Adms\n"+
+                 " ~ Dimension: 205.20*74.19*33.30mm",
+    capacity: { fingerprint: 1000, card: 1000, face: 1000, transaction: 50000 },
+    download: { lan: true, usb: true, wifi: true },
+    price: { fakeAmount: 13000, amount: 13000, currency: "PHP" },
+    withADMS: true,
+    dimension: "205.20*74.19*33.30mm",
+    warranty: { duration: 18, unit: "months" },
     isActive: true,
   },
   {
