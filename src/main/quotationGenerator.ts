@@ -47,10 +47,13 @@ const ICON_MAX_SIZE: { [filename: string]: number } = {
   "rps.png": 50,
   "ebg.png": 50,
   "small-push-button.jpg": 50,
+  "small-push-button.png": 40,
   "k1.png": 50,
   "emergency-key-switch.png": 50,
   "tmd01.png": 50,
   "proximity-card.png": 50,
+  "tmd95e.png": 50,
+  "mini-ups.png": 50,
 };
 
 function getIconMaxSize(imagePath: string): number {
@@ -115,6 +118,7 @@ export interface QuotationData {
   agent?: string;
   notes?: string;
   longDateFormat?: boolean;
+  optionalAccessories?: "none" | "biometrics" | "door-access";
 }
 
 export async function generateQuotation(
@@ -210,6 +214,11 @@ export async function generateQuotation(
                   ],
                 }),
               ]
+            : []),
+
+          // Optional Accessories
+          ...(data.optionalAccessories && data.optionalAccessories !== "none"
+            ? createOptionalAccessoriesSection(data.optionalAccessories, data.sixColumnMode, data.showPesoSign)
             : []),
 
           // Remarks & Conforme
@@ -1460,6 +1469,149 @@ function createTermsAndConditions(vatInclusive?: boolean, installationCost?: num
     termsTable,
   ];
 }
+
+// ─── Optional Accessories ────────────────────────────────────────────────────
+
+interface AccessoryItem {
+  model: string;
+  description: string;
+  qty: number;
+  unit: string;
+  price: number;
+  icon?: string; // filename inside src/assets/icons/
+}
+
+const BIOMETRICS_ACCESSORIES: AccessoryItem[] = [
+  { model: "TMD95E", description: "Temperature Detection Module\nCommunication: USB Type-C\nTemperature Detection: Non-Contact Infrared\nDigital Display, Operating Voltage: 5VDC\nDimensions: 55 × 55 × 20mm", qty: 1, unit: "pc", price: 9500, icon: "tmd95e.png" },
+  { model: "", description: "Proximity Card 125 khz (Thin)", qty: 1, unit: "pc", price: 80, icon: "proximity-card.png" },
+  { model: "", description: "5v Mini Ups", qty: 1, unit: "pc", price: 2500, icon: "mini-ups.png" },
+  { model: "", description: "12v Mini Ups", qty: 1, unit: "pc", price: 3500, icon: "mini-ups.png" },
+];
+
+const DOOR_ACCESS_ACCESSORIES: AccessoryItem[] = [
+  { model: "", description: "Small Push Button (to be installed in reception)", qty: 1, unit: "pc", price: 150, icon: "small-push-button.png" },
+  { model: "", description: "Slim Push Button", qty: 1, unit: "pc", price: 800, icon: "slim-push-button.png" },
+  { model: "TMD01", description: "Temperature Detection Module for FA210", qty: 1, unit: "pc", price: 9500, icon: "tmd01.png" },
+  { model: "", description: "LCD Intercom", qty: 1, unit: "set", price: 12500, icon: "intercom.png" },
+  { model: "", description: "Proximity Card 125 khz (Thin)", qty: 1, unit: "pc", price: 80, icon: "proximity-card.png" },
+  { model: "", description: "U-bracket (for frameless Door)", qty: 1, unit: "pc", price: 1200, icon: "u-bracket.png" },
+  { model: "", description: "Dropbolt (DC 12V fail-safe)", qty: 1, unit: "Sets", price: 8200, icon: "dropboltxx.png" },
+  { model: "Aluminum U-Bracket**", description: "Aluminum U-Bracket**", qty: 1, unit: "pc", price: 1500, icon: "al-u-bracket.png" },
+  { model: "", description: "Dropbolt", qty: 1, unit: "pc", price: 6500, icon: "drop-bolt.png" },
+  { model: "RPS", description: "12Vdc 5A Regulated Power Supply with backup battery", qty: 1, unit: "pc", price: 4500, icon: "rps.png" },
+  { model: "FR1200", description: "Biometrics Scanner with Card Reader, Slave Device for F22\n~ 12 MONTHS WARRANTY", qty: 1, unit: "pc", price: 8500, icon: "fr1200.png" },
+  { model: "K1", description: "Touch Free Push to Exit", qty: 1, unit: "pc", price: 1200, icon: "k1.png" },
+  { model: "WTTTX KIT2", description: "Wireless Receiver to Exit with Remote Control, 12V/24VDC", qty: 1, unit: "pc", price: 1500, icon: "wireless-remote.png" },
+  { model: "", description: "Emergency Key Switch", qty: 1, unit: "pc", price: 1500, icon: "emergency-key-switch.png" },
+  { model: "", description: "Door Buzzer", qty: 1, unit: "pc", price: 350, icon: "door-buzzer.png" },
+  { model: "", description: "Wireless Door Bell", qty: 1, unit: "pc", price: 1500 },
+  { model: "BATTERY", description: "Lead-Acid Battery 12v, 7.2Ah", qty: 1, unit: "pc", price: 2500, icon: "battery.png" },
+];
+
+function createOptionalAccessoriesSection(
+  type: "biometrics" | "door-access",
+  sixColumnMode?: boolean,
+  showPesoSign?: boolean
+): (Paragraph | Table)[] {
+  const items = type === "biometrics" ? BIOMETRICS_ACCESSORIES : DOOR_ACCESS_ACCESSORIES;
+  const curr = showPesoSign ? "₱" : "";
+
+  const borderStyle = { style: BorderStyle.SINGLE, size: 4, color: BORDER_COLOR };
+  const borders = { top: borderStyle, bottom: borderStyle, left: borderStyle, right: borderStyle };
+
+  const w = sixColumnMode
+    ? { model: 17, desc: 45, qty: 7, unit: 7, unitPrice: 12, amount: 12 }
+    : { model: 17, desc: 32, qty: 7, unit: 7, unitPrice: 12, promo: 13, amount: 12 };
+
+  const headerRow = new TableRow({
+    children: [
+      createProductHeaderCell("Model", w.model, borders),
+      createProductHeaderCell("Item Description", w.desc, borders),
+      createProductHeaderCell("Qty", w.qty, borders),
+      createProductHeaderCell("Unit", w.unit, borders),
+      createProductHeaderCell("Unit Price", w.unitPrice, borders),
+      ...(!sixColumnMode ? [createProductHeaderCell("PROMO\nAMOUNT", w.promo!, borders)] : []),
+      createProductHeaderCell("AMOUNT", w.amount, borders),
+    ],
+    height: { value: 480, rule: HeightRule.ATLEAST },
+  });
+
+  const dataRows: TableRow[] = items.map((item) => {
+    const total = item.price * item.qty;
+    const priceStr = `${curr}${item.price.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const totalStr = `${curr}${total.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+    const descParagraphs = item.description.split("\n").map(
+      (line) => new Paragraph({ children: [new TextRun({ text: " " + line.trim(), font: FONT_FAMILY, size: FONT_SIZE })] })
+    );
+
+    // Build model cell with optional icon (same pattern as createGroupedTable)
+    const modelCellChildren: Paragraph[] = [];
+    if (item.icon) {
+      const absoluteImagePath = path.resolve(process.cwd(), `src/assets/icons/${item.icon}`);
+      if (fs.existsSync(absoluteImagePath)) {
+        const imgBuf = fs.readFileSync(absoluteImagePath);
+        const dims = getImageDimensions(imgBuf);
+        const iconMax = getIconMaxSize(absoluteImagePath);
+        const { width: imgW, height: imgH } = dims ? fitInBox(dims.width, dims.height, iconMax) : { width: iconMax, height: iconMax };
+        modelCellChildren.push(
+          new Paragraph({
+            children: [new ImageRun({ data: imgBuf, transformation: { width: imgW, height: imgH } })],
+            alignment: AlignmentType.CENTER,
+          })
+        );
+      }
+    }
+    modelCellChildren.push(
+      new Paragraph({
+        children: [new TextRun({ text: item.model, font: FONT_FAMILY, size: FONT_SIZE })],
+        alignment: AlignmentType.CENTER,
+        spacing: { before: item.icon ? 100 : 0 },
+      })
+    );
+
+    return new TableRow({
+      children: [
+        new TableCell({ children: modelCellChildren, borders, verticalAlign: VerticalAlign.CENTER }),
+        new TableCell({ children: descParagraphs, borders, verticalAlign: VerticalAlign.CENTER }),
+        new TableCell({
+          children: [new Paragraph({ children: [new TextRun({ text: item.qty.toString(), font: FONT_FAMILY, size: FONT_SIZE })], alignment: AlignmentType.CENTER })],
+          borders, verticalAlign: VerticalAlign.CENTER,
+        }),
+        new TableCell({
+          children: [new Paragraph({ children: [new TextRun({ text: item.unit, font: FONT_FAMILY, size: FONT_SIZE })], alignment: AlignmentType.CENTER })],
+          borders, verticalAlign: VerticalAlign.CENTER,
+        }),
+        new TableCell({
+          children: [new Paragraph({ children: [new TextRun({ text: priceStr, font: FONT_FAMILY, size: FONT_SIZE })], alignment: AlignmentType.CENTER })],
+          borders, verticalAlign: VerticalAlign.CENTER,
+        }),
+        ...(!sixColumnMode ? [new TableCell({
+          children: [new Paragraph({ children: [new TextRun({ text: priceStr, font: FONT_FAMILY, size: FONT_SIZE })], alignment: AlignmentType.CENTER })],
+          borders, verticalAlign: VerticalAlign.CENTER,
+        })] : []),
+        new TableCell({
+          children: [new Paragraph({ children: [new TextRun({ text: totalStr, font: FONT_FAMILY, bold: true, size: FONT_SIZE })], alignment: AlignmentType.CENTER })],
+          borders, verticalAlign: VerticalAlign.CENTER,
+        }),
+      ],
+    });
+  });
+
+  return [
+    new Paragraph({
+      children: [new TextRun({ text: "OPTIONAL ACCESSORIES", font: FONT_FAMILY, bold: true, size: FONT_SIZE, highlight: "yellow" })],
+      spacing: { before: 300, after: 100 },
+    }),
+    new Table({
+      width: { size: 100, type: WidthType.PERCENTAGE },
+      rows: [headerRow, ...dataRows],
+    }),
+    new Paragraph({ children: [] }),
+  ];
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 
 function createRemarksSection(): (Paragraph | Table)[] {
   const remarksSpacing = { line: 259, lineRule: LineRuleType.AUTO };

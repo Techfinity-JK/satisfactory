@@ -36,6 +36,7 @@ interface SelectedItem {
   product: Product;
   quantity: number;
   customPrice?: number;
+  excludeFromDiscount?: boolean;
 }
 
 interface Service {
@@ -92,6 +93,7 @@ interface QuotationData {
   agent?: string;
   notes?: string;
   longDateFormat?: boolean;
+  optionalAccessories?: "none" | "biometrics" | "door-access";
 }
 
 // Map product names to icon filenames
@@ -107,6 +109,7 @@ const productIconMap: { [key: string]: string } = {
   "FA110": "fa110.png",
   "F22": "f22.png",
   "SF200": "sf200.png",
+  "SF400": "sf400.png",
   "IFACE3": "iface3.png",
   "MB460": "mb460.png",
   "FA210": "fa210.png",
@@ -351,6 +354,47 @@ const products: Product[] = [
     dimension: "205.20*74.19*33.30mm",
     warranty: { duration: 18, unit: "months" },
     isActive: true,
+  },
+  {
+    id: "gt-f04",
+    brand: "GRANDING",
+    name: "F04",
+    category: "Biometrics",
+    withExtras: true,
+    description: " ~ 1500 Fingerprint Templates Capacity\n"+
+                 " ~ 5000 Card Capacity\n"+
+                 " ~ 100,000 Transaction logs Capacity\n"+
+                 " ~ Network Connectivity\n"+
+                 " ~ USB host\n"+
+                 " ~ support magnetic contact\n"+
+                 " ~ 125khz RFID",
+    capacity: { fingerprint: 1500, card: 5000, face: 0, transaction: 100000 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 14300, amount: 11000, currency: "PHP" },
+    withADMS: false,
+    warranty: { duration: 36, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "zk-sf400",
+    brand: "ZKTECO",
+    name: "SF400",
+    category: "Biometrics",
+    withExtras: true,
+    description: " ~ 1500 Fingerprint Templates Capacity\n"+
+                 " ~ 5000 Card Capacity\n"+
+                 " ~ 100,000 Transaction logs Capacity\n"+
+                 " ~ Network Connectivity\n"+
+                 " ~ USB host\n"+
+                 " ~ support magnetic contact\n"+
+                 " ~ 125khz RFID",
+    capacity: { fingerprint: 1500, card: 5000, face: 0, transaction: 100000 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 14300, amount: 11000, currency: "PHP" },
+    withADMS: false,
+    warranty: { duration: 18, unit: "months" },
+    isActive: true,
+    isDeprecated: true,
   },
   {
     id: "zk-f22",
@@ -716,8 +760,29 @@ const products: Product[] = [
     download: { lan: false, usb: false, wifi: false },
     price: { fakeAmount: 14300, amount: 14300, currency: "PHP" },
     withADMS: false,
-    warranty: { duration: 12, unit: "months" },
+    warranty: { duration: 36, unit: "months" },
     isActive: true,
+  },
+  {
+    id: "zk-sf400",
+    brand: "ZKTECO",
+    name: "SF400",
+    category: "Door Access",
+    withExtras: true,
+    description: " ~ 1500 Fingerprint Templates Capacity\n"+
+                 " ~ 5000 Card Capacity\n"+
+                 " ~ 100,000 Transaction logs Capacity\n"+
+                 " ~ Network Connectivity\n"+
+                 " ~ USB host\n"+
+                 " ~ support magnetic contact\n"+
+                 " ~ 125khz RFID",
+    capacity: { fingerprint: 1500, card: 5000, face: 0, transaction: 100000 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 14300, amount: 14300, currency: "PHP" },
+    withADMS: false,
+    warranty: { duration: 18, unit: "months" },
+    isActive: true,
+    isDeprecated: true,
   },
   {
     id: "zk-sf200",
@@ -1251,6 +1316,7 @@ const itemToGroup: Map<string, string> = new Map(); // itemId -> groupId
 let groupIdCounter = 0;
 let productInstanceCounter = 0; // Counter for unique product instances
 let currentCategory = "Biometrics"; // Current product category tab
+let hideDeprecated = false;
 
 // Order tracking for items within groups and ungrouped
 const groupItemOrder: Map<string, string[]> = new Map(); // groupId -> itemIds in order
@@ -1282,6 +1348,7 @@ const vatInclusiveEl = document.getElementById("vatInclusive") as HTMLInputEleme
 const generateBtnEl = document.getElementById("generateBtn") as HTMLButtonElement;
 const clearBtnEl = document.getElementById("clearBtn") as HTMLButtonElement;
 const sixColumnModeEl = document.getElementById("sixColumnMode") as HTMLInputElement;
+const optionalAccessoriesEl = document.getElementById("optionalAccessories") as HTMLSelectElement;
 const showPesoSignEl = document.getElementById("showPesoSign") as HTMLInputElement;
 const longDateFormatEl = document.getElementById("longDateFormat") as HTMLInputElement;
 const agentSelectEl = document.getElementById("agentSelect") as HTMLSelectElement;
@@ -1321,6 +1388,7 @@ function renderProducts(): void {
     const card = document.createElement("div");
     card.className = "product-card";
     card.dataset.productId = product.id;
+    if (product.isDeprecated) card.dataset.deprecated = "true";
 
     // Count how many instances of this product are selected
     const instanceCount = Array.from(selectedItems.values()).filter(
@@ -1352,6 +1420,13 @@ function renderProducts(): void {
     card.addEventListener("click", () => addProduct(product));
     productListEl.appendChild(card);
   });
+
+  // If filter is active, instantly hide deprecated cards (no animation — they're freshly rendered)
+  if (hideDeprecated) {
+    productListEl.querySelectorAll<HTMLElement>("[data-deprecated='true']").forEach((card) => {
+      card.classList.add("product-card--hidden");
+    });
+  }
 }
 
 // Switch product category tab
@@ -1566,6 +1641,10 @@ function createProductRow(item: SelectedItem, productId: string, groupId: string
     <td>PHP ${total.toLocaleString()}</td>
     <td class="action-cell">
       ${groupActions}
+      <label class="exclude-discount-label" title="Exclude from discount calculation">
+        <input type="checkbox" class="exclude-discount-cb" data-product-id="${productId}" ${item.excludeFromDiscount ? "checked" : ""}>
+        No disc.
+      </label>
       <button class="btn-remove" data-product-id="${productId}">Remove</button>
     </td>
   `;
@@ -1732,6 +1811,19 @@ function renderSelectedItems(): void {
       if (item) {
         item.quantity++;
         renderSelectedItems();
+      }
+    });
+  });
+
+  // Add event listeners for exclude-from-discount checkboxes
+  document.querySelectorAll(".exclude-discount-cb").forEach((cb) => {
+    cb.addEventListener("change", (e) => {
+      const target = e.target as HTMLInputElement;
+      const productId = target.dataset.productId!;
+      const item = selectedItems.get(productId);
+      if (item) {
+        item.excludeFromDiscount = target.checked;
+        updateGrandTotal();
       }
     });
   });
@@ -1935,6 +2027,7 @@ function reorderItems(
 }
 
 let currentEquipmentCost = 0;
+let currentDiscountableEquipmentCost = 0;
 
 function formatPeso(amount: number): string {
   return `PHP ${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -1944,11 +2037,17 @@ function formatPeso(amount: number): string {
 function updateGrandTotal(): void {
   // 1. Calculate Total Cost (all selected items)
   let equipmentCost = 0;
+  let discountableEquipmentCost = 0;
   selectedItems.forEach((item) => {
     const unitPrice = item.customPrice !== undefined ? item.customPrice : item.product.price.amount;
-    equipmentCost += unitPrice * item.quantity;
+    const lineTotal = unitPrice * item.quantity;
+    equipmentCost += lineTotal;
+    if (!item.excludeFromDiscount) {
+      discountableEquipmentCost += lineTotal;
+    }
   });
   currentEquipmentCost = equipmentCost;
+  currentDiscountableEquipmentCost = discountableEquipmentCost;
   equipmentCostTotalEl.textContent = formatPeso(equipmentCost);
 
   // 2. Get discount and installation cost
@@ -2122,6 +2221,7 @@ async function generateQuotation(): Promise<void> {
     agent: agentSelectEl.value,
     notes: notesEl.value.trim() || undefined,
     longDateFormat: longDateFormatEl.checked,
+    optionalAccessories: (optionalAccessoriesEl.value as "none" | "biometrics" | "door-access") || "none",
   };
 
   generateBtnEl.disabled = true;
@@ -2236,7 +2336,7 @@ discountInputEl.addEventListener("input", () => {
 document.querySelectorAll<HTMLButtonElement>(".discount-pct-btn").forEach((btn) => {
   btn.addEventListener("click", () => {
     const pct = parseInt(btn.dataset.pct ?? "0", 10);
-    const discountAmount = currentEquipmentCost * pct / 100;
+    const discountAmount = currentDiscountableEquipmentCost * pct / 100;
     discountInputEl.value = discountAmount.toFixed(2);
     updateGrandTotal();
   });
@@ -2443,6 +2543,30 @@ productTabs.forEach((tab) => {
 });
 
 productSearchEl.addEventListener("input", () => renderProducts());
+
+const hideDeprecatedToggleEl = document.getElementById("hideDeprecatedToggle") as HTMLInputElement;
+hideDeprecatedToggleEl.addEventListener("change", () => {
+  hideDeprecated = hideDeprecatedToggleEl.checked;
+  const deprecatedCards = productListEl.querySelectorAll<HTMLElement>("[data-deprecated='true']");
+  if (hideDeprecated) {
+    // Fade out then hide
+    deprecatedCards.forEach((card) => {
+      card.classList.add("product-card--fading");
+      card.addEventListener("transitionend", () => {
+        card.classList.add("product-card--hidden");
+        card.classList.remove("product-card--fading");
+      }, { once: true });
+    });
+  } else {
+    // Unhide then fade in
+    deprecatedCards.forEach((card) => {
+      card.classList.add("product-card--fading"); // opacity: 0
+      card.classList.remove("product-card--hidden"); // show at opacity 0
+      void card.offsetHeight; // force reflow so transition fires
+      card.classList.remove("product-card--fading"); // animate to opacity 1
+    });
+  }
+});
 
 // Initial render
 loadSavedTheme();

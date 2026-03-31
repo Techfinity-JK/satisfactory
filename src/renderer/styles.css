@@ -393,6 +393,11 @@ h2 {
   gap: 20px;
 }
 
+.form-col {
+  display: flex;
+  flex-direction: column;
+}
+
 .form-group {
   margin-bottom: 15px;
 }
@@ -599,7 +604,16 @@ h2 {
   border-radius: 8px;
   padding: 15px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, opacity 0.3s ease;
+  opacity: 1;
+}
+
+.product-card--fading {
+  opacity: 0;
+}
+
+.product-card--hidden {
+  display: none;
 }
 
 .product-card:hover {
@@ -869,6 +883,21 @@ th {
 
 .btn-remove:hover {
   opacity: 0.9;
+}
+
+.exclude-discount-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--text-muted, #888);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.exclude-discount-label input[type="checkbox"] {
+  cursor: pointer;
+  accent-color: var(--accent-color);
 }
 
 .total-label {
@@ -1280,6 +1309,23 @@ tr[data-group-id]:not([data-group-id=""]):hover {
 }
 
 .group-select:focus {
+  outline: none;
+  border-color: var(--accent-color);
+}
+
+.accessories-select,
+.accessories-header-select {
+  padding: 4px 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.accessories-select:focus,
+.accessories-header-select:focus {
   outline: none;
   border-color: var(--accent-color);
 }

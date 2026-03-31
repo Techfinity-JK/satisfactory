@@ -76,43 +76,51 @@
           </div>
         </div>
         <div class="form-row">
-          <div class="form-group">
-            <label>Quote Ref No:</label>
-            <div class="quote-ref-row">
-              <span id="quoteRefPrefix" class="quote-ref-prefix">2026-JK</span>
-              <span class="quote-ref-sep hidden" id="quoteRefSep">-</span>
-              <input type="text" id="quoteRefSeq" placeholder="001" class="quote-ref-seq">
+          <div class="form-col">
+            <div class="form-group">
+              <label>Quote Ref No:</label>
+              <div class="quote-ref-row">
+                <span id="quoteRefPrefix" class="quote-ref-prefix">2026-JK</span>
+                <span class="quote-ref-sep hidden" id="quoteRefSep">-</span>
+                <input type="text" id="quoteRefSeq" placeholder="001" class="quote-ref-seq">
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="companyName">Client:</label>
+              <input type="text" id="companyName" placeholder="Enter company name">
+            </div>
+            <div class="form-group">
+              <label for="companyAddress">Address:</label>
+              <textarea id="companyAddress" placeholder="Enter company address"></textarea>
             </div>
           </div>
-          <div class="form-group">
-            <label for="companyName">Company Name:</label>
-            <input type="text" id="companyName" placeholder="Enter company name">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="contactPerson">Contact Person:</label>
-            <input type="text" id="contactPerson" placeholder="Enter contact person">
-          </div>
-          <div class="form-group">
-            <label for="contactNumber">Contact Number:</label>
-            <input type="tel" id="contactNumber" placeholder="Enter contact number">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="companyAddress">Company Address:</label>
-            <textarea id="companyAddress" placeholder="Enter company address"></textarea>
-          </div>
-          <div class="form-group">
-            <label for="emailAddress">Email Address:</label>
-            <input type="email" id="emailAddress" placeholder="Enter email address">
+          <div class="form-col">
+            <div class="form-group">
+              <label for="contactPerson">Contact Person:</label>
+              <input type="text" id="contactPerson" placeholder="Enter contact person">
+            </div>
+            <div class="form-group">
+              <label for="contactNumber">Contact Number:</label>
+              <input type="tel" id="contactNumber" placeholder="Enter contact number">
+            </div>
+            <div class="form-group">
+              <label for="emailAddress">Email Address:</label>
+              <input type="email" id="emailAddress" placeholder="Enter email address">
+            </div>
           </div>
         </div>
       </section>
 
       <section class="product-selection">
-        <h2>Select Products</h2>
+        <div class="section-header">
+          <h2>Select Products</h2>
+          <div class="section-header-actions">
+            <label class="checkbox-label" title="Hide items only available on special orders">
+              <input type="checkbox" id="hideDeprecatedToggle">
+              <span>Hide Deprecated</span>
+            </label>
+          </div>
+        </div>
         <div class="product-tabs-row">
           <div class="product-tabs">
             <button class="product-tab active" data-category="biometrics">Biometrics</button>
@@ -150,6 +158,15 @@
         <div class="section-header">
           <h2>Selected Items</h2>
           <div class="section-header-actions">
+            <label class="checkbox-label">
+              <span>Optional Accessories</span>
+              <select id="optionalAccessories" class="accessories-header-select">
+                <option value="none">None</option>
+                <option value="biometrics">Biometrics</option>
+                <option value="door-access">Door Access</option>
+              </select>
+              <span class="info-icon">&#9432;<span class="info-tooltip">Adds the optional accessories table, located below the NOTES:</span></span>
+            </label>
             <label class="checkbox-label">
               <input type="checkbox" id="brochureOnly">
               <span>Brochure Only</span>

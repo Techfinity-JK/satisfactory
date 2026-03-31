@@ -16,7 +16,9 @@
       "Bash(curl -L -o Inter.zip \"https://github.com/rsms/inter/releases/download/v4.1/Inter-4.1.zip\")",
       "Bash(unzip -l Inter.zip)",
       "Bash(unzip -j Inter.zip \"extras/woff-hinted/Inter-Regular.woff2\" \"extras/woff-hinted/Inter-Medium.woff2\" \"extras/woff-hinted/Inter-SemiBold.woff2\" \"extras/woff-hinted/Inter-Bold.woff2\")",
-      "Bash(rm Inter.zip)"
+      "Bash(rm Inter.zip)",
+      "Bash(unzip -q \"biometrics - optional.docx\" -d bio_extract)",
+      "Bash(unzip -q \"dooraccess - optional.docx\" -d door_extract)"
     ]
   }
 }
