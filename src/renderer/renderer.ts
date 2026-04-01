@@ -1228,6 +1228,135 @@ const products: Product[] = [
     warranty: { duration: 0, unit: "months" },
     isActive: true,
   },
+  // UTIME SOFTWARE
+  {
+    id: "gt-utm-p010",
+    brand: "GRANDING",
+    name: "UTM-P010",
+    category: "UTIME",
+    description: " Maximum Device Qty: 10\n"+
+                 " Maximum User: 3000\n"+
+                 " App Account: 1",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: true, usb: false, wifi: false },
+    price: { fakeAmount: 24800, amount: 19700, currency: "PHP" },
+    withADMS: false,
+    dimension: "WxHxDmm",
+    warranty: { duration: 0, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "gt-utm-p020",
+    brand: "GRANDING",
+    name: "UTM-P020",
+    category: "UTIME",
+    description: " Maximum Device Qty: 20\n"+
+                 " Maximum User: 6000\n"+
+                 " App Account: 2",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: true, usb: false, wifi: false },
+    price: { fakeAmount: 48000, amount: 37000, currency: "PHP" },
+    withADMS: false,
+    dimension: "WxHxDmm",
+    warranty: { duration: 0, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "gt-utm-p050",
+    brand: "GRANDING",
+    name: "UTM-P050",
+    category: "UTIME",
+    description: " Maximum Device Qty: 50\n"+
+                 " Maximum User: 10000\n"+
+                 " App Account: 5",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: true, usb: false, wifi: false },
+    price: { fakeAmount: 98000, amount: 74000, currency: "PHP" },
+    withADMS: false,
+    dimension: "WxHxDmm",
+    warranty: { duration: 0, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "gt-utm-p0100",
+    brand: "GRANDING",
+    name: "UTM-P0100",
+    category: "UTIME",
+    description: " Maximum Device Qty: 100\n"+
+                 " Maximum User: 10000\n"+
+                 " App Account: 10",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: true, usb: false, wifi: false },
+    price: { fakeAmount: 167000, amount: 125000, currency: "PHP" },
+    withADMS: false,
+    dimension: "WxHxDmm",
+    warranty: { duration: 0, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "gt-utm-p0200",
+    brand: "GRANDING",
+    name: "UTM-P0200",
+    category: "UTIME",
+    description: " Maximum Device Qty: 200\n"+
+                 " Maximum User: 20000\n"+
+                 " App Account: 20",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: true, usb: false, wifi: false },
+    price: { fakeAmount: 245000, amount: 225000, currency: "PHP" },
+    withADMS: false,
+    dimension: "WxHxDmm",
+    warranty: { duration: 0, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "gt-utm-p0300",
+    brand: "GRANDING",
+    name: "UTM-P0300",
+    category: "UTIME",
+    description: " Maximum Device Qty: 300\n"+
+                 " Maximum User: 20000\n"+
+                 " App Account: 30",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: true, usb: false, wifi: false },
+    price: { fakeAmount: 285000, amount: 267000, currency: "PHP" },
+    withADMS: false,
+    dimension: "WxHxDmm",
+    warranty: { duration: 0, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "gt-utm-p0400",
+    brand: "GRANDING",
+    name: "UTM-P0400",
+    category: "UTIME",
+    description: " Maximum Device Qty: 400\n"+
+                 " Maximum User: 30000\n"+
+                 " App Account: 40",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: true, usb: false, wifi: false },
+    price: { fakeAmount: 318000, amount: 305000, currency: "PHP" },
+    withADMS: false,
+    dimension: "WxHxDmm",
+    warranty: { duration: 0, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "gt-utm-p0500",
+    brand: "GRANDING",
+    name: "UTM-P0500",
+    category: "UTIME",
+    description: " Maximum Device Qty: 500\n"+
+                 " Maximum User: 30000\n"+
+                 " App Account: 50",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: true, usb: false, wifi: false },
+    price: { fakeAmount: 370000, amount: 350000, currency: "PHP" },
+    withADMS: false,
+    dimension: "WxHxDmm",
+    warranty: { duration: 0, unit: "months" },
+    isActive: true,
+  },
   // CCTV (Dahua)
   {
     id: "dahua-ipc-placeholder-1",
@@ -1442,6 +1571,8 @@ function switchCategory(category: string): void {
     } else if (tabCategory === "door-access" && category === "Door Access") {
       tab.classList.add("active");
     } else if (tabCategory === "cctv" && category === "CCTV") {
+      tab.classList.add("active");
+    } else if (tabCategory === "utime" && category === "UTIME") {
       tab.classList.add("active");
     } else {
       tab.classList.remove("active");
@@ -2538,6 +2669,8 @@ productTabs.forEach((tab) => {
       switchCategory("Door Access");
     } else if (category === "cctv") {
       switchCategory("CCTV");
+    } else if (category === "utime") {
+      switchCategory("UTIME");
     }
   });
 });

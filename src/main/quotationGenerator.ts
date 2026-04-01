@@ -1600,7 +1600,7 @@ function createOptionalAccessoriesSection(
 
   return [
     new Paragraph({
-      children: [new TextRun({ text: "OPTIONAL ACCESSORIES", font: FONT_FAMILY, bold: true, size: FONT_SIZE, highlight: "yellow" })],
+      children: [new TextRun({ text: "OPTIONAL ACCESSORIES", font: FONT_FAMILY, bold: true, size: FONT_SIZE })],
       spacing: { before: 300, after: 100 },
     }),
     new Table({
