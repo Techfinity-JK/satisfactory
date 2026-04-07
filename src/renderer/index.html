@@ -254,8 +254,11 @@
       </section>
 
       <section class="notes-section">
-        <h2>Notes</h2>
-        <textarea id="notes" placeholder="Add any additional notes (optional)"></textarea>
+        <div class="section-header">
+          <h2>Additional Notes</h2>
+          <button type="button" id="addNoteBtn" class="btn-add-note">+ Add Note</button>
+        </div>
+        <div id="customNotesList" class="custom-notes-list"></div>
       </section>
 
       <div class="actions">
@@ -264,6 +267,22 @@
         <button id="clearBtn" class="btn-secondary">Clear All</button>
       </div>
     </main>
+  </div>
+
+  <div id="productDetailPopup" class="product-detail-popup hidden">
+    <div class="pdp-header">
+      <img id="pdpIcon" class="pdp-icon" src="" alt="">
+      <div class="pdp-title">
+        <div id="pdpBrand" class="pdp-brand"></div>
+        <div id="pdpName" class="pdp-name"></div>
+      </div>
+      <div class="pdp-price-block">
+        <div id="pdpFakePrice" class="pdp-fake-price"></div>
+        <div id="pdpPrice" class="pdp-price"></div>
+      </div>
+    </div>
+    <div id="pdpDesc" class="pdp-desc"></div>
+    <div id="pdpMeta" class="pdp-meta"></div>
   </div>
 
   <script src="renderer.js"></script>

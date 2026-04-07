@@ -18,7 +18,11 @@
       "Bash(unzip -j Inter.zip \"extras/woff-hinted/Inter-Regular.woff2\" \"extras/woff-hinted/Inter-Medium.woff2\" \"extras/woff-hinted/Inter-SemiBold.woff2\" \"extras/woff-hinted/Inter-Bold.woff2\")",
       "Bash(rm Inter.zip)",
       "Bash(unzip -q \"biometrics - optional.docx\" -d bio_extract)",
-      "Bash(unzip -q \"dooraccess - optional.docx\" -d door_extract)"
+      "Bash(unzip -q \"dooraccess - optional.docx\" -d door_extract)",
+      "Bash(npm run:*)",
+      "Bash(CSC_IDENTITY_AUTO_DISCOVERY=false npx electron-builder:*)",
+      "Bash(powershell -Command \"Compress-Archive -Path 'release/win-unpacked/*' -DestinationPath 'release/QuotationGenerator-portable.zip' -Force\")",
+      "Bash(powershell:*)"
     ]
   }
 }

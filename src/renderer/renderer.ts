@@ -92,7 +92,9 @@ interface QuotationData {
   showPesoSign?: boolean;
   agent?: string;
   notes?: string;
+  customNotes?: string[];
   longDateFormat?: boolean;
+  onSiteOrientation?: boolean;
   optionalAccessories?: "none" | "biometrics" | "door-access";
 }
 
@@ -1471,7 +1473,104 @@ const companyAddressEl = document.getElementById("companyAddress") as HTMLTextAr
 const contactPersonEl = document.getElementById("contactPerson") as HTMLInputElement;
 const contactNumberEl = document.getElementById("contactNumber") as HTMLInputElement;
 const emailAddressEl = document.getElementById("emailAddress") as HTMLInputElement;
-const notesEl = document.getElementById("notes") as HTMLTextAreaElement;
+const addNoteBtnEl = document.getElementById("addNoteBtn") as HTMLButtonElement;
+const customNotesListEl = document.getElementById("customNotesList") as HTMLDivElement;
+
+// Product detail popup
+const productDetailPopup = document.getElementById("productDetailPopup") as HTMLDivElement;
+const pdpIcon = document.getElementById("pdpIcon") as HTMLImageElement;
+const pdpBrand = document.getElementById("pdpBrand") as HTMLDivElement;
+const pdpName = document.getElementById("pdpName") as HTMLDivElement;
+const pdpFakePrice = document.getElementById("pdpFakePrice") as HTMLDivElement;
+const pdpPrice = document.getElementById("pdpPrice") as HTMLDivElement;
+const pdpDesc = document.getElementById("pdpDesc") as HTMLDivElement;
+const pdpMeta = document.getElementById("pdpMeta") as HTMLDivElement;
+
+let pdpHoverTimer: ReturnType<typeof setTimeout> | null = null;
+let pdpFadeTimer: ReturnType<typeof setTimeout> | null = null;
+
+function showProductDetailPopup(product: Product): void {
+  const iconFile = productIconMap[product.name];
+  if (iconFile) {
+    pdpIcon.src = `../../src/assets/icons/${iconFile}`;
+    pdpIcon.classList.remove("hidden");
+  } else {
+    pdpIcon.classList.add("hidden");
+  }
+  pdpBrand.textContent = product.brand;
+  pdpName.textContent = product.name;
+  pdpFakePrice.textContent = `PHP ${product.price.fakeAmount.toLocaleString()}`;
+  pdpPrice.textContent = `PHP ${product.price.amount.toLocaleString()}`;
+  pdpDesc.textContent = product.description ?? "";
+
+  const tags: string[] = [];
+  if (product.warranty && product.warranty.duration > 0) {
+    tags.push(`${product.warranty.duration} ${product.warranty.unit} warranty`);
+  }
+  if (product.download.lan) tags.push("LAN");
+  if (product.download.wifi) tags.push("WiFi");
+  if (product.download.usb) tags.push("USB");
+  if (product.withADMS) tags.push("ADMS");
+  if (product.dimension && product.dimension !== "WxHxDmm") tags.push(product.dimension);
+  pdpMeta.innerHTML = tags.map((t) => `<span class="pdp-tag">${t}</span>`).join("");
+
+  productDetailPopup.classList.remove("hidden", "fading-out");
+}
+
+function hideProductDetailPopup(): void {
+  productDetailPopup.classList.add("fading-out");
+  if (pdpFadeTimer) clearTimeout(pdpFadeTimer);
+  pdpFadeTimer = setTimeout(() => {
+    productDetailPopup.classList.add("hidden");
+    productDetailPopup.classList.remove("fading-out");
+  }, 200);
+}
+
+function attachProductCardHover(card: HTMLElement, product: Product): void {
+  card.addEventListener("mouseenter", () => {
+    if (pdpHoverTimer) clearTimeout(pdpHoverTimer);
+    pdpHoverTimer = setTimeout(() => showProductDetailPopup(product), 800);
+  });
+  card.addEventListener("mouseleave", () => {
+    if (pdpHoverTimer) { clearTimeout(pdpHoverTimer); pdpHoverTimer = null; }
+    hideProductDetailPopup();
+  });
+}
+
+function getCustomNotes(): string[] {
+  return Array.from(customNotesListEl.querySelectorAll<HTMLInputElement>(".custom-note-input"))
+    .map((input) => input.value.trim())
+    .filter((v) => v.length > 0);
+}
+
+function renderCustomNotes(): void {
+  const inputs = customNotesListEl.querySelectorAll<HTMLInputElement>(".custom-note-input");
+  inputs.forEach((input, i) => {
+    const row = input.closest(".custom-note-row");
+    if (row) {
+      const numEl = row.querySelector(".custom-note-num");
+      if (numEl) numEl.textContent = `${i + 1}.`;
+    }
+  });
+}
+
+function addCustomNote(value = ""): void {
+  const count = customNotesListEl.querySelectorAll(".custom-note-row").length;
+  const row = document.createElement("div");
+  row.className = "custom-note-row";
+  row.innerHTML = `
+    <span class="custom-note-num">${count + 1}.</span>
+    <input type="text" class="custom-note-input" placeholder="Enter note text..." value="${value.replace(/"/g, "&quot;")}">
+    <button type="button" class="btn-remove-note" title="Remove note">&#x2715;</button>
+  `;
+  row.querySelector(".btn-remove-note")!.addEventListener("click", () => {
+    row.remove();
+    renderCustomNotes();
+  });
+  customNotesListEl.appendChild(row);
+}
+
+addNoteBtnEl.addEventListener("click", () => addCustomNote());
 const brochureOnlyEl = document.getElementById("brochureOnly") as HTMLInputElement;
 const vatInclusiveEl = document.getElementById("vatInclusive") as HTMLInputElement;
 const generateBtnEl = document.getElementById("generateBtn") as HTMLButtonElement;
@@ -1547,6 +1646,7 @@ function renderProducts(): void {
     `;
 
     card.addEventListener("click", () => addProduct(product));
+    attachProductCardHover(card, product);
     productListEl.appendChild(card);
   });
 
@@ -2350,8 +2450,9 @@ async function generateQuotation(): Promise<void> {
     sixColumnMode: !sixColumnModeEl.checked,
     showPesoSign: showPesoSignEl.checked,
     agent: agentSelectEl.value,
-    notes: notesEl.value.trim() || undefined,
+    customNotes: getCustomNotes().length > 0 ? getCustomNotes() : undefined,
     longDateFormat: longDateFormatEl.checked,
+    onSiteOrientation: Array.from(selectedItems.values()).some((item) => item.product.id === "orientation"),
     optionalAccessories: (optionalAccessoriesEl.value as "none" | "biometrics" | "door-access") || "none",
   };
 
@@ -2392,7 +2493,7 @@ function clearAll(): void {
   contactPersonEl.value = "";
   contactNumberEl.value = "";
   emailAddressEl.value = "";
-  notesEl.value = "";
+  customNotesListEl.innerHTML = "";
   brochureOnlyEl.checked = false;
   vatInclusiveEl.checked = false;
   discountInputEl.value = "0";

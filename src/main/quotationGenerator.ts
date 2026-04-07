@@ -18,6 +18,15 @@ import {
 } from "docx";
 import * as fs from "fs";
 import * as path from "path";
+import { app } from "electron";
+
+// Resolves asset paths for both dev and packaged Electron builds.
+function getAssetPath(...segments: string[]): string {
+  if (app.isPackaged) {
+    return path.join(process.resourcesPath, "assets", ...segments);
+  }
+  return path.join(__dirname, "../../src/assets", ...segments);
+}
 
 // Returns { width, height } in pixels from a PNG or JPEG file buffer, or null if unreadable.
 function getImageDimensions(buf: Buffer): { width: number; height: number } | null {
@@ -117,6 +126,8 @@ export interface QuotationData {
   showPesoSign?: boolean;
   agent?: string;
   notes?: string;
+  customNotes?: string[];
+  onSiteOrientation?: boolean;
   longDateFormat?: boolean;
   optionalAccessories?: "none" | "biometrics" | "door-access";
 }
@@ -152,7 +163,7 @@ export async function generateQuotation(
           new Paragraph({
             children: [
               new ImageRun({
-                data: fs.readFileSync(`src/assets/header/header_${data.agent ?? "jk"}.png`),
+                data: fs.readFileSync(getAssetPath("header", `header_${data.agent ?? "jk"}.png`)),
                 transformation: { width: 700, height: 248 },
               }),
             ],
@@ -188,33 +199,8 @@ export async function generateQuotation(
           }),
 
           // Products
-          ...createProductSections(data.items, data.groups, data.brochureOnly, data.vatInclusive, data.discount, data.sixColumnMode, data.showPesoSign, data.installationCost),
+          ...createProductSections(data.items, data.groups, data.brochureOnly, data.vatInclusive, data.discount, data.sixColumnMode, data.showPesoSign, data.installationCost, data.customNotes, data.onSiteOrientation),
 
-          // Notes
-          ...(data.notes
-            ? [
-                new Paragraph({
-                  children: [
-                    new TextRun({
-                      text: "Notes:",
-                      font: FONT_FAMILY,
-                      bold: true,
-                      size: FONT_SIZE,
-                    }),
-                  ],
-                  spacing: { before: 300 },
-                }),
-                new Paragraph({
-                  children: [
-                    new TextRun({
-                      text: data.notes,
-                      font: FONT_FAMILY,
-                      size: FONT_SIZE,
-                    }),
-                  ],
-                }),
-              ]
-            : []),
 
           // Optional Accessories
           ...(data.optionalAccessories && data.optionalAccessories !== "none"
@@ -328,7 +314,7 @@ function createInfoValueCell(text: string, cellWidth: number, borders: object): 
   });
 }
 
-function createProductSections(items: QuotationItem[], groups?: QuotationGroup[], brochureOnly?: boolean, vatInclusive?: boolean, discount?: number, sixColumnMode?: boolean, showPesoSign?: boolean, installationCost?: number): (Paragraph | Table)[] {
+function createProductSections(items: QuotationItem[], groups?: QuotationGroup[], brochureOnly?: boolean, vatInclusive?: boolean, discount?: number, sixColumnMode?: boolean, showPesoSign?: boolean, installationCost?: number, customNotes?: string[], onSiteOrientation?: boolean): (Paragraph | Table)[] {
   const sections: (Paragraph | Table)[] = [];
   const curr = showPesoSign ? "₱" : "";
 
@@ -586,7 +572,7 @@ function createProductSections(items: QuotationItem[], groups?: QuotationGroup[]
       new Paragraph({
         children: [
           new TextRun({
-            text: `${noteNum}. USER ORIENTATION HOW TO USE DEVICE VIA VIRTUAL GOOGLE MEET`,
+            text: onSiteOrientation ? `${noteNum}. ON SITE USER ORIENTATION` : `${noteNum}. USER ORIENTATION HOW TO USE DEVICE VIA VIRTUAL GOOGLE MEET`,
             font: FONT_FAMILY,
             bold: true,
             size: FONT_SIZE,
@@ -594,7 +580,7 @@ function createProductSections(items: QuotationItem[], groups?: QuotationGroup[]
           }),
         ],
         alignment: AlignmentType.LEFT,
-        spacing: { after: totalInvestment < 10000 ? 50 : 200 },
+        spacing: { after: totalInvestment < 10000 ? 50 : (customNotes && customNotes.length > 0 ? 50 : 200) },
       })
     );
     if (totalInvestment < 10000) {
@@ -611,9 +597,30 @@ function createProductSections(items: QuotationItem[], groups?: QuotationGroup[]
             }),
           ],
           alignment: AlignmentType.LEFT,
-          spacing: { after: 200 },
+          spacing: { after: customNotes && customNotes.length > 0 ? 50 : 200 },
         })
       );
+    }
+    // Custom notes (appended after mandatory notes with sequential numbering)
+    if (customNotes && customNotes.length > 0) {
+      for (let i = 0; i < customNotes.length; i++) {
+        noteNum++;
+        sections.push(
+          new Paragraph({
+            children: [
+              new TextRun({
+                text: `${noteNum}. ${customNotes[i].toUpperCase()}`,
+                font: FONT_FAMILY,
+                bold: true,
+                size: FONT_SIZE,
+                highlight: "yellow",
+              }),
+            ],
+            alignment: AlignmentType.LEFT,
+            spacing: { after: i === customNotes.length - 1 ? 200 : 50 },
+          })
+        );
+      }
     }
     // Blank line after NOTES before Conforme
     sections.push(new Paragraph({ children: [] }));
@@ -714,7 +721,7 @@ function createGroupedTable(items: QuotationItem[], sixColumnMode?: boolean, sho
 
     // Add image if path exists
     if (item.imagePath) {
-      const absoluteImagePath = path.resolve(process.cwd(), item.imagePath);
+      const absoluteImagePath = getAssetPath("icons", path.basename(item.imagePath));
       if (fs.existsSync(absoluteImagePath)) {
         const imgBuf = fs.readFileSync(absoluteImagePath);
         const dims = getImageDimensions(imgBuf);
@@ -1548,7 +1555,7 @@ function createOptionalAccessoriesSection(
     // Build model cell with optional icon (same pattern as createGroupedTable)
     const modelCellChildren: Paragraph[] = [];
     if (item.icon) {
-      const absoluteImagePath = path.resolve(process.cwd(), `src/assets/icons/${item.icon}`);
+      const absoluteImagePath = getAssetPath("icons", item.icon);
       if (fs.existsSync(absoluteImagePath)) {
         const imgBuf = fs.readFileSync(absoluteImagePath);
         const dims = getImageDimensions(imgBuf);

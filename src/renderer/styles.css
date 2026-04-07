@@ -1018,15 +1018,64 @@ th {
   opacity: 0;
 }
 
-.notes-section textarea {
-  width: 100%;
-  min-height: 80px;
-  padding: 10px;
+.btn-add-note {
+  padding: 4px 12px;
+  font-size: 0.8rem;
+  background: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-add-note:hover {
+  opacity: 0.85;
+}
+
+.custom-notes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.custom-note-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.custom-note-num {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  min-width: 28px;
+  text-align: right;
+}
+
+.custom-note-input {
+  flex: 1;
+  padding: 7px 10px;
   border: 1px solid var(--border-color);
   border-radius: 4px;
-  resize: vertical;
   background: var(--bg-input);
   color: var(--text-primary);
+  font-size: 0.85rem;
+}
+
+.btn-remove-note {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 1rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  line-height: 1;
+}
+
+.btn-remove-note:hover {
+  background: var(--danger-bg, #fee2e2);
+  color: #dc2626;
 }
 
 .actions {
@@ -1349,4 +1398,115 @@ tr[data-group-id]:not([data-group-id=""]):hover {
 .group-header-row.drag-over,
 .group-header-row.drag-over-bottom {
   box-shadow: inset 0 0 0 2px white;
+}
+
+/* Product detail popup */
+.product-detail-popup {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+  padding: 16px 20px;
+  min-width: 320px;
+  max-width: 520px;
+  width: max-content;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.2s ease;
+}
+
+.product-detail-popup.hidden {
+  opacity: 0;
+  pointer-events: none;
+  display: none;
+}
+
+.product-detail-popup.fading-out {
+  opacity: 0;
+}
+
+.pdp-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+
+.pdp-icon {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.pdp-icon.hidden {
+  display: none;
+}
+
+.pdp-title {
+  flex: 1;
+}
+
+.pdp-brand {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.pdp-name {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.pdp-price-block {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.pdp-fake-price {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  text-decoration: line-through;
+}
+
+.pdp-price {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--accent-color);
+}
+
+.pdp-desc {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  white-space: pre-line;
+  line-height: 1.6;
+  border-top: 1px solid var(--border-color);
+  padding-top: 8px;
+  margin-bottom: 8px;
+}
+
+.pdp-desc:empty {
+  display: none;
+}
+
+.pdp-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 0.75rem;
+}
+
+.pdp-tag {
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 2px 8px;
+  color: var(--text-secondary);
 }
