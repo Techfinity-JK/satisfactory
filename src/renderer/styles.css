@@ -1403,9 +1403,9 @@ tr[data-group-id]:not([data-group-id=""]):hover {
 /* Product detail popup */
 .product-detail-popup {
   position: fixed;
-  top: 16px;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
   z-index: 9999;
   background: var(--bg-card);
   border: 1px solid var(--border-color);
