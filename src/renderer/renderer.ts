@@ -98,6 +98,38 @@ interface QuotationData {
   optionalAccessories?: "none" | "biometrics" | "door-access";
 }
 
+interface SavedQuotationEntry {
+  id: string;
+  savedAt: string;
+  quoteRefSeq: string;
+  agent: string;
+  companyName: string;
+  companyAddress: string;
+  contactPerson: string;
+  contactNumber: string;
+  emailAddress: string;
+  brochureOnly: boolean;
+  vatInclusive: boolean;
+  discount: number;
+  installationCost: number;
+  sixColumnMode: boolean;
+  optionalAccessories: string;
+  customNotes: string[];
+  savedItems: Array<{
+    instanceId: string;
+    productId: string;
+    quantity: number;
+    customPrice?: number;
+    excludeFromDiscount?: boolean;
+  }>;
+  ungroupedOrder: string[];
+  groups: Array<{
+    id: string;
+    name: string;
+    itemOrder: string[];
+  }>;
+}
+
 // Map product names to icon filenames
 const productIconMap: { [key: string]: string } = {
   // Biometrics
@@ -879,6 +911,7 @@ const products: Product[] = [
     dimension: "167x148x32mm",
     warranty: { duration: 36, unit: "months" },
     isActive: true,
+    isDeprecated: true
   },
   {
     id: "zk-iface3",
@@ -1475,6 +1508,7 @@ const contactNumberEl = document.getElementById("contactNumber") as HTMLInputEle
 const emailAddressEl = document.getElementById("emailAddress") as HTMLInputElement;
 const addNoteBtnEl = document.getElementById("addNoteBtn") as HTMLButtonElement;
 const customNotesListEl = document.getElementById("customNotesList") as HTMLDivElement;
+const historyListEl = document.getElementById("historyList") as HTMLDivElement;
 
 // Product detail popup
 const productDetailPopup = document.getElementById("productDetailPopup") as HTMLDivElement;
@@ -2390,7 +2424,7 @@ async function generateQuotation(): Promise<void> {
         imagePath: isService ? undefined : getProductImagePath(item.product.name),
         quantity: item.quantity,
         unit: isService ? "lot" : "pc",
-        unitPrice: item.product.price.fakeAmount,
+        unitPrice: item.customPrice !== undefined ? item.customPrice : item.product.price.fakeAmount,
         promoPrice: promoPrice,
         totalPrice: promoPrice * item.quantity,
         warrantyMonths: item.product.warranty?.duration ?? 0,
@@ -2463,6 +2497,7 @@ async function generateQuotation(): Promise<void> {
     const result = await window.electronAPI.generateQuotation(data);
 
     if (result.success) {
+      saveToHistory();
       alert(`Quotation saved to: ${result.filePath}`);
     } else if (result.cancelled) {
       // User cancelled, do nothing
@@ -2517,6 +2552,207 @@ function clearItems(): void {
   renderProducts();
   renderServices();
   renderSelectedItems();
+}
+
+// ── Quotation History ──────────────────────────────────────────────────────
+
+function getHistory(): SavedQuotationEntry[] {
+  try {
+    return JSON.parse(localStorage.getItem("quotationHistory") ?? "[]");
+  } catch {
+    return [];
+  }
+}
+
+function saveToHistory(): void {
+  const savedItems = Array.from(selectedItems.entries()).map(([instanceId, item]) => ({
+    instanceId,
+    productId: item.product.id,
+    quantity: item.quantity,
+    customPrice: item.customPrice,
+    excludeFromDiscount: item.excludeFromDiscount,
+  }));
+
+  const groupsData = Array.from(itemGroups.entries()).map(([groupId, group]) => ({
+    id: group.id,
+    name: group.name,
+    itemOrder: groupItemOrder.get(groupId) ?? [],
+  }));
+
+  const entry: SavedQuotationEntry = {
+    id: Date.now().toString(),
+    savedAt: new Date().toISOString(),
+    quoteRefSeq: quoteRefSeqEl.value.trim(),
+    agent: agentSelectEl.value,
+    companyName: companyNameEl.value.trim(),
+    companyAddress: companyAddressEl.value.trim(),
+    contactPerson: contactPersonEl.value.trim(),
+    contactNumber: contactNumberEl.value.trim(),
+    emailAddress: emailAddressEl.value.trim(),
+    brochureOnly: brochureOnlyEl.checked,
+    vatInclusive: vatInclusiveEl.checked,
+    discount: parseFloat(discountInputEl.value) || 0,
+    installationCost: parseFloat(installationCostInputEl.value) || 0,
+    sixColumnMode: sixColumnModeEl.checked,
+    optionalAccessories: optionalAccessoriesEl.value,
+    customNotes: getCustomNotes(),
+    savedItems,
+    ungroupedOrder: [...ungroupedItemOrder],
+    groups: groupsData,
+  };
+
+  const history = getHistory();
+  history.unshift(entry);
+  if (history.length > 20) history.splice(20);
+  localStorage.setItem("quotationHistory", JSON.stringify(history));
+  renderHistoryPanel();
+}
+
+function deleteFromHistory(id: string): void {
+  const history = getHistory().filter((e) => e.id !== id);
+  localStorage.setItem("quotationHistory", JSON.stringify(history));
+  renderHistoryPanel();
+}
+
+function loadFromHistory(entry: SavedQuotationEntry): void {
+  // Clear current state
+  selectedItems.clear();
+  itemGroups.clear();
+  itemToGroup.clear();
+  groupItemOrder.clear();
+  ungroupedItemOrder = [];
+  groupIdCounter = 0;
+  productInstanceCounter = 0;
+
+  // Restore form fields
+  agentSelectEl.value = entry.agent;
+  updateQuoteRefPrefix();
+  quoteRefSeqEl.value = entry.quoteRefSeq;
+  companyNameEl.value = entry.companyName;
+  companyAddressEl.value = entry.companyAddress;
+  contactPersonEl.value = entry.contactPerson;
+  contactNumberEl.value = entry.contactNumber;
+  emailAddressEl.value = entry.emailAddress;
+  brochureOnlyEl.checked = entry.brochureOnly;
+  vatInclusiveEl.checked = entry.vatInclusive;
+  discountInputEl.value = String(entry.discount);
+  installationCostInputEl.value = String(entry.installationCost);
+  sixColumnModeEl.checked = entry.sixColumnMode;
+  optionalAccessoriesEl.value = entry.optionalAccessories;
+
+  // Restore custom notes
+  customNotesListEl.innerHTML = "";
+  entry.customNotes.forEach((note) => addCustomNote(note));
+
+  // Build product lookup map
+  const productLookup = new Map<string, Product>(products.map((p) => [p.id, p]));
+  services.forEach((s) => {
+    const asProduct: Product = {
+      id: s.id,
+      brand: "Service",
+      name: s.name,
+      category: "Service",
+      description: s.description,
+      capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+      download: { lan: false, usb: false, wifi: false },
+      price: { fakeAmount: s.price, amount: s.price, currency: "PHP" },
+      withADMS: false,
+      warranty: { duration: 0, unit: "months" },
+      isActive: true,
+    };
+    productLookup.set(s.id, asProduct);
+  });
+
+  // Restore items and track max counter values
+  let maxCounter = 0;
+  entry.savedItems.forEach(({ instanceId, productId, quantity, customPrice, excludeFromDiscount }) => {
+    const product = productLookup.get(productId);
+    if (!product) return;
+    const item: SelectedItem = { product, quantity };
+    if (customPrice !== undefined) item.customPrice = customPrice;
+    if (excludeFromDiscount) item.excludeFromDiscount = true;
+    selectedItems.set(instanceId, item);
+    const match = instanceId.match(/^product-(\d+)$/);
+    if (match) maxCounter = Math.max(maxCounter, parseInt(match[1], 10));
+  });
+  productInstanceCounter = maxCounter;
+
+  // Restore ungrouped order (only include items that actually exist)
+  ungroupedItemOrder = entry.ungroupedOrder.filter((id) => selectedItems.has(id));
+
+  // Restore groups
+  let maxGroupCounter = 0;
+  entry.groups.forEach(({ id, name, itemOrder }) => {
+    itemGroups.set(id, { id, name });
+    const validOrder = itemOrder.filter((itemId) => selectedItems.has(itemId));
+    groupItemOrder.set(id, validOrder);
+    validOrder.forEach((itemId) => itemToGroup.set(itemId, id));
+    const match = id.match(/^group-(\d+)$/);
+    if (match) maxGroupCounter = Math.max(maxGroupCounter, parseInt(match[1], 10));
+  });
+  groupIdCounter = maxGroupCounter;
+
+  // Sync UI state
+  brochureOnlyEl.dispatchEvent(new Event("change"));
+  vatInclusiveEl.dispatchEvent(new Event("change"));
+
+  renderProducts();
+  renderServices();
+  renderSelectedItems();
+  updateGrandTotal();
+}
+
+function renderHistoryPanel(): void {
+  const history = getHistory();
+  const countEl = document.getElementById("historyCount") as HTMLSpanElement;
+  countEl.textContent = history.length > 0 ? String(history.length) : "";
+
+  if (history.length === 0) {
+    historyListEl.innerHTML = `<div class="history-empty">No saved quotations yet. Quotations are saved automatically after generating.</div>`;
+    return;
+  }
+
+  historyListEl.innerHTML = history.map((entry) => {
+    const date = new Date(entry.savedAt);
+    const dateStr = date.toLocaleDateString("en-PH", { year: "numeric", month: "short", day: "numeric" });
+    const timeStr = date.toLocaleTimeString("en-PH", { hour: "2-digit", minute: "2-digit" });
+    const refDisplay = entry.quoteRefSeq
+      ? `${new Date(entry.savedAt).getFullYear()}-${entry.agent.toUpperCase()}-${entry.quoteRefSeq}`
+      : `${new Date(entry.savedAt).getFullYear()}-${entry.agent.toUpperCase()}`;
+    const itemCount = entry.savedItems.length;
+    return `
+      <div class="history-entry" data-id="${entry.id}">
+        <div class="history-entry-info">
+          <div class="history-entry-ref">${refDisplay}</div>
+          <div class="history-entry-company">${entry.companyName || "(No company)"}</div>
+          <div class="history-entry-meta">${dateStr} ${timeStr} &bull; ${itemCount} item${itemCount !== 1 ? "s" : ""}</div>
+        </div>
+        <div class="history-entry-actions">
+          <button class="btn-history-load" data-id="${entry.id}">Load</button>
+          <button class="btn-history-delete" data-id="${entry.id}" title="Delete">&#x2715;</button>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  historyListEl.querySelectorAll<HTMLButtonElement>(".btn-history-load").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const id = btn.dataset.id!;
+      const entry = getHistory().find((e) => e.id === id);
+      if (entry) {
+        loadFromHistory(entry);
+        // Collapse the history panel after loading
+        historyListEl.classList.add("hidden");
+        historyToggleBtn.classList.remove("open");
+      }
+    });
+  });
+
+  historyListEl.querySelectorAll<HTMLButtonElement>(".btn-history-delete").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      deleteFromHistory(btn.dataset.id!);
+    });
+  });
 }
 
 // Event listeners
@@ -2802,8 +3038,22 @@ hideDeprecatedToggleEl.addEventListener("change", () => {
   }
 });
 
+// History panel toggle
+const historyToggleBtn = document.getElementById("historyToggleBtn") as HTMLButtonElement;
+historyToggleBtn.addEventListener("click", () => {
+  const isOpen = !historyListEl.classList.contains("hidden");
+  if (isOpen) {
+    historyListEl.classList.add("hidden");
+    historyToggleBtn.classList.remove("open");
+  } else {
+    historyListEl.classList.remove("hidden");
+    historyToggleBtn.classList.add("open");
+  }
+});
+
 // Initial render
 loadSavedTheme();
 renderProducts();
 renderServices();
 renderSelectedItems();
+renderHistoryPanel();
