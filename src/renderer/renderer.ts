@@ -98,6 +98,44 @@ interface QuotationData {
   optionalAccessories?: "none" | "biometrics" | "door-access";
 }
 
+interface TabSnapshot {
+  quoteRefSeq: string;
+  agent: string;
+  companyName: string;
+  companyAddress: string;
+  contactPerson: string;
+  contactNumber: string;
+  emailAddress: string;
+  brochureOnly: boolean;
+  vatInclusive: boolean;
+  discount: number;
+  installationCost: number;
+  sixColumnMode: boolean;
+  optionalAccessories: string;
+  customNotes: string[];
+  savedItems: Array<{
+    instanceId: string;
+    productId: string;
+    quantity: number;
+    customPrice?: number;
+    excludeFromDiscount?: boolean;
+  }>;
+  ungroupedOrder: string[];
+  groups: Array<{
+    id: string;
+    name: string;
+    itemOrder: string[];
+  }>;
+  productInstanceCounter: number;
+  groupIdCounter: number;
+  currentCategory: string;
+}
+
+interface TabState extends TabSnapshot {
+  id: string;
+  label: string;
+}
+
 interface SavedQuotationEntry {
   id: string;
   savedAt: string;
@@ -1482,6 +1520,11 @@ let productInstanceCounter = 0; // Counter for unique product instances
 let currentCategory = "Biometrics"; // Current product category tab
 let hideDeprecated = false;
 
+// Tab state
+let tabs: TabState[] = [];
+let activeTabId = "";
+let tabCounter = 0;
+
 // Order tracking for items within groups and ungrouped
 const groupItemOrder: Map<string, string[]> = new Map(); // groupId -> itemIds in order
 let ungroupedItemOrder: string[] = []; // itemIds for ungrouped items
@@ -2514,28 +2557,12 @@ async function generateQuotation(): Promise<void> {
 
 // Clear all
 function clearAll(): void {
-  selectedItems.clear();
-  itemGroups.clear();
-  itemToGroup.clear();
-  groupItemOrder.clear();
-  ungroupedItemOrder = [];
-  groupIdCounter = 0;
-  productInstanceCounter = 0;
-  quoteRefSeqEl.value = "";
-  updateQuoteRefPrefix();
-  companyNameEl.value = "";
-  companyAddressEl.value = "";
-  contactPersonEl.value = "";
-  contactNumberEl.value = "";
-  emailAddressEl.value = "";
-  customNotesListEl.innerHTML = "";
-  brochureOnlyEl.checked = false;
-  vatInclusiveEl.checked = false;
-  discountInputEl.value = "0";
-  installationCostInputEl.value = "0";
-  renderProducts();
-  renderServices();
-  renderSelectedItems();
+  const idx = tabs.findIndex((t) => t.id === activeTabId);
+  const label = idx >= 0 ? tabs[idx].label : "Quotation";
+  const empty = createEmptySnapshot();
+  applyTabState(empty);
+  if (idx >= 0) tabs[idx] = { ...tabs[idx], ...empty, label };
+  renderTabBar();
 }
 
 // Clear selected items only (keep customer info)
@@ -2552,6 +2579,218 @@ function clearItems(): void {
   renderProducts();
   renderServices();
   renderSelectedItems();
+}
+
+// ── Tab Management ────────────────────────────────────────────────────────
+
+function buildProductLookup(): Map<string, Product> {
+  const lookup = new Map<string, Product>(products.map((p) => [p.id, p]));
+  services.forEach((s) => {
+    lookup.set(s.id, {
+      id: s.id, brand: "Service", name: s.name, category: "Service",
+      description: s.description,
+      capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+      download: { lan: false, usb: false, wifi: false },
+      price: { fakeAmount: s.price, amount: s.price, currency: "PHP" },
+      withADMS: false, warranty: { duration: 0, unit: "months" }, isActive: true,
+    });
+  });
+  return lookup;
+}
+
+function createEmptySnapshot(): TabSnapshot {
+  return {
+    quoteRefSeq: "", agent: "jk", companyName: "", companyAddress: "",
+    contactPerson: "", contactNumber: "", emailAddress: "",
+    brochureOnly: false, vatInclusive: false, discount: 0, installationCost: 0,
+    sixColumnMode: false, optionalAccessories: "none", customNotes: [],
+    savedItems: [], ungroupedOrder: [], groups: [],
+    productInstanceCounter: 0, groupIdCounter: 0, currentCategory: "Biometrics",
+  };
+}
+
+function captureCurrentState(): TabSnapshot {
+  const savedItems = Array.from(selectedItems.entries()).map(([instanceId, item]) => ({
+    instanceId,
+    productId: item.product.id,
+    quantity: item.quantity,
+    customPrice: item.customPrice,
+    excludeFromDiscount: item.excludeFromDiscount,
+  }));
+  const groupsData = Array.from(itemGroups.entries()).map(([groupId, group]) => ({
+    id: group.id, name: group.name, itemOrder: groupItemOrder.get(groupId) ?? [],
+  }));
+  return {
+    quoteRefSeq: quoteRefSeqEl.value.trim(),
+    agent: agentSelectEl.value,
+    companyName: companyNameEl.value.trim(),
+    companyAddress: companyAddressEl.value.trim(),
+    contactPerson: contactPersonEl.value.trim(),
+    contactNumber: contactNumberEl.value.trim(),
+    emailAddress: emailAddressEl.value.trim(),
+    brochureOnly: brochureOnlyEl.checked,
+    vatInclusive: vatInclusiveEl.checked,
+    discount: parseFloat(discountInputEl.value) || 0,
+    installationCost: parseFloat(installationCostInputEl.value) || 0,
+    sixColumnMode: sixColumnModeEl.checked,
+    optionalAccessories: optionalAccessoriesEl.value,
+    customNotes: getCustomNotes(),
+    savedItems,
+    ungroupedOrder: [...ungroupedItemOrder],
+    groups: groupsData,
+    productInstanceCounter,
+    groupIdCounter,
+    currentCategory,
+  };
+}
+
+function applyTabState(snapshot: TabSnapshot): void {
+  selectedItems.clear();
+  itemGroups.clear();
+  itemToGroup.clear();
+  groupItemOrder.clear();
+  ungroupedItemOrder = [];
+  productInstanceCounter = snapshot.productInstanceCounter;
+  groupIdCounter = snapshot.groupIdCounter;
+  currentCategory = snapshot.currentCategory;
+
+  agentSelectEl.value = snapshot.agent;
+  updateQuoteRefPrefix();
+  quoteRefSeqEl.value = snapshot.quoteRefSeq;
+  companyNameEl.value = snapshot.companyName;
+  companyAddressEl.value = snapshot.companyAddress;
+  contactPersonEl.value = snapshot.contactPerson;
+  contactNumberEl.value = snapshot.contactNumber;
+  emailAddressEl.value = snapshot.emailAddress;
+  brochureOnlyEl.checked = snapshot.brochureOnly;
+  vatInclusiveEl.checked = snapshot.vatInclusive;
+  discountInputEl.value = String(snapshot.discount);
+  installationCostInputEl.value = String(snapshot.installationCost);
+  sixColumnModeEl.checked = snapshot.sixColumnMode;
+  optionalAccessoriesEl.value = snapshot.optionalAccessories;
+
+  customNotesListEl.innerHTML = "";
+  snapshot.customNotes.forEach((note) => addCustomNote(note));
+
+  const productLookup = buildProductLookup();
+  snapshot.savedItems.forEach(({ instanceId, productId, quantity, customPrice, excludeFromDiscount }) => {
+    const product = productLookup.get(productId);
+    if (!product) return;
+    const item: SelectedItem = { product, quantity };
+    if (customPrice !== undefined) item.customPrice = customPrice;
+    if (excludeFromDiscount) item.excludeFromDiscount = true;
+    selectedItems.set(instanceId, item);
+  });
+
+  ungroupedItemOrder = snapshot.ungroupedOrder.filter((id) => selectedItems.has(id));
+  snapshot.groups.forEach(({ id, name, itemOrder }) => {
+    itemGroups.set(id, { id, name });
+    const validOrder = itemOrder.filter((itemId) => selectedItems.has(itemId));
+    groupItemOrder.set(id, validOrder);
+    validOrder.forEach((itemId) => itemToGroup.set(itemId, id));
+  });
+
+  brochureOnlyEl.dispatchEvent(new Event("change"));
+  vatInclusiveEl.dispatchEvent(new Event("change"));
+  renderProducts();
+  renderServices();
+  renderSelectedItems();
+  updateGrandTotal();
+}
+
+function getTabLabel(snapshot: TabSnapshot, fallbackIndex: number): string {
+  if (snapshot.companyName) return snapshot.companyName;
+  if (snapshot.quoteRefSeq) {
+    const year = new Date().getFullYear();
+    return `${year}-${snapshot.agent.toUpperCase()}-${snapshot.quoteRefSeq}`;
+  }
+  return `Quotation ${fallbackIndex}`;
+}
+
+function renderTabBar(): void {
+  const tabListEl = document.getElementById("tabList") as HTMLDivElement;
+  tabListEl.innerHTML = tabs.map((tab, i) => `
+    <button class="quotation-tab${tab.id === activeTabId ? " active" : ""}" data-tab-id="${tab.id}">
+      <span class="tab-label">${tab.label || getTabLabel(tab, i + 1)}</span>
+      <span class="tab-close" data-close-id="${tab.id}" title="Close">&#xd7;</span>
+    </button>
+  `).join("");
+
+  tabListEl.querySelectorAll<HTMLButtonElement>(".quotation-tab").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      if ((e.target as HTMLElement).dataset.closeId) return;
+      switchToTab(btn.dataset.tabId!);
+    });
+  });
+  tabListEl.querySelectorAll<HTMLElement>("[data-close-id]").forEach((el) => {
+    el.addEventListener("click", (e) => {
+      e.stopPropagation();
+      closeTab((el as HTMLElement).dataset.closeId!);
+    });
+  });
+}
+
+function flushActiveTab(): void {
+  if (!activeTabId) return;
+  const idx = tabs.findIndex((t) => t.id === activeTabId);
+  if (idx < 0) return;
+  const snapshot = captureCurrentState();
+  tabs[idx] = { ...tabs[idx], ...snapshot, label: getTabLabel(snapshot, idx + 1) };
+}
+
+function switchToTab(id: string): void {
+  if (id === activeTabId) return;
+  flushActiveTab();
+  activeTabId = id;
+  const tab = tabs.find((t) => t.id === id)!;
+  applyTabState(tab);
+  renderTabBar();
+}
+
+function addTab(): void {
+  flushActiveTab();
+  const id = `tab-${++tabCounter}`;
+  const newTab: TabState = { ...createEmptySnapshot(), id, label: `Quotation ${tabCounter}` };
+  tabs.push(newTab);
+  activeTabId = id;
+  applyTabState(newTab);
+  renderTabBar();
+}
+
+function closeTab(id: string): void {
+  const idx = tabs.findIndex((t) => t.id === id);
+  if (idx < 0) return;
+
+  if (tabs.length === 1) {
+    // Reset the only tab instead of closing
+    const empty = createEmptySnapshot();
+    tabs[0] = { ...tabs[0], ...empty, label: "Quotation 1" };
+    applyTabState(tabs[0]);
+    renderTabBar();
+    return;
+  }
+
+  if (activeTabId === id) {
+    // Switch to adjacent tab first without flushing the closing tab
+    const nextIdx = idx === tabs.length - 1 ? idx - 1 : idx + 1;
+    const nextId = tabs[nextIdx].id;
+    tabs.splice(idx, 1);
+    activeTabId = nextId;
+    applyTabState(tabs.find((t) => t.id === nextId)!);
+  } else {
+    tabs.splice(idx, 1);
+  }
+  renderTabBar();
+}
+
+function updateActiveTabLabel(): void {
+  const idx = tabs.findIndex((t) => t.id === activeTabId);
+  if (idx < 0) return;
+  const snapshot = captureCurrentState();
+  tabs[idx].label = getTabLabel(snapshot, idx + 1);
+  // Update only the label text without full re-render to avoid focus disruption
+  const tabEl = document.querySelector<HTMLButtonElement>(`.quotation-tab[data-tab-id="${activeTabId}"] .tab-label`);
+  if (tabEl) tabEl.textContent = tabs[idx].label;
 }
 
 // ── Quotation History ──────────────────────────────────────────────────────
@@ -2614,92 +2853,50 @@ function deleteFromHistory(id: string): void {
   renderHistoryPanel();
 }
 
-function loadFromHistory(entry: SavedQuotationEntry): void {
-  // Clear current state
-  selectedItems.clear();
-  itemGroups.clear();
-  itemToGroup.clear();
-  groupItemOrder.clear();
-  ungroupedItemOrder = [];
-  groupIdCounter = 0;
-  productInstanceCounter = 0;
-
-  // Restore form fields
-  agentSelectEl.value = entry.agent;
-  updateQuoteRefPrefix();
-  quoteRefSeqEl.value = entry.quoteRefSeq;
-  companyNameEl.value = entry.companyName;
-  companyAddressEl.value = entry.companyAddress;
-  contactPersonEl.value = entry.contactPerson;
-  contactNumberEl.value = entry.contactNumber;
-  emailAddressEl.value = entry.emailAddress;
-  brochureOnlyEl.checked = entry.brochureOnly;
-  vatInclusiveEl.checked = entry.vatInclusive;
-  discountInputEl.value = String(entry.discount);
-  installationCostInputEl.value = String(entry.installationCost);
-  sixColumnModeEl.checked = entry.sixColumnMode;
-  optionalAccessoriesEl.value = entry.optionalAccessories;
-
-  // Restore custom notes
-  customNotesListEl.innerHTML = "";
-  entry.customNotes.forEach((note) => addCustomNote(note));
-
-  // Build product lookup map
-  const productLookup = new Map<string, Product>(products.map((p) => [p.id, p]));
-  services.forEach((s) => {
-    const asProduct: Product = {
-      id: s.id,
-      brand: "Service",
-      name: s.name,
-      category: "Service",
-      description: s.description,
-      capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
-      download: { lan: false, usb: false, wifi: false },
-      price: { fakeAmount: s.price, amount: s.price, currency: "PHP" },
-      withADMS: false,
-      warranty: { duration: 0, unit: "months" },
-      isActive: true,
-    };
-    productLookup.set(s.id, asProduct);
-  });
-
-  // Restore items and track max counter values
+function snapshotFromHistoryEntry(entry: SavedQuotationEntry): TabSnapshot {
   let maxCounter = 0;
-  entry.savedItems.forEach(({ instanceId, productId, quantity, customPrice, excludeFromDiscount }) => {
-    const product = productLookup.get(productId);
-    if (!product) return;
-    const item: SelectedItem = { product, quantity };
-    if (customPrice !== undefined) item.customPrice = customPrice;
-    if (excludeFromDiscount) item.excludeFromDiscount = true;
-    selectedItems.set(instanceId, item);
-    const match = instanceId.match(/^product-(\d+)$/);
-    if (match) maxCounter = Math.max(maxCounter, parseInt(match[1], 10));
+  entry.savedItems.forEach(({ instanceId }) => {
+    const m = instanceId.match(/^product-(\d+)$/);
+    if (m) maxCounter = Math.max(maxCounter, parseInt(m[1], 10));
   });
-  productInstanceCounter = maxCounter;
-
-  // Restore ungrouped order (only include items that actually exist)
-  ungroupedItemOrder = entry.ungroupedOrder.filter((id) => selectedItems.has(id));
-
-  // Restore groups
   let maxGroupCounter = 0;
-  entry.groups.forEach(({ id, name, itemOrder }) => {
-    itemGroups.set(id, { id, name });
-    const validOrder = itemOrder.filter((itemId) => selectedItems.has(itemId));
-    groupItemOrder.set(id, validOrder);
-    validOrder.forEach((itemId) => itemToGroup.set(itemId, id));
-    const match = id.match(/^group-(\d+)$/);
-    if (match) maxGroupCounter = Math.max(maxGroupCounter, parseInt(match[1], 10));
+  entry.groups.forEach(({ id }) => {
+    const m = id.match(/^group-(\d+)$/);
+    if (m) maxGroupCounter = Math.max(maxGroupCounter, parseInt(m[1], 10));
   });
-  groupIdCounter = maxGroupCounter;
+  return {
+    quoteRefSeq: entry.quoteRefSeq,
+    agent: entry.agent,
+    companyName: entry.companyName,
+    companyAddress: entry.companyAddress,
+    contactPerson: entry.contactPerson,
+    contactNumber: entry.contactNumber,
+    emailAddress: entry.emailAddress,
+    brochureOnly: entry.brochureOnly,
+    vatInclusive: entry.vatInclusive,
+    discount: entry.discount,
+    installationCost: entry.installationCost,
+    sixColumnMode: entry.sixColumnMode,
+    optionalAccessories: entry.optionalAccessories,
+    customNotes: entry.customNotes,
+    savedItems: entry.savedItems,
+    ungroupedOrder: entry.ungroupedOrder,
+    groups: entry.groups,
+    productInstanceCounter: maxCounter,
+    groupIdCounter: maxGroupCounter,
+    currentCategory: "Biometrics",
+  };
+}
 
-  // Sync UI state
-  brochureOnlyEl.dispatchEvent(new Event("change"));
-  vatInclusiveEl.dispatchEvent(new Event("change"));
-
-  renderProducts();
-  renderServices();
-  renderSelectedItems();
-  updateGrandTotal();
+function loadFromHistory(entry: SavedQuotationEntry): void {
+  const snapshot = snapshotFromHistoryEntry(entry);
+  applyTabState(snapshot);
+  // Update the current tab's stored state
+  const idx = tabs.findIndex((t) => t.id === activeTabId);
+  if (idx >= 0) {
+    tabs[idx] = { ...tabs[idx], ...snapshot, label: entry.companyName || entry.quoteRefSeq || tabs[idx].label };
+  }
+  renderTabBar();
 }
 
 function renderHistoryPanel(): void {
@@ -2760,6 +2957,14 @@ generateBtnEl.addEventListener("click", generateQuotation);
 const clearItemsBtnEl = document.getElementById("clearItemsBtn") as HTMLButtonElement;
 clearItemsBtnEl.addEventListener("click", clearItems);
 clearBtnEl.addEventListener("click", clearAll);
+
+// Update tab label live when company name or ref seq changes
+companyNameEl.addEventListener("input", updateActiveTabLabel);
+quoteRefSeqEl.addEventListener("input", updateActiveTabLabel);
+agentSelectEl.addEventListener("change", updateActiveTabLabel);
+
+// Add Tab button
+document.getElementById("addTabBtn")!.addEventListener("click", addTab);
 
 // Add Group button
 const addGroupBtnEl = document.getElementById("addGroupBtn") as HTMLButtonElement;
@@ -3051,9 +3256,16 @@ historyToggleBtn.addEventListener("click", () => {
   }
 });
 
+// Initialize first tab
+tabCounter = 1;
+const firstTab: TabState = { ...createEmptySnapshot(), id: "tab-1", label: "Quotation 1" };
+tabs = [firstTab];
+activeTabId = "tab-1";
+
 // Initial render
 loadSavedTheme();
 renderProducts();
 renderServices();
 renderSelectedItems();
 renderHistoryPanel();
+renderTabBar();

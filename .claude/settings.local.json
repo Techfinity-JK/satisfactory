@@ -22,7 +22,10 @@
       "Bash(npm run:*)",
       "Bash(CSC_IDENTITY_AUTO_DISCOVERY=false npx electron-builder:*)",
       "Bash(powershell -Command \"Compress-Archive -Path 'release/win-unpacked/*' -DestinationPath 'release/QuotationGenerator-portable.zip' -Force\")",
-      "Bash(powershell:*)"
+      "Bash(powershell:*)",
+      "Bash(cp:*)",
+      "Bash(mkdir -p \"C:/Users/hi/Documents/GitHub/satisfactory/.claude/skills\")",
+      "Bash(cp -r /tmp/skills/skills/frontend-design \"C:/Users/hi/Documents/GitHub/satisfactory/.claude/skills/\")"
     ]
   }
 }

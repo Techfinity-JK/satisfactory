@@ -8,278 +8,312 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <img id="bgImage" class="bg-image" alt="">
-  <div class="container">
-    <header>
-      <h1>Quotation Generator</h1>
+  <img id="bgImage" class="bg-image" alt="">
+
+  <div class="app-shell">
+
+    <!-- Top Chrome -->
+    <div class="app-chrome">
+      <div class="app-brand">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+          <path d="M9 1L11.5 6.5H17L12.5 10L14.5 16L9 12.5L3.5 16L5.5 10L1 6.5H6.5L9 1Z" fill="currentColor"/>
+        </svg>
+        <span>QUOTATION GENERATOR</span>
+      </div>
+      <div class="tab-bar-wrapper">
+        <div id="tabList" class="tab-list"></div>
+        <button id="addTabBtn" class="btn-add-tab" title="New quotation">+</button>
+      </div>
       <button id="settingsBtn" class="settings-btn" title="Settings">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="12" r="3"></circle>
           <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
         </svg>
       </button>
-    </header>
-
-    <!-- Settings Modal -->
-    <div id="settingsModal" class="modal-overlay hidden">
-      <div class="modal">
-        <div class="modal-header">
-          <h2>Settings</h2>
-          <button id="closeSettingsBtn" class="close-btn">&times;</button>
-        </div>
-        <div class="modal-body">
-          <h3>Background</h3>
-          <div class="bg-picker">
-            <div id="bgPreview" class="bg-preview">No background set</div>
-            <div class="bg-actions">
-              <button id="bgPickBtn" class="btn-bg-pick">Choose Image</button>
-              <button id="bgClearBtn" class="btn-bg-clear">Clear</button>
-            </div>
-          </div>
-          <h3>Color Theme</h3>
-          <div class="theme-options">
-            <button class="theme-circle" data-theme="night" title="Night Mode" style="background: linear-gradient(135deg, #1a1a2e, #16213e);"></button>
-            <button class="theme-circle" data-theme="light" title="Light Mode" style="background: linear-gradient(135deg, #ffffff, #f5f5f5);"></button>
-            <button class="theme-circle" data-theme="ocean" title="Ocean Blue" style="background: linear-gradient(135deg, #1e3a5f, #2196F3);"></button>
-            <button class="theme-circle" data-theme="forest" title="Forest Green" style="background: linear-gradient(135deg, #1b4332, #40916c);"></button>
-            <button class="theme-circle" data-theme="purple" title="Royal Purple" style="background: linear-gradient(135deg, #2d1b69, #7c3aed);"></button>
-            <button class="theme-circle" data-theme="sunset" title="Sunset Orange" style="background: linear-gradient(135deg, #7c2d12, #f97316);"></button>
-            <button class="theme-circle" data-theme="teal" title="Teal" style="background: linear-gradient(135deg, #134e4a, #14b8a6);"></button>
-            <button class="theme-circle" data-theme="rose" title="Rose" style="background: linear-gradient(135deg, #4c0519, #e11d48);"></button>
-          </div>
-          <h3>Output</h3>
-          <label class="checkbox-label">
-            <input type="checkbox" id="showPesoSign">
-            <span>Show ₱ Sign</span>
-          </label>
-          <label class="checkbox-label">
-            <input type="checkbox" id="longDateFormat">
-            <span>Use long date format</span>
-            <span class="checkbox-hint">(March 28, 2026)</span>
-          </label>
-        </div>
-      </div>
     </div>
 
-    <main>
-      <section class="history-section">
-        <button id="historyToggleBtn" class="history-toggle-btn">
-          <svg class="history-chevron" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5">
-            <polyline points="4,6 8,10 12,6"></polyline>
-          </svg>
-          Previously Generated Quotations
-          <span id="historyCount" class="history-count"></span>
-        </button>
-        <div id="historyList" class="history-list hidden"></div>
-      </section>
+    <!-- Main Two-Column Layout -->
+    <main class="app-layout">
 
-      <section class="customer-info">
-        <h2>Customer Information</h2>
-        <div class="form-row">
-          <div class="form-group">
-            <label for="agentSelect">Agent</label>
-            <select id="agentSelect">
-              <option value="jk" selected>JK</option>
-              <option value="shae">SHAE</option>
-              <option value="jhel">JHEL</option>
-              <option value="cle">CLE</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-col">
-            <div class="form-group">
-              <label>Quote Ref No:</label>
+      <!-- ── LEFT PANEL ── -->
+      <aside class="panel panel-left">
+
+        <section class="history-section">
+          <button id="historyToggleBtn" class="history-toggle-btn">
+            <svg class="history-chevron" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="4,6 8,10 12,6"></polyline>
+            </svg>
+            <span>Recent Quotations</span>
+            <span id="historyCount" class="history-count"></span>
+          </button>
+          <div id="historyList" class="history-list hidden"></div>
+        </section>
+
+        <section class="customer-info">
+          <div class="panel-section-label">CLIENT INFORMATION</div>
+
+          <div class="form-row-inline">
+            <div class="form-group form-group--sm">
+              <label for="agentSelect">Agent</label>
+              <select id="agentSelect">
+                <option value="jk" selected>JK</option>
+                <option value="shae">SHAE</option>
+                <option value="jhel">JHEL</option>
+                <option value="cle">CLE</option>
+              </select>
+            </div>
+            <div class="form-group form-group--grow">
+              <label>Quote Ref</label>
               <div class="quote-ref-row">
                 <span id="quoteRefPrefix" class="quote-ref-prefix">2026-JK</span>
                 <span class="quote-ref-sep hidden" id="quoteRefSep">-</span>
                 <input type="text" id="quoteRefSeq" placeholder="001" class="quote-ref-seq">
               </div>
             </div>
-            <div class="form-group">
-              <label for="companyName">Client:</label>
-              <input type="text" id="companyName" placeholder="Enter company name">
-            </div>
-            <div class="form-group">
-              <label for="companyAddress">Address:</label>
-              <textarea id="companyAddress" placeholder="Enter company address"></textarea>
-            </div>
           </div>
-          <div class="form-col">
-            <div class="form-group">
-              <label for="contactPerson">Contact Person:</label>
-              <input type="text" id="contactPerson" placeholder="Enter contact person">
+
+          <div class="form-group">
+            <label for="companyName">Company</label>
+            <input type="text" id="companyName" placeholder="Enter company name">
+          </div>
+          <div class="form-group">
+            <label for="companyAddress">Address</label>
+            <textarea id="companyAddress" placeholder="Enter address"></textarea>
+          </div>
+          <div class="form-row-inline">
+            <div class="form-group form-group--grow">
+              <label for="contactPerson">Contact Person</label>
+              <input type="text" id="contactPerson" placeholder="Name">
             </div>
-            <div class="form-group">
-              <label for="contactNumber">Contact Number:</label>
-              <input type="tel" id="contactNumber" placeholder="Enter contact number">
-            </div>
-            <div class="form-group">
-              <label for="emailAddress">Email Address:</label>
-              <input type="email" id="emailAddress" placeholder="Enter email address">
+            <div class="form-group form-group--grow">
+              <label for="contactNumber">Number</label>
+              <input type="tel" id="contactNumber" placeholder="09XX">
             </div>
           </div>
-        </div>
-      </section>
+          <div class="form-group">
+            <label for="emailAddress">Email</label>
+            <input type="email" id="emailAddress" placeholder="email@example.com">
+          </div>
+        </section>
 
-      <section class="product-selection">
-        <div class="section-header">
-          <h2>Select Products</h2>
-          <div class="section-header-actions">
-            <label class="checkbox-label" title="Hide items only available on special orders">
-              <input type="checkbox" id="hideDeprecatedToggle">
-              <span>Hide Deprecated</span>
-            </label>
+        <section class="notes-section">
+          <div class="panel-section-label">
+            ADDITIONAL NOTES
+            <button type="button" id="addNoteBtn" class="btn-add-note">+ Add</button>
           </div>
-        </div>
-        <div class="product-tabs-row">
-          <div class="product-tabs">
-            <button class="product-tab active" data-category="biometrics">Biometrics</button>
-            <button class="product-tab" data-category="door-access">Door Access</button>
-            <button class="product-tab" data-category="utime">UTIME</button>
-            <button class="product-tab" data-category="cctv">CCTV (Dahua)</button>
+          <div id="customNotesList" class="custom-notes-list"></div>
+        </section>
+
+        <!-- Actions -->
+        <div class="actions">
+          <button id="generateBtn" class="btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            Generate Quotation
+          </button>
+          <div class="actions-secondary">
+            <button id="clearItemsBtn" class="btn-ghost">Clear Items</button>
+            <button id="clearBtn" class="btn-ghost btn-ghost--danger">Clear All</button>
           </div>
-          <input type="text" id="productSearch" class="product-search" placeholder="Search products...">
-        </div>
-        <div id="productList" class="product-grid">
-          <!-- Products will be rendered here -->
         </div>
 
-        <h3 class="services-heading">Additional Services</h3>
-        <div id="servicesList" class="services-grid">
-          <div class="service-card" data-service-id="mounting">
-            <div class="service-name">Biometrics Mounting</div>
-            <div class="service-price">PHP 1,500</div>
-          </div>
-          <div class="service-card" data-service-id="orientation">
-            <div class="service-name">On-Site User Orientation</div>
-            <div class="service-price">PHP 2,500</div>
-          </div>
-<div class="service-card" data-service-id="delivery">
-            <div class="service-name">Delivery Fee</div>
-            <div class="service-price">PHP 500</div>
-          </div>
-          <div class="service-card" data-service-id="others">
-            <div class="service-name">Others</div>
-            <div class="service-price">PHP 0</div>
-          </div>
-        </div>
-      </section>
+      </aside>
 
-      <section class="selected-items">
-        <div class="section-header">
-          <h2>Selected Items</h2>
-          <div class="section-header-actions">
-            <label class="checkbox-label">
-              <span>Optional Accessories</span>
-              <select id="optionalAccessories" class="accessories-header-select">
-                <option value="none">None</option>
-                <option value="biometrics">Biometrics</option>
-                <option value="door-access">Door Access</option>
-              </select>
-              <span class="info-icon">&#9432;<span class="info-tooltip">Adds the optional accessories table, located below the NOTES:</span></span>
-            </label>
-            <label class="checkbox-label">
-              <input type="checkbox" id="brochureOnly">
-              <span>Brochure Only</span>
-              <span class="info-icon">&#9432;<span class="info-tooltip">Hides Total Equipment Cost, use this if you are going to make a biometrics brochure.</span></span>
-            </label>
-            <label class="checkbox-label">
-              <input type="checkbox" id="vatInclusive">
-              <span>VAT Inclusive</span>
-              <span class="info-icon">&#9432;<span class="info-tooltip">Adds 12% VAT for Sales Invoice.</span></span>
-            </label>
-            <label class="checkbox-label">
-              <input type="checkbox" id="sixColumnMode">
-              <span>7-Column Output</span>
-              <span class="info-icon">&#9432;<span class="info-tooltip">Additional column with the promo amount pricing. Use this for multiple biometrics orders.</span></span>
-            </label>
-            <button id="addGroupBtn" class="btn-add-group">+ Add Group</button>
+      <!-- ── RIGHT PANEL ── -->
+      <div class="panel panel-right">
+
+        <section class="product-selection">
+          <div class="product-selection-header">
+            <div class="product-tabs-row">
+              <div class="product-tabs">
+                <button class="product-tab active" data-category="biometrics">Biometrics</button>
+                <button class="product-tab" data-category="door-access">Door Access</button>
+                <button class="product-tab" data-category="utime">UTIME</button>
+                <button class="product-tab" data-category="cctv">CCTV</button>
+              </div>
+              <div class="product-toolbar">
+                <input type="text" id="productSearch" class="product-search" placeholder="Search…">
+                <label class="toggle-pill" title="Hide special order items">
+                  <input type="checkbox" id="hideDeprecatedToggle">
+                  <span>Hide deprecated</span>
+                </label>
+              </div>
+            </div>
           </div>
-        </div>
-        <table id="selectedItemsTable">
-          <thead>
-            <tr>
-              <th class="drag-handle-header"></th>
-              <th></th>
-              <th>Product</th>
-              <th>Unit Price</th>
-              <th>Qty</th>
-              <th>Total</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="selectedItemsBody">
-            <!-- Selected items will appear here -->
-          </tbody>
-          <tfoot id="tableTfoot">
-            <tr>
-              <td></td>
-              <td colspan="4" class="total-label">Equipment Price:</td>
-              <td id="equipmentCostTotal" class="total-amount">PHP 0</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td></td>
-              <td colspan="4" class="total-label">Less Discount:</td>
-              <td class="total-amount">
-                <div class="discount-field">
-                  <input type="number" class="discount-input" id="discountInput" value="0" min="0" step="0.01">
-                  <button class="discount-pct-btn" data-pct="25">25%</button>
-                  <button class="discount-pct-btn" data-pct="27">27%</button>
-                  <button class="discount-pct-btn" data-pct="30">30%</button>
-                </div>
-              </td>
-              <td></td>
-            </tr>
-            <tr id="totalEquipmentCostRow" class="hidden">
-              <td></td>
-              <td colspan="4" class="total-label">Total Equipment Cost:</td>
-              <td id="totalEquipmentCost" class="total-amount">PHP 0</td>
-              <td></td>
-            </tr>
-            <tr>
-              <td></td>
-              <td colspan="4" class="total-label">Installation Cost:</td>
-              <td class="total-amount">
-                <input type="number" class="discount-input" id="installationCostInput" value="0" min="0">
-              </td>
-              <td></td>
-            </tr>
-            <tr id="vatRow" class="hidden">
-              <td></td>
-              <td colspan="4" class="total-label">Plus 12% VAT:</td>
-              <td id="vatTotal" class="total-amount">PHP 0</td>
-              <td></td>
-            </tr>
-            <tr class="grand-total-row">
-              <td></td>
-              <td colspan="4" class="total-label">Total Investment Cost:</td>
-              <td class="total-amount grand-total">
-                <input type="number" class="grand-total-input" id="grandTotal" value="0.00" min="0" step="0.01">
-              </td>
-              <td></td>
-            </tr>
-          </tfoot>
-        </table>
-      </section>
 
-      <section class="notes-section">
-        <div class="section-header">
-          <h2>Additional Notes</h2>
-          <button type="button" id="addNoteBtn" class="btn-add-note">+ Add Note</button>
-        </div>
-        <div id="customNotesList" class="custom-notes-list"></div>
-      </section>
+          <div id="productList" class="product-grid"></div>
 
-      <div class="actions">
-        <button id="generateBtn" class="btn-primary">Generate Quotation</button>
-        <button id="clearItemsBtn" class="btn-secondary">Clear Items</button>
-        <button id="clearBtn" class="btn-secondary">Clear All</button>
-      </div>
+          <div class="services-divider">
+            <span>ADDITIONAL SERVICES</span>
+          </div>
+          <div id="servicesList" class="services-grid">
+            <div class="service-card" data-service-id="mounting">
+              <div class="service-name">Biometrics Mounting</div>
+              <div class="service-price">PHP 1,500</div>
+            </div>
+            <div class="service-card" data-service-id="orientation">
+              <div class="service-name">On-Site User Orientation</div>
+              <div class="service-price">PHP 2,500</div>
+            </div>
+            <div class="service-card" data-service-id="delivery">
+              <div class="service-name">Delivery Fee</div>
+              <div class="service-price">PHP 500</div>
+            </div>
+            <div class="service-card" data-service-id="others">
+              <div class="service-name">Others</div>
+              <div class="service-price">PHP 0</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="selected-items">
+          <div class="section-header">
+            <div class="panel-section-label" style="margin-bottom:0">LINE ITEMS</div>
+            <div class="section-header-actions">
+              <label class="checkbox-label">
+                <span>Accessories</span>
+                <select id="optionalAccessories" class="accessories-header-select">
+                  <option value="none">None</option>
+                  <option value="biometrics">Biometrics</option>
+                  <option value="door-access">Door Access</option>
+                </select>
+                <span class="info-icon">&#9432;<span class="info-tooltip">Adds the optional accessories table below NOTES</span></span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="brochureOnly">
+                <span>Brochure</span>
+                <span class="info-icon">&#9432;<span class="info-tooltip">Hides pricing footer — for brochure output</span></span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="vatInclusive">
+                <span>+VAT</span>
+                <span class="info-icon">&#9432;<span class="info-tooltip">Adds 12% VAT for Sales Invoice</span></span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="sixColumnMode">
+                <span>7-Col</span>
+                <span class="info-icon">&#9432;<span class="info-tooltip">Extra promo amount column — for multi-unit orders</span></span>
+              </label>
+              <button id="addGroupBtn" class="btn-add-group">+ Group</button>
+            </div>
+          </div>
+
+          <table id="selectedItemsTable">
+            <thead>
+              <tr>
+                <th class="drag-handle-header"></th>
+                <th></th>
+                <th>Product</th>
+                <th>Unit Price</th>
+                <th>Qty</th>
+                <th>Total</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="selectedItemsBody"></tbody>
+            <tfoot id="tableTfoot">
+              <tr>
+                <td></td>
+                <td colspan="4" class="total-label">Equipment Price:</td>
+                <td id="equipmentCostTotal" class="total-amount">PHP 0</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td></td>
+                <td colspan="4" class="total-label">Less Discount:</td>
+                <td class="total-amount">
+                  <div class="discount-field">
+                    <input type="number" class="discount-input" id="discountInput" value="0" min="0" step="0.01">
+                    <button class="discount-pct-btn" data-pct="25">25%</button>
+                    <button class="discount-pct-btn" data-pct="27">27%</button>
+                    <button class="discount-pct-btn" data-pct="30">30%</button>
+                  </div>
+                </td>
+                <td></td>
+              </tr>
+              <tr id="totalEquipmentCostRow" class="hidden">
+                <td></td>
+                <td colspan="4" class="total-label">Total Equipment Cost:</td>
+                <td id="totalEquipmentCost" class="total-amount">PHP 0</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td></td>
+                <td colspan="4" class="total-label">Installation Cost:</td>
+                <td class="total-amount">
+                  <input type="number" class="discount-input" id="installationCostInput" value="0" min="0">
+                </td>
+                <td></td>
+              </tr>
+              <tr id="vatRow" class="hidden">
+                <td></td>
+                <td colspan="4" class="total-label">Plus 12% VAT:</td>
+                <td id="vatTotal" class="total-amount">PHP 0</td>
+                <td></td>
+              </tr>
+              <tr class="grand-total-row">
+                <td></td>
+                <td colspan="4" class="total-label">Total Investment Cost:</td>
+                <td class="total-amount grand-total">
+                  <input type="number" class="grand-total-input" id="grandTotal" value="0.00" min="0" step="0.01">
+                </td>
+                <td></td>
+              </tr>
+            </tfoot>
+          </table>
+        </section>
+
+      </div><!-- /panel-right -->
     </main>
+  </div><!-- /app-shell -->
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="modal-overlay hidden">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Settings</h2>
+        <button id="closeSettingsBtn" class="close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <h3>Background</h3>
+        <div class="bg-picker">
+          <div id="bgPreview" class="bg-preview">No background set</div>
+          <div class="bg-actions">
+            <button id="bgPickBtn" class="btn-bg-pick">Choose Image</button>
+            <button id="bgClearBtn" class="btn-bg-clear">Clear</button>
+          </div>
+        </div>
+        <h3>Color Theme</h3>
+        <div class="theme-options">
+          <button class="theme-circle" data-theme="night"    title="Night"   style="background:linear-gradient(135deg,#1a1a2e,#16213e)"></button>
+          <button class="theme-circle" data-theme="light"   title="Light"   style="background:linear-gradient(135deg,#ffffff,#f5f5f5)"></button>
+          <button class="theme-circle" data-theme="ocean"   title="Ocean"   style="background:linear-gradient(135deg,#1e3a5f,#2196F3)"></button>
+          <button class="theme-circle" data-theme="forest"  title="Forest"  style="background:linear-gradient(135deg,#1b4332,#40916c)"></button>
+          <button class="theme-circle" data-theme="purple"  title="Purple"  style="background:linear-gradient(135deg,#2d1b69,#7c3aed)"></button>
+          <button class="theme-circle" data-theme="sunset"  title="Sunset"  style="background:linear-gradient(135deg,#7c2d12,#f97316)"></button>
+          <button class="theme-circle" data-theme="teal"    title="Teal"    style="background:linear-gradient(135deg,#134e4a,#14b8a6)"></button>
+          <button class="theme-circle" data-theme="rose"    title="Rose"    style="background:linear-gradient(135deg,#4c0519,#e11d48)"></button>
+        </div>
+        <h3>Output</h3>
+        <label class="checkbox-label">
+          <input type="checkbox" id="showPesoSign">
+          <span>Show ₱ Sign</span>
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" id="longDateFormat">
+          <span>Long date format</span>
+          <span class="checkbox-hint">(March 28, 2026)</span>
+        </label>
+      </div>
+    </div>
   </div>
 
+  <!-- Product Detail Popup -->
   <div id="productDetailPopup" class="product-detail-popup hidden">
     <div class="pdp-header">
       <img id="pdpIcon" class="pdp-icon" src="" alt="">
