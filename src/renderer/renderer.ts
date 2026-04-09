@@ -1577,14 +1577,14 @@ const APP_TITLE_MESSAGES = [
   "may the sales odds be ever in your favor",
   "door access, time attendance, and CCTV, all in one place",
   "used by the only top 5 sales associates in the company",
-  "Techfinity's trial software",
+  "Techfinity's trial software (and developer)",
   "sadly, not compatible with MacOS",
   "great for generating quotes, not so much for generating revenue",
   "great vibes in closing this one",
   "take care of your kids, I'll take care of the quotes",
-  "free time personal project",
+  "just a free time personal project",
   "quality tested by Cleo",
-  "any hardware testing? talk to Master Jay",
+  "any hardware testing? talk to master Jay",
   "request biometrics demo'es [2]Andrey",
   "kahit sino pwede nang maging sales associate",
   "kailan ka mag reresign sa chess match natin?",
@@ -1612,15 +1612,24 @@ const APP_TITLE_MESSAGES = [
   "ano ba ako sayo Boss Epi?",
   "minumulto na ako ng damdamin ko",
   "gusto ko happy ka",
+  "observe everything, see everything, but say nothing, most of the time.",
+  "fast results, minimal effort",
+  "just you using this tool puts a smile on my face :)",
+  "100 custom messages in the code, can you find them all?",
+  "[4] sales associates remain",
+  "a friendly reminder to update your weekly reports",
+  "this will not last forever, but hopefully it will last a long time",
+  "pabili daw ng extra rice sabi ni Jay",
+  "i do my best to keep my promises, but this is a free tool so no promises really",
   "im fine really",
   "im good",
   "make sure to double check lahat ha",
   "congrats, you found the easter egg message",
   "Hanabi Sanjo (花火参上), means Hanabi has arrived",
   "frozen like ice, but i hope im still nice",
-  "100% respectful of your time and effort",
+  "100% respectful of your boundaries",
   "[3], [1] + [2]",
-  "i'll support you forever, just like how this app will support you in generating quotations",
+  "i'll support you, just like how this app will support you in generating quotations",
   "_ ____ ______ __ ____",
   "if you can read this, you deserve a break",
   "tagal na nating di nakapag mcdo",
@@ -1862,7 +1871,7 @@ function addService(service: Service): void {
     warranty: { duration: 0, unit: "months" },
     isActive: true,
   };
-  selectedItems.set(instanceId, { product: asProduct, quantity: 1 });
+  selectedItems.set(instanceId, { product: asProduct, quantity: 1, excludeFromDiscount: true });
   ungroupedItemOrder.push(instanceId);
   renderServices();
   renderSelectedItems();
@@ -3027,6 +3036,17 @@ function applyTabState(snapshot: TabSnapshot): void {
   productInstanceCounter = snapshot.productInstanceCounter;
   groupIdCounter = snapshot.groupIdCounter;
   currentCategory = snapshot.currentCategory;
+  productSearchEl.value = "";
+  // Sync the category tab button active states to match the restored category
+  document.querySelectorAll(".product-tab").forEach((tab) => {
+    const tabCategory = (tab as HTMLElement).dataset.category;
+    const isActive =
+      (tabCategory === "biometrics" && currentCategory === "Biometrics") ||
+      (tabCategory === "door-access" && currentCategory === "Door Access") ||
+      (tabCategory === "cctv" && currentCategory === "CCTV") ||
+      (tabCategory === "utime" && currentCategory === "UTIME");
+    tab.classList.toggle("active", isActive);
+  });
 
   agentSelectEl.value = snapshot.agent;
   updateQuoteRefPrefix();
@@ -3081,26 +3101,63 @@ function getTabLabel(snapshot: TabSnapshot, fallbackIndex: number): string {
   return `Quotation ${fallbackIndex}`;
 }
 
+function createTabElement(tab: TabState, fallbackIndex: number): HTMLButtonElement {
+  const btn = document.createElement("button");
+  btn.className = "quotation-tab";
+  btn.dataset.tabId = tab.id;
+  btn.innerHTML = `
+    <span class="tab-label">${tab.label || getTabLabel(tab, fallbackIndex)}</span>
+    <span class="tab-close" data-close-id="${tab.id}" title="Close">&#xd7;</span>
+  `;
+  btn.addEventListener("click", (e) => {
+    if ((e.target as HTMLElement).dataset.closeId) return;
+    switchToTab(btn.dataset.tabId!);
+  });
+  btn.querySelector<HTMLElement>(".tab-close")!.addEventListener("click", (e) => {
+    e.stopPropagation();
+    closeTab(tab.id);
+  });
+  return btn;
+}
+
 function renderTabBar(): void {
   const tabListEl = document.getElementById("tabList") as HTMLDivElement;
-  tabListEl.innerHTML = tabs.map((tab, i) => `
-    <button class="quotation-tab${tab.id === activeTabId ? " active" : ""}" data-tab-id="${tab.id}">
-      <span class="tab-label">${tab.label || getTabLabel(tab, i + 1)}</span>
-      <span class="tab-close" data-close-id="${tab.id}" title="Close">&#xd7;</span>
-    </button>
-  `).join("");
 
-  tabListEl.querySelectorAll<HTMLButtonElement>(".quotation-tab").forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-      if ((e.target as HTMLElement).dataset.closeId) return;
-      switchToTab(btn.dataset.tabId!);
-    });
+  // Build a map of existing (non-exiting) tab elements keyed by tab id
+  const existing = new Map<string, HTMLButtonElement>();
+  tabListEl.querySelectorAll<HTMLButtonElement>(".quotation-tab").forEach((el) => {
+    if (el.classList.contains("tab-exiting")) return;
+    existing.set(el.dataset.tabId!, el);
   });
-  tabListEl.querySelectorAll<HTMLElement>("[data-close-id]").forEach((el) => {
-    el.addEventListener("click", (e) => {
-      e.stopPropagation();
-      closeTab((el as HTMLElement).dataset.closeId!);
-    });
+
+  // Remove any live elements that no longer correspond to a tab (edge cases only)
+  existing.forEach((el, id) => {
+    if (!tabs.find((t) => t.id === id)) el.remove();
+  });
+
+  // Sync DOM order with tabs[], creating new elements as needed
+  tabs.forEach((tab, i) => {
+    let el = existing.get(tab.id);
+    if (!el) {
+      el = createTabElement(tab, i + 1);
+      el.classList.add("tab-entering");
+      el.addEventListener("animationend", () => el!.classList.remove("tab-entering"), { once: true });
+    } else {
+      // Update label text if it changed
+      const labelEl = el.querySelector<HTMLElement>(".tab-label");
+      if (labelEl) labelEl.textContent = tab.label || getTabLabel(tab, i + 1);
+    }
+    el.classList.toggle("active", tab.id === activeTabId);
+
+    // Ensure correct position (skipping any exiting elements between live ones)
+    const liveChildren = Array.from(tabListEl.children).filter(
+      (c) => !(c as HTMLElement).classList.contains("tab-exiting")
+    );
+    if (liveChildren[i] !== el) {
+      // Find the reference node (next live child at position i) to insertBefore
+      const refNode = liveChildren[i] ?? null;
+      tabListEl.insertBefore(el, refNode);
+    }
   });
 }
 
@@ -3144,17 +3201,33 @@ function closeTab(id: string): void {
     return;
   }
 
-  if (activeTabId === id) {
-    // Switch to adjacent tab first without flushing the closing tab
-    const nextIdx = idx === tabs.length - 1 ? idx - 1 : idx + 1;
-    const nextId = tabs[nextIdx].id;
-    tabs.splice(idx, 1);
-    activeTabId = nextId;
-    applyTabState(tabs.find((t) => t.id === nextId)!);
+  const tabEl = document.querySelector<HTMLButtonElement>(
+    `.quotation-tab[data-tab-id="${id}"]:not(.tab-exiting)`
+  );
+
+  const finalize = (): void => {
+    const idx2 = tabs.findIndex((t) => t.id === id);
+    if (idx2 < 0) return;
+    if (activeTabId === id) {
+      const nextIdx = idx2 === tabs.length - 1 ? idx2 - 1 : idx2 + 1;
+      const nextId = tabs[nextIdx].id;
+      tabs.splice(idx2, 1);
+      activeTabId = nextId;
+      applyTabState(tabs.find((t) => t.id === nextId)!);
+    } else {
+      tabs.splice(idx2, 1);
+    }
+    // Remove the exiting element before the diffing render runs
+    tabEl?.remove();
+    renderTabBar();
+  };
+
+  if (tabEl) {
+    tabEl.classList.add("tab-exiting");
+    tabEl.addEventListener("animationend", finalize, { once: true });
   } else {
-    tabs.splice(idx, 1);
+    finalize();
   }
-  renderTabBar();
 }
 
 function updateActiveTabLabel(): void {
@@ -3530,10 +3603,12 @@ function applyBackground(dataUrl: string | null): void {
   if (dataUrl) {
     bgImageEl.src = dataUrl;
     bgImageEl.classList.add("active");
+    document.body.classList.add("has-custom-bg");
     bgPreviewEl.innerHTML = `<img src="${dataUrl}" style="width:100%;height:100%;object-fit:cover;">`;
   } else {
     bgImageEl.src = "";
     bgImageEl.classList.remove("active");
+    document.body.classList.remove("has-custom-bg");
     bgPreviewEl.innerHTML = "No background set";
   }
 }
