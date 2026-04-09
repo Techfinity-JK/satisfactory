@@ -25,7 +25,8 @@
       "Bash(powershell:*)",
       "Bash(cp:*)",
       "Bash(mkdir -p \"C:/Users/hi/Documents/GitHub/satisfactory/.claude/skills\")",
-      "Bash(cp -r /tmp/skills/skills/frontend-design \"C:/Users/hi/Documents/GitHub/satisfactory/.claude/skills/\")"
+      "Bash(cp -r /tmp/skills/skills/frontend-design \"C:/Users/hi/Documents/GitHub/satisfactory/.claude/skills/\")",
+      "Bash(npx tsc:*)"
     ]
   }
 }

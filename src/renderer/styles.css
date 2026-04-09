@@ -1246,6 +1246,102 @@ tr[data-group-id]:not([data-group-id=""]):hover { background: var(--bg-hover); }
 .modal-body .checkbox-label { margin-bottom: 8px; font-size: 12px; }
 .modal-body .checkbox-label:last-child { margin-bottom: 0; }
 
+/* ── Preview Button ─────────────────────────────────────────────────────── */
+.btn-preview {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%;
+  padding: 10px 20px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px; font-weight: 600;
+  letter-spacing: 0.03em;
+  background: transparent;
+  color: var(--accent-color);
+  border: 1.5px solid var(--accent-color);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, transform 0.1s;
+}
+.btn-preview:hover {
+  background: var(--accent-color);
+  color: white;
+  transform: translateY(-1px);
+}
+.btn-preview:active { transform: translateY(0); }
+
+/* ── Preview Modal ──────────────────────────────────────────────────────── */
+.preview-modal {
+  max-width: 820px;
+  width: 92vw;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+.preview-modal .modal-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 20px;
+  margin: 0;
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+.preview-modal .modal-header h2 { font-size: 14px; font-weight: 700; color: var(--text-primary); margin: 0; }
+.preview-header-actions { display: flex; align-items: center; gap: 10px; }
+.preview-body,
+.preview-body * {
+  color: #000 !important;
+}
+.preview-body {
+  overflow-y: auto;
+  flex: 1;
+  padding: 30px 36px;
+  background: #fff;
+  font-family: 'Century Gothic', 'Segoe UI', sans-serif;
+  font-size: 9pt;
+  line-height: 1.4;
+}
+.preview-body::-webkit-scrollbar { width: 8px; }
+.preview-body::-webkit-scrollbar-track { background: #f0f0f0; }
+.preview-body::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+.preview-body::-webkit-scrollbar-thumb:hover { background: #aaa; }
+
+/* Document-mirroring styles scoped to preview */
+.pv-header-img { width: 100%; max-width: 700px; display: block; margin-bottom: 12px; }
+.pv-ref { font-weight: bold; margin: 10px 0; }
+.pv-info-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+.pv-info-table td { border: 1px solid #000; padding: 3px 6px; font-weight: bold; font-size: 9pt; }
+.pv-info-label { background: #f7f7f7; }
+.pv-thankyou { margin: 12px 0; }
+.pv-group-name { font-weight: bold; margin: 14px 0 8px; }
+.pv-product-table { width: 100%; border-collapse: collapse; margin-bottom: 6px; }
+.pv-product-table th {
+  background: #0070C0; color: #fff !important; font-weight: bold;
+  border: 1px solid #000; text-align: center; padding: 5px 4px; font-size: 9pt;
+  white-space: pre-line;
+}
+.pv-product-table td { border: 1px solid #000; padding: 4px 6px; text-align: center; vertical-align: middle; font-size: 9pt; }
+.pv-product-table td.td-desc { text-align: left; }
+.pv-product-table .pv-icon { max-width: 70px; max-height: 70px; display: block; margin: 0 auto 4px; }
+.pv-totals { text-align: right; font-weight: bold; margin: 6px 0; font-size: 9pt; }
+.pv-highlight { background: yellow; font-weight: bold; padding: 1px 3px; }
+.pv-notes { margin: 10px 0; }
+.pv-notes p { margin: 3px 0; }
+.pv-remarks-row { display: flex; gap: 16px; margin: 16px 0; }
+.pv-remarks-box { flex: 1; }
+.pv-remarks-box .pv-label { font-weight: normal; margin-bottom: 4px; }
+.pv-remarks-bordered {
+  border: 1px solid #000; padding: 8px; min-height: 60px; font-size: 9pt;
+}
+.pv-conforme-box { flex: 1; }
+.pv-conforme-box .pv-label { font-weight: normal; margin-bottom: 4px; }
+.pv-sig-line { border-bottom: 1px solid #000; margin-top: 40px; width: 80%; }
+.pv-sig-caption { text-align: center; font-size: 9pt; width: 80%; }
+.pv-terms-box { border: 1px solid #000; padding: 10px 12px; margin: 16px 0; font-size: 9pt; line-height: 1.5; }
+.pv-terms-box .pv-terms-title { font-weight: bold; margin-bottom: 6px; }
+.pv-terms-box p { margin: 3px 0; }
+.pv-signature { margin-top: 20px; font-size: 9pt; }
+.pv-signature .pv-name { font-weight: bold; text-decoration: underline; }
+.pv-brochure-heading { font-weight: bold; margin: 12px 0 6px; }
+
 /* ── Utility ─────────────────────────────────────────────────────────────── */
 .hidden { display: none !important; }
 

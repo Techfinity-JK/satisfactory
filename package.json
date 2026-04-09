@@ -15,7 +15,7 @@
   "license": "ISC",
   "build": {
     "appId": "com.techfinity.quotation-generator",
-    "productName": "Quotation Generator",
+    "productName": "Lraxious' Quotation Generator",
     "directories": {
       "output": "release"
     },

@@ -1553,6 +1553,53 @@ const addNoteBtnEl = document.getElementById("addNoteBtn") as HTMLButtonElement;
 const customNotesListEl = document.getElementById("customNotesList") as HTMLDivElement;
 const historyListEl = document.getElementById("historyList") as HTMLDivElement;
 
+// Random title message
+const APP_TITLE_MESSAGES = [
+  "certified pampaganda ng benta",
+  "para sa mga taong ayaw mag-manual",
+  "do you have pending lalamove shipments?",
+  "coffee time maybe?",
+  "software developer masquerading as a sales associate",
+  "faster than your calculator",
+  "low stress quotation building",
+  "powered by sheer willpower and caffeine",
+  "any big clients lately?",
+  "another future signed conforme",
+  "sales quota, protein quota",
+  "fourteen plus five",
+  "take care of your kids, I'll take care of the quotes",
+  "free time personal project",
+  "quality tested by Cleo",
+  "any hardware testing? talk to Master Jay",
+  "request biometrics demo'es to Andrey",
+  "kahit sino pwede nang mag acting sales gamit ito",
+  "kailan ka mag reresign?",
+  "flying under the radar from management",
+  "tagalog ulet para mas feel ni Shae",
+  "may still contain bugs, report to JK immediately if you find any",
+  "expecting new sales users soon",
+  "feedback is always appreciated",
+  "no refunds on bad prices",
+  "your 99.9% antiseptic",
+  "3rd floor hopia time when",
+  "ASAP daw sabi ni Shae",
+  "pending application, this application? or my job application?",
+  "under surveillance, literally",
+  "may stock pa ba tayo niyan?",
+  "may nakaipit ka pa bang benta?",
+  "HRIS development soon",
+  "check the time, baka overtime na",
+  "wish ma'am Jhel could see this",
+  "ano ba ako sayo Boss Epi?",
+  "minumulto na ako ng damdamin ko",
+  "gusto ko happy ka",
+  "im fine, am I really fine though?",
+  "im good",
+  "huwag kalimutang i-double check lahat ha",
+];
+const randomMsg = APP_TITLE_MESSAGES[Math.floor(Math.random() * APP_TITLE_MESSAGES.length)];
+document.title = `Lraxious' Quotation Generator - ${randomMsg}`;
+
 // Product detail popup
 const productDetailPopup = document.getElementById("productDetailPopup") as HTMLDivElement;
 const pdpIcon = document.getElementById("pdpIcon") as HTMLImageElement;
@@ -2439,18 +2486,16 @@ function buildProductSpecs(product: Product): string[] {
   return specs;
 }
 
-// Generate quotation
-async function generateQuotation(): Promise<void> {
-  const seq = quoteRefSeqEl.value.trim();
-  const quoteRefNo = seq ? `${getQuoteRefPrefix()}-${seq}` : getQuoteRefPrefix();
-  const companyName = companyNameEl.value.trim();
-
+// Collect quotation data from the UI (shared by preview and generate)
+function collectQuotationData(): QuotationData | null {
   if (selectedItems.size === 0) {
     alert("Please select at least one product");
-    return;
+    return null;
   }
 
-  // Helper to create quotation item from product/service
+  const seq = quoteRefSeqEl.value.trim();
+  const quoteRefNo = seq ? `${getQuoteRefPrefix()}-${seq}` : getQuoteRefPrefix();
+
   const createQuotationItem = (itemId: string): QuotationItem | null => {
     if (selectedItems.has(itemId)) {
       const item = selectedItems.get(itemId)!;
@@ -2477,14 +2522,12 @@ async function generateQuotation(): Promise<void> {
     return null;
   };
 
-  // Build ungrouped items (items not in any group)
   const ungroupedItems: QuotationItem[] = [];
   ungroupedItemOrder.forEach((itemId) => {
     const item = createQuotationItem(itemId);
     if (item) ungroupedItems.push(item);
   });
 
-  // Build groups with their items
   const groups: QuotationGroup[] = [];
   itemGroups.forEach((group, groupId) => {
     const groupItems: QuotationItem[] = [];
@@ -2494,26 +2537,16 @@ async function generateQuotation(): Promise<void> {
       if (item) groupItems.push(item);
     });
     if (groupItems.length > 0) {
-      groups.push({
-        id: group.id,
-        name: group.name,
-        items: groupItems,
-      });
+      groups.push({ id: group.id, name: group.name, items: groupItems });
     }
   });
-
-  // Combine all items for total calculation (ungrouped + grouped)
-  const allItems: QuotationItem[] = [
-    ...ungroupedItems,
-    ...groups.flatMap((g) => g.items),
-  ];
 
   const discount = parseFloat(discountInputEl.value) || 0;
   const installationCost = parseFloat(installationCostInputEl.value) || 0;
 
-  const data: QuotationData = {
+  return {
     quoteRefNo,
-    companyName,
+    companyName: companyNameEl.value.trim(),
     companyAddress: companyAddressEl.value.trim() || undefined,
     contactPerson: contactPersonEl.value.trim() || undefined,
     contactNumber: contactNumberEl.value.trim() || undefined,
@@ -2532,6 +2565,12 @@ async function generateQuotation(): Promise<void> {
     onSiteOrientation: Array.from(selectedItems.values()).some((item) => item.product.id === "orientation"),
     optionalAccessories: (optionalAccessoriesEl.value as "none" | "biometrics" | "door-access") || "none",
   };
+}
+
+// Generate quotation
+async function generateQuotation(): Promise<void> {
+  const data = collectQuotationData();
+  if (!data) return;
 
   generateBtnEl.disabled = true;
   generateBtnEl.textContent = "Generating...";
@@ -2553,6 +2592,308 @@ async function generateQuotation(): Promise<void> {
     generateBtnEl.disabled = false;
     generateBtnEl.textContent = "Generate Quotation";
   }
+}
+
+// ─── Preview ─────────────────────────────────────────────────────────────────
+
+function buildPreviewHTML(data: QuotationData): string {
+  const curr = data.showPesoSign ? "₱" : "";
+  const fmt = (n: number) => `${curr}${n.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const today = data.longDateFormat
+    ? new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
+    : new Date().toLocaleDateString("en-US");
+
+  const agentFile = data.agent && data.agent !== "jk" ? `header_${data.agent}.png` : "header_jk.png";
+
+  let html = "";
+
+  // 1. Header image
+  html += `<img class="pv-header-img" src="../../src/assets/header/${agentFile}">`;
+
+  // 2. Quote Ref No
+  html += `<p class="pv-ref">Quote Ref No: ${esc(data.quoteRefNo)}</p>`;
+
+  // 3. Customer info table
+  html += `<table class="pv-info-table">
+    <tr><td class="pv-info-label" style="width:8%">Date</td><td style="width:53%">${esc(today)}</td><td class="pv-info-label" style="width:15%">Contact Person</td><td style="width:24%">${esc(data.contactPerson || "")}</td></tr>
+    <tr><td class="pv-info-label">Client</td><td>${esc(data.companyName)}</td><td class="pv-info-label">Contact Number</td><td>${esc(data.contactNumber || "")}</td></tr>
+    <tr><td class="pv-info-label">Address</td><td>${esc(data.companyAddress || "")}</td><td class="pv-info-label">Email</td><td>${esc(data.emailAddress || "")}</td></tr>
+  </table>`;
+
+  // 4. Thank you message
+  html += `<p class="pv-thankyou">Thank you for your interest in our products; we will assist you with selecting the best systems &amp; solutions that would fit your requirements.</p>`;
+
+  // 5. Product sections
+  const allItems = [...data.items, ...(data.groups ?? []).flatMap((g) => g.items)];
+  let totalEquipmentCost = allItems.reduce((sum, item) => sum + item.totalPrice, 0);
+
+  const renderProductTable = (items: QuotationItem[]): string => {
+    const biometricQty = items
+      .filter((i) => i.category === "Biometrics" || i.withExtras === true)
+      .reduce((sum, i) => sum + i.quantity, 0);
+
+    let t = `<table class="pv-product-table"><thead><tr>`;
+    t += `<th style="width:17%">Model</th><th style="width:${data.sixColumnMode ? 45 : 32}%">Item Description</th>`;
+    t += `<th style="width:7%">Qty</th><th style="width:7%">Unit</th><th style="width:12%">Unit Price</th>`;
+    if (!data.sixColumnMode) t += `<th style="width:13%">PROMO\nAMOUNT</th>`;
+    t += `<th style="width:12%">AMOUNT</th></tr></thead><tbody>`;
+
+    items.forEach((item) => {
+      const iconFile = item.imagePath ? item.imagePath.split("/").pop() || "" : "";
+      const imgHtml = iconFile ? `<img class="pv-icon" src="../../src/assets/icons/${iconFile}">` : "";
+      const descLines = (item.description || "").split("\n").filter((l) => l.trim()).map((l) => esc(l.trim())).join("<br>");
+      let warrantyHtml = "";
+      if (item.warrantyMonths && item.warrantyMonths > 0) {
+        const wText = item.warrantyMonths >= 12 && item.warrantyMonths % 12 === 0
+          ? `~ ${item.warrantyMonths / 12} YEAR${item.warrantyMonths / 12 > 1 ? "S" : ""} WARRANTY`
+          : `~ ${item.warrantyMonths} MONTHS WARRANTY`;
+        warrantyHtml = `<br><b>${esc(wText)}</b>`;
+      }
+
+      t += `<tr>`;
+      t += `<td>${imgHtml}${esc(item.name)}</td>`;
+      t += `<td class="td-desc">${descLines}${warrantyHtml}</td>`;
+      t += `<td>${item.quantity}</td>`;
+      t += `<td>${esc(item.unit)}</td>`;
+      t += `<td>${fmt(item.unitPrice)}</td>`;
+      if (!data.sixColumnMode) t += `<td>${fmt(item.promoPrice)}</td>`;
+      t += `<td><b>${fmt(item.totalPrice)}</b></td>`;
+      t += `</tr>`;
+    });
+
+    // Freebie rows for biometric items
+    if (biometricQty > 0) {
+      const freebieRow = (model: string, desc: string, unit: string) => {
+        let r = `<tr><td>${esc(model)}</td><td class="td-desc">${esc(desc)}</td><td>${biometricQty}</td><td>${esc(unit)}</td><td>Free</td>`;
+        if (!data.sixColumnMode) r += `<td>Free</td>`;
+        r += `<td><b>Free</b></td></tr>`;
+        return r;
+      };
+      t += freebieRow("Software", "ZkTeco Attendance Management", "License");
+      t += freebieRow("", "16GB USB FLASH DISK DRIVE", "pc");
+    }
+
+    t += `</tbody></table>`;
+    return t;
+  };
+
+  const getBiometricCapabilities = (item: QuotationItem): string => {
+    const caps: string[] = [];
+    if (item.specs) {
+      item.specs.forEach((spec) => {
+        const lower = spec.toLowerCase();
+        if (lower.includes("face")) caps.push("FACE");
+        if (lower.includes("fingerprint")) caps.push("FINGERPRINT");
+        if (lower.includes("card")) caps.push("RFID");
+      });
+    }
+    return [...new Set(caps)].join(" & ") || "BIOMETRIC";
+  };
+
+  // Render ungrouped items
+  if (data.items.length > 0) {
+    if (data.brochureOnly) {
+      const bioItems = data.items.filter((i) => i.category === "Biometrics" || i.withExtras === true);
+      const otherItems = data.items.filter((i) => i.category !== "Biometrics" && i.withExtras !== true);
+      bioItems.forEach((item) => {
+        html += `<p class="pv-brochure-heading">&#x25CF; ${esc(item.brand)} - ${esc(item.name)} - ${esc(getBiometricCapabilities(item))}</p>`;
+        html += renderProductTable([item]);
+      });
+      if (otherItems.length > 0) html += renderProductTable(otherItems);
+    } else {
+      html += renderProductTable(data.items);
+    }
+  }
+
+  // Render groups
+  if (data.groups && data.groups.length > 0) {
+    data.groups.forEach((group) => {
+      html += `<p class="pv-group-name">${esc(group.name)}</p>`;
+      if (data.brochureOnly) {
+        const bioItems = group.items.filter((i) => i.category === "Biometrics" || i.withExtras === true);
+        const otherItems = group.items.filter((i) => i.category !== "Biometrics" && i.withExtras !== true);
+        bioItems.forEach((item) => {
+          html += `<p class="pv-brochure-heading">&#x25CF; ${esc(item.brand)} - ${esc(item.name)} - ${esc(getBiometricCapabilities(item))}</p>`;
+          html += renderProductTable([item]);
+        });
+        if (otherItems.length > 0) html += renderProductTable(otherItems);
+      } else {
+        html += renderProductTable(group.items);
+      }
+    });
+  }
+
+  // 6. Totals (only if not brochure mode)
+  if (!data.brochureOnly) {
+    const discountAmount = data.discount || 0;
+    const installationAmount = data.installationCost || 0;
+    const totalAfterDiscount = totalEquipmentCost - discountAmount;
+    const subtotal = totalAfterDiscount + installationAmount;
+    let vatAmount = 0;
+    if (data.vatInclusive) vatAmount = Math.ceil(subtotal * 0.12 * 100) / 100;
+    const totalInvestment = subtotal + vatAmount;
+
+    html += `<p class="pv-totals">EQUIPMENT PRICE = ${fmt(totalEquipmentCost)}</p>`;
+    if (discountAmount > 0) {
+      html += `<p class="pv-totals">LESS DISCOUNT = ${fmt(discountAmount)}</p>`;
+      html += `<p class="pv-totals">TOTAL EQUIPMENT COST = ${fmt(totalAfterDiscount)}</p>`;
+    }
+    if (installationAmount > 0) html += `<p class="pv-totals">INSTALLATION COST = ${fmt(installationAmount)}</p>`;
+    if (vatAmount > 0) html += `<p class="pv-totals">PLUS 12% VAT = ${fmt(vatAmount)}</p>`;
+    html += `<p class="pv-totals"><span class="pv-highlight" style="text-decoration:underline">TOTAL INVESTMENT COST = ${fmt(totalInvestment)}</span></p>`;
+
+    // 7. Notes
+    const hasDoorAccess = allItems.some((i) => i.category === "Door Access");
+    const vatText = data.vatInclusive ? "VAT INCLUSIVE PRICE" : "VAT EXCLUSIVE PRICE";
+    html += `<div class="pv-notes">`;
+    html += `<p><span class="pv-highlight">NOTES:</span></p>`;
+    let noteNum = 1;
+    if ((data.installationCost ?? 0) > 0 || hasDoorAccess) {
+      const noteText = (data.installationCost ?? 0) > 0
+        ? `${noteNum}. INSTALLATION SERVICE & COST INCLUDED`
+        : `${noteNum}. INSTALLATION SERVICE NOT YET INCLUDED (NEED SITE SURVEY)`;
+      html += `<p><span class="pv-highlight">${esc(noteText)}</span></p>`;
+      noteNum++;
+    }
+    html += `<p><span class="pv-highlight">${noteNum}. ${esc(vatText)}</span></p>`;
+    noteNum++;
+    const orientationText = data.onSiteOrientation
+      ? `${noteNum}. ON SITE USER ORIENTATION`
+      : `${noteNum}. USER ORIENTATION HOW TO USE DEVICE VIA VIRTUAL GOOGLE MEET`;
+    html += `<p><span class="pv-highlight">${esc(orientationText)}</span></p>`;
+    if (totalInvestment < 10000) {
+      noteNum++;
+      html += `<p><span class="pv-highlight">${noteNum}. DELIVERY FEE CARE OF CLIENT</span></p>`;
+    }
+    if (data.customNotes && data.customNotes.length > 0) {
+      data.customNotes.forEach((note) => {
+        noteNum++;
+        html += `<p><span class="pv-highlight">${noteNum}. ${esc(note.toUpperCase())}</span></p>`;
+      });
+    }
+    html += `</div>`;
+  }
+
+  // 8. Optional Accessories
+  if (data.optionalAccessories && data.optionalAccessories !== "none") {
+    html += buildOptionalAccessoriesPreview(data.optionalAccessories, data.sixColumnMode, data.showPesoSign);
+  }
+
+  // 9. Remarks & Conforme
+  html += `<div class="pv-remarks-row">
+    <div class="pv-remarks-box">
+      <div class="pv-label">REMARKS</div>
+      <div class="pv-remarks-bordered">Prices of labor and material costs such as supply/installation conduit, coaxial cable, power cable, connectors, metal plates and any other hardware necessary to complete the system installation is not part of the package</div>
+    </div>
+    <div class="pv-conforme-box">
+      <div class="pv-label">CONFORME</div>
+      <div style="margin-top:10px">
+        <div class="pv-sig-line"></div>
+        <div class="pv-sig-caption">Signature Over Printed Name/Date</div>
+      </div>
+    </div>
+  </div>`;
+
+  // 10. Terms & Conditions
+  const maxWarranty = allItems.reduce((max, i) => Math.max(max, i.warrantyMonths ?? 0), 0);
+  const warrantyText = pvWarrantyToText(maxWarranty);
+  const vatTermText = data.vatInclusive ? "VAT Inclusive" : "VAT Exclusive";
+  html += `<div class="pv-terms-box">
+    <div class="pv-terms-title">TERMS &amp; CONDITIONS:</div>
+    <p>1.) Prices quoted above are <span class="pv-highlight">${vatTermText}</span>. Email or fax certification if your company is vat exempt and zero rated for billing preparation.</p>
+    <p>2.) Prices are subject to change without prior notice. Validity for this quotation is 15 days from the date stated above.</p>
+    <p>3.) Payment terms is Fifty Percent (50%) upon P.O. or signing of this CONFORME. Remaining balance shall be paid upon receive of items or after the installation.</p>
+    <p>4.) Payment will be accepted in COD, CASH, and Dated check or thru Bank Transfer payable to <b>TECHFINITY SECURITY DEVICE TRADING</b>.</p>
+    <p>5.) FREE DELIVERY for purchases above Php10,000 within Metro Manila.</p>
+    <p>6.) Cancelled orders are subject to a cancellation charge of Fifty Percent (50%).</p>
+    <p>7.) Up to ${esc(warrantyText)} limited warranty in service and parts will be given for main equipment from date of purchase/delivery/installation. Accessories such as power supply, adaptor, magnetic lock, exit button have six (6) months warranty. The warranty covers the parts cause of factory defect not including upgrades and relocation. Unauthorized repair will void its warranty. Warranty claims is strictly carry in basis, client must send the item to our office for repair. For those with installation, we will do the onsite checking and troubleshooting for free within metro manila, for outside metro manila client will pay for the mobilization/demobilization cost.</p>
+    <p>8.) Should client will require service unit while defective device is under repair; client must pay a service unit fee but depends on the availability of the service unit.</p>
+    <p>9.) After sales support is from Monday – Friday 8:30 – 5:30 pm</p>
+  </div>`;
+
+  // 11. Signature
+  const agentDetails: Record<string, { name: string; number: string }> = {
+    shae: { name: "SHAENA FALLE", number: "09070456737" },
+    cle: { name: "LEO DURA", number: "09100255412" },
+    jhel: { name: "Jhel Villavecencio", number: "09460378085" },
+  };
+  const details = agentDetails[data.agent ?? ""] ?? { name: "JOHN KARL NOLASCO", number: "09484263778" };
+  html += `<div class="pv-signature">
+    <p><b>Best Regards</b></p>
+    <br>
+    <p class="pv-name">${esc(details.name)}</p>
+    <p>Sales Account Officer</p>
+    <p>${esc(details.number)}</p>
+  </div>`;
+
+  return html;
+}
+
+function esc(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+function pvWarrantyToText(months: number): string {
+  if (months <= 0) return "one (1) year";
+  if (months % 12 === 0) {
+    const years = months / 12;
+    const words: Record<number, string> = { 1: "one", 2: "two", 3: "three", 4: "four", 5: "five" };
+    const word = words[years] ?? `${years}`;
+    return `${word} (${years}) ${years === 1 ? "year" : "years"}`;
+  }
+  const words: Record<number, string> = { 6: "six", 18: "eighteen" };
+  const word = words[months] ?? `${months}`;
+  return `${word} (${months}) months`;
+}
+
+function buildOptionalAccessoriesPreview(type: "biometrics" | "door-access", sixColumnMode?: boolean, showPesoSign?: boolean): string {
+  const curr = showPesoSign ? "₱" : "";
+  const fmt = (n: number) => `${curr}${n.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
+  const bioAccessories = [
+    { model: "TMD95E", description: "Temperature Detection Module", qty: 1, unit: "pc", price: 9500 },
+    { model: "", description: "Proximity Card 125 khz (Thin)", qty: 1, unit: "pc", price: 80 },
+    { model: "", description: "5v Mini Ups", qty: 1, unit: "pc", price: 2500 },
+    { model: "", description: "12v Mini Ups", qty: 1, unit: "pc", price: 3500 },
+  ];
+  const doorAccessories = [
+    { model: "", description: "Small Push Button", qty: 1, unit: "pc", price: 150 },
+    { model: "", description: "Slim Push Button", qty: 1, unit: "pc", price: 800 },
+    { model: "TMD01", description: "Temperature Detection Module for FA210", qty: 1, unit: "pc", price: 9500 },
+    { model: "", description: "LCD Intercom", qty: 1, unit: "set", price: 12500 },
+    { model: "", description: "Proximity Card 125 khz (Thin)", qty: 1, unit: "pc", price: 80 },
+    { model: "", description: "U-bracket (for frameless Door)", qty: 1, unit: "pc", price: 1200 },
+    { model: "", description: "Dropbolt (DC 12V fail-safe)", qty: 1, unit: "Sets", price: 8200 },
+    { model: "Aluminum U-Bracket**", description: "Aluminum U-Bracket**", qty: 1, unit: "pc", price: 1500 },
+    { model: "", description: "Dropbolt", qty: 1, unit: "pc", price: 6500 },
+    { model: "RPS", description: "12Vdc 5A Regulated Power Supply with backup battery", qty: 1, unit: "pc", price: 4500 },
+    { model: "FR1200", description: "Biometrics Scanner with Card Reader, Slave Device for F22", qty: 1, unit: "pc", price: 8500 },
+    { model: "K1", description: "Touch Free Push to Exit", qty: 1, unit: "pc", price: 1200 },
+    { model: "WTTTX KIT2", description: "Wireless Receiver to Exit with Remote Control, 12V/24VDC", qty: 1, unit: "pc", price: 1500 },
+    { model: "", description: "Emergency Key Switch", qty: 1, unit: "pc", price: 1500 },
+    { model: "", description: "Door Buzzer", qty: 1, unit: "pc", price: 350 },
+    { model: "", description: "Wireless Door Bell", qty: 1, unit: "pc", price: 1500 },
+    { model: "BATTERY", description: "Lead-Acid Battery 12v, 7.2Ah", qty: 1, unit: "pc", price: 2500 },
+  ];
+
+  const items = type === "biometrics" ? bioAccessories : doorAccessories;
+  let t = `<p class="pv-group-name">OPTIONAL ACCESSORIES</p>`;
+  t += `<table class="pv-product-table"><thead><tr>`;
+  t += `<th style="width:17%">Model</th><th style="width:${sixColumnMode ? 45 : 32}%">Item Description</th>`;
+  t += `<th style="width:7%">Qty</th><th style="width:7%">Unit</th><th style="width:12%">Unit Price</th>`;
+  if (!sixColumnMode) t += `<th style="width:13%">PROMO\nAMOUNT</th>`;
+  t += `<th style="width:12%">AMOUNT</th></tr></thead><tbody>`;
+
+  items.forEach((item) => {
+    const total = item.price * item.qty;
+    t += `<tr><td>${esc(item.model)}</td><td class="td-desc">${esc(item.description)}</td>`;
+    t += `<td>${item.qty}</td><td>${esc(item.unit)}</td><td>${fmt(item.price)}</td>`;
+    if (!sixColumnMode) t += `<td>${fmt(item.price)}</td>`;
+    t += `<td><b>${fmt(total)}</b></td></tr>`;
+  });
+
+  t += `</tbody></table>`;
+  return t;
 }
 
 // Clear all
@@ -2954,6 +3295,28 @@ function renderHistoryPanel(): void {
 
 // Event listeners
 generateBtnEl.addEventListener("click", generateQuotation);
+
+// Preview
+const previewBtnEl = document.getElementById("previewBtn") as HTMLButtonElement;
+const previewModalEl = document.getElementById("previewModal") as HTMLDivElement;
+const closePreviewBtnEl = document.getElementById("closePreviewBtn") as HTMLButtonElement;
+const previewContentEl = document.getElementById("previewContent") as HTMLDivElement;
+const previewGenerateBtnEl = document.getElementById("previewGenerateBtn") as HTMLButtonElement;
+
+previewBtnEl.addEventListener("click", () => {
+  const data = collectQuotationData();
+  if (!data) return;
+  previewContentEl.innerHTML = buildPreviewHTML(data);
+  previewModalEl.classList.remove("hidden");
+});
+closePreviewBtnEl.addEventListener("click", () => previewModalEl.classList.add("hidden"));
+previewModalEl.addEventListener("click", (e) => {
+  if (e.target === previewModalEl) previewModalEl.classList.add("hidden");
+});
+previewGenerateBtnEl.addEventListener("click", () => {
+  previewModalEl.classList.add("hidden");
+  generateQuotation();
+});
 const clearItemsBtnEl = document.getElementById("clearItemsBtn") as HTMLButtonElement;
 clearItemsBtnEl.addEventListener("click", clearItems);
 clearBtnEl.addEventListener("click", clearAll);
