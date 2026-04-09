@@ -264,7 +264,7 @@ body {
   display: flex;
   align-items: flex-end;
   gap: 3px;
-  flex: 1;
+  flex: 0 1 auto;
   overflow-x: auto;
   overflow-y: hidden;
   scrollbar-width: none;
@@ -1267,6 +1267,14 @@ tr[data-group-id]:not([data-group-id=""]):hover { background: var(--bg-hover); }
   transform: translateY(-1px);
 }
 .btn-preview:active { transform: translateY(0); }
+.btn-preview.shake { animation: shake 0.4s ease; }
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
 
 /* ── Preview Modal ──────────────────────────────────────────────────────── */
 .preview-modal {

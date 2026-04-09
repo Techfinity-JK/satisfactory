@@ -170,18 +170,22 @@ export async function generateQuotation(
             spacing: { before: 0, after: 300 },
           }),
 
-          // Quote Reference Number
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: `Quote Ref No: ${data.quoteRefNo}`,
-                font: FONT_FAMILY,
-                bold: true,
-                size: FONT_SIZE,
-              }),
-            ],
-            spacing: { after: 120 },
-          }),
+          // Quote Reference Number (skipped for guest mode when empty)
+          ...(data.quoteRefNo
+            ? [
+                new Paragraph({
+                  children: [
+                    new TextRun({
+                      text: `Quote Ref No: ${data.quoteRefNo}`,
+                      font: FONT_FAMILY,
+                      bold: true,
+                      size: FONT_SIZE,
+                    }),
+                  ],
+                  spacing: { after: 120 },
+                }),
+              ]
+            : []),
 
           // Customer Info Table
           createCustomerInfoTable(data),

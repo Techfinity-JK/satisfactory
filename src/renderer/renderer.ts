@@ -595,6 +595,7 @@ const products: Product[] = [
     dimension: "",
     warranty: { duration: 36, unit: "months" },
     isActive: true,
+    isDeprecated: true,
   },
   {
     id: "zk-xface100",
@@ -1555,35 +1556,53 @@ const historyListEl = document.getElementById("historyList") as HTMLDivElement;
 
 // Random title message
 const APP_TITLE_MESSAGES = [
-  "certified pampaganda ng benta",
+  "pampaganda ng benta",
   "para sa mga taong ayaw mag-manual",
   "do you have pending lalamove shipments?",
   "coffee time maybe?",
   "software developer masquerading as a sales associate",
   "faster than your calculator",
   "low stress quotation building",
+  "yung i-fofollow up mo baka makalimutan mo",
   "powered by sheer willpower and caffeine",
   "any big clients lately?",
+  "may tubig pa ba tayo?",
+  "huwag kalimutang magpahinga, tao ka rin",
+  "pag masakit ang ulo mo, meron akong biogesic, chat lang",
+  "suggestions? complaints? talk to JK",
+  "optimizing sales pipeline, one quote at a time",
   "another future signed conforme",
   "sales quota, protein quota",
   "fourteen plus five",
+  "may the sales odds be ever in your favor",
+  "door access, time attendance, and CCTV, all in one place",
+  "used by the only top 5 sales associates in the company",
+  "Techfinity's trial software",
+  "sadly, not compatible with MacOS",
+  "great for generating quotes, not so much for generating revenue",
+  "great vibes in closing this one",
   "take care of your kids, I'll take care of the quotes",
   "free time personal project",
   "quality tested by Cleo",
   "any hardware testing? talk to Master Jay",
-  "request biometrics demo'es to Andrey",
-  "kahit sino pwede nang mag acting sales gamit ito",
-  "kailan ka mag reresign?",
-  "flying under the radar from management",
+  "request biometrics demo'es [2]Andrey",
+  "kahit sino pwede nang maging sales associate",
+  "kailan ka mag reresign sa chess match natin?",
+  "flying under the radar",
   "tagalog ulet para mas feel ni Shae",
   "may still contain bugs, report to JK immediately if you find any",
   "expecting new sales users soon",
   "feedback is always appreciated",
   "no refunds on bad prices",
   "your 99.9% antiseptic",
-  "3rd floor hopia time when",
+  "3rd floor hopia time?",
+  "[1]bleauming, just a made up word from bleau",
+  "don't forget to rename IQ or FQ",
+  "goodluck replicating this, I don't even know how I did it",
+  "phlegmatic melancholic, non alcoholic",
+  "my gift to future sales associates",
   "ASAP daw sabi ni Shae",
-  "pending application, this application? or my job application?",
+  "pending application, this application? or something else...",
   "under surveillance, literally",
   "may stock pa ba tayo niyan?",
   "may nakaipit ka pa bang benta?",
@@ -1593,9 +1612,21 @@ const APP_TITLE_MESSAGES = [
   "ano ba ako sayo Boss Epi?",
   "minumulto na ako ng damdamin ko",
   "gusto ko happy ka",
-  "im fine, am I really fine though?",
+  "im fine really",
   "im good",
-  "huwag kalimutang i-double check lahat ha",
+  "make sure to double check lahat ha",
+  "congrats, you found the easter egg message",
+  "Hanabi Sanjo (花火参上), means Hanabi has arrived",
+  "frozen like ice, but i hope im still nice",
+  "100% respectful of your time and effort",
+  "[3], [1] + [2]",
+  "i'll support you forever, just like how this app will support you in generating quotations",
+  "_ ____ ______ __ ____",
+  "if you can read this, you deserve a break",
+  "tagal na nating di nakapag mcdo",
+  "close to quota already? The future is [3]shining for you then!",
+  "日本語が上手になりたい"
+
 ];
 const randomMsg = APP_TITLE_MESSAGES[Math.floor(Math.random() * APP_TITLE_MESSAGES.length)];
 document.title = `Lraxious' Quotation Generator - ${randomMsg}`;
@@ -2489,7 +2520,6 @@ function buildProductSpecs(product: Product): string[] {
 // Collect quotation data from the UI (shared by preview and generate)
 function collectQuotationData(): QuotationData | null {
   if (selectedItems.size === 0) {
-    alert("Please select at least one product");
     return null;
   }
 
@@ -2570,7 +2600,10 @@ function collectQuotationData(): QuotationData | null {
 // Generate quotation
 async function generateQuotation(): Promise<void> {
   const data = collectQuotationData();
-  if (!data) return;
+  if (!data) {
+    alert("Please select at least one product");
+    return;
+  }
 
   generateBtnEl.disabled = true;
   generateBtnEl.textContent = "Generating...";
@@ -3305,7 +3338,11 @@ const previewGenerateBtnEl = document.getElementById("previewGenerateBtn") as HT
 
 previewBtnEl.addEventListener("click", () => {
   const data = collectQuotationData();
-  if (!data) return;
+  if (!data) {
+    previewBtnEl.classList.add("shake");
+    previewBtnEl.addEventListener("animationend", () => previewBtnEl.classList.remove("shake"), { once: true });
+    return;
+  }
   previewContentEl.innerHTML = buildPreviewHTML(data);
   previewModalEl.classList.remove("hidden");
 });
