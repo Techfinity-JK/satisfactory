@@ -1534,9 +1534,10 @@ const products: Product[] = [
   {
     id: "vs-basic",
     brand: "Microsoft",
-    name: "Basic Server Plan",
+    name: "Basic Server Plan (1~5)",
     category: "Virtual Server",
-    description: " ~ 4 GB RAM\n"+
+    description: " ~ 1 to 5 non-visible light biometrics\n"+
+                 " ~ 4 GB RAM\n"+
                  " ~ 2 CPU Cores\n"+
                  " ~ 60GB SSD Disk Space\n"+
                  " ~ 100Mbps Unmetered Bandwidth\n"+
@@ -1554,9 +1555,10 @@ const products: Product[] = [
   {
     id: "vs-basic-plus",
     brand: "Microsoft",
-    name: "Basic Plus Server Plan",
+    name: "Basic Plus Server Plan (6~20)",
     category: "Virtual Server",
-    description: " ~ 6 GB RAM\n"+
+    description: " ~ 6 to 20 non-visible light biometrics\n"+
+                 " ~ 6 GB RAM\n"+
                  " ~ 3 CPU Cores\n"+
                  " ~ 100GB SSD Disk Space\n"+
                  " ~ 100Mbps Unmetered Bandwidth\n"+
@@ -1574,9 +1576,10 @@ const products: Product[] = [
   {
     id: "vs-pro",
     brand: "Microsoft",
-    name: "Pro Server Plan",
+    name: "Pro Server Plan (21~50)",
     category: "Virtual Server",
-    description: " ~ 12 GB RAM\n"+
+    description: " ~ 21 to 50 non-visible light biometrics\n"+
+                 " ~ 12 GB RAM\n"+
                  " ~ 6 CPU Cores\n"+
                  " ~ 180GB SSD Disk Space\n"+
                  " ~ 1Gbps Unmetered Bandwidth\n"+
@@ -1594,9 +1597,10 @@ const products: Product[] = [
     {
     id: "vs-business",
     brand: "Microsoft",
-    name: "Business Server Plan",
+    name: "Business Server Plan (51~100)",
     category: "Virtual Server",
-    description: " ~ 18 GB RAM\n"+
+    description: " ~ 51 to 100 non-visible light biometrics\n"+
+                 " ~ 18 GB RAM\n"+
                  " ~ 8 CPU Cores\n"+
                  " ~ 240GB SSD Disk Space\n"+
                  " ~ 1Gbps Unmetered Bandwidth\n"+
@@ -2085,7 +2089,7 @@ const products: Product[] = [
     price: { fakeAmount: 3000, amount: 3000, currency: "PHP" },
     withADMS: false,
     dimension: "WxHxDmm",
-    warranty: { duration: 12, unit: "months" },
+    warranty: { duration: 0, unit: "months" },
     isActive: true,
   },
   {
@@ -2099,7 +2103,7 @@ const products: Product[] = [
     price: { fakeAmount: 1000, amount: 1000, currency: "PHP" },
     withADMS: false,
     dimension: "WxHxDmm",
-    warranty: { duration: 12, unit: "months" },
+    warranty: { duration: 0, unit: "months" },
     isActive: true,
   },
   {
@@ -2113,7 +2117,7 @@ const products: Product[] = [
     price: { fakeAmount: 600, amount: 600, currency: "PHP" },
     withADMS: false,
     dimension: "WxHxDmm",
-    warranty: { duration: 12, unit: "months" },
+    warranty: { duration: 0, unit: "months" },
     isActive: true,
   },
   {
@@ -2294,7 +2298,7 @@ const APP_TITLE_MESSAGES = [
 
 ];
 const randomMsg = APP_TITLE_MESSAGES[Math.floor(Math.random() * APP_TITLE_MESSAGES.length)];
-document.title = `Lraxious' Quotation Generator - ${randomMsg}`;
+document.title = `Lraxious' Quotation Generator v1.0 - ${randomMsg}`;
 
 // Product detail popup
 const productDetailPopup = document.getElementById("productDetailPopup") as HTMLDivElement;
