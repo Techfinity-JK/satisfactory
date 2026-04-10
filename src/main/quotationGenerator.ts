@@ -129,7 +129,7 @@ export interface QuotationData {
   customNotes?: string[];
   onSiteOrientation?: boolean;
   longDateFormat?: boolean;
-  optionalAccessories?: "none" | "biometrics" | "door-access";
+  optionalAccessories?: "none" | "biometrics" | "door-access" | "smart-lock";
 }
 
 export async function generateQuotation(
@@ -1499,6 +1499,15 @@ const BIOMETRICS_ACCESSORIES: AccessoryItem[] = [
   { model: "", description: "12v Mini Ups", qty: 1, unit: "pc", price: 3500, icon: "mini-ups.png" },
 ];
 
+const SMART_LOCK_ACCESSORIES: AccessoryItem[] = [
+  { model: "", description: "Card Encoder", qty: 1, unit: "pc", price: 3000, icon: "cardencoder.png" },
+  { model: "", description: "Customizable Hotel Card", qty: 1, unit: "pc", price: 50, icon: "cuztomizablehotelcard.png" },
+  { model: "", description: "RFID Bracelet", qty: 1, unit: "pc", price: 100, icon: "rfidbracelet.png" },
+  { model: "", description: "RFID Card Loock", qty: 1, unit: "pc", price: 50, icon: "rfidcardloock.png" },
+  { model: "", description: "TTLock Gateway", qty: 1, unit: "pc", price: 1000, icon: "ttlockgateway.png" },
+  { model: "", description: "Power Saver", qty: 1, unit: "pc", price: 600, icon: "powersaver.png" },
+];
+
 const DOOR_ACCESS_ACCESSORIES: AccessoryItem[] = [
   { model: "", description: "Small Push Button (to be installed in reception)", qty: 1, unit: "pc", price: 150, icon: "small-push-button.png" },
   { model: "", description: "Slim Push Button", qty: 1, unit: "pc", price: 800, icon: "slim-push-button.png" },
@@ -1520,11 +1529,11 @@ const DOOR_ACCESS_ACCESSORIES: AccessoryItem[] = [
 ];
 
 function createOptionalAccessoriesSection(
-  type: "biometrics" | "door-access",
+  type: "biometrics" | "door-access" | "smart-lock",
   sixColumnMode?: boolean,
   showPesoSign?: boolean
 ): (Paragraph | Table)[] {
-  const items = type === "biometrics" ? BIOMETRICS_ACCESSORIES : DOOR_ACCESS_ACCESSORIES;
+  const items = type === "biometrics" ? BIOMETRICS_ACCESSORIES : type === "smart-lock" ? SMART_LOCK_ACCESSORIES : DOOR_ACCESS_ACCESSORIES;
   const curr = showPesoSign ? "₱" : "";
 
   const borderStyle = { style: BorderStyle.SINGLE, size: 4, color: BORDER_COLOR };

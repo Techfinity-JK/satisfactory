@@ -95,7 +95,7 @@ interface QuotationData {
   customNotes?: string[];
   longDateFormat?: boolean;
   onSiteOrientation?: boolean;
-  optionalAccessories?: "none" | "biometrics" | "door-access";
+  optionalAccessories?: "none" | "biometrics" | "door-access" | "smart-lock";
 }
 
 interface TabSnapshot {
@@ -220,6 +220,33 @@ const productIconMap: { [key: string]: string } = {
   "Emergency Key Switch": "emergency-key-switch.png",
   "Door Buzzer": "door-buzzer.png",
   "Battery": "battery.png",
+  // Smart Locks
+  "Card Encoder": "cardencoder.png",
+  "Customizable Hotel Card": "cuztomizablehotelcard.png",
+  "RFID Bracelet": "rfidbracelet.png",
+  "RFID Card": "rfidcardloock.png",
+  "TTLock Gateway": "ttlockgateway.png",
+  "Power Saver": "powersaver.png",
+  "A-01": "a01.png",
+  "A-12": "a12.png",
+  "B-03": "b03.png",
+  "B-11": "b11.png",
+  "F-11": "f11.png",
+  "F-14": "f14.png",
+  "F-21": "f21.png",
+  "G-01": "g01.png",
+  "G-04": "g04.png",
+  "G-06B": "g06b.png",
+  "G-11": "g11.png",
+  "G-16": "g16.png",
+  "G-24B": "g24b.png",
+  "G-24C": "g24c.png",
+  "G-28": "g28.png",
+  "S-11": "s11.png",
+  "S-12": "s12.png",
+  "SB-45": "sb45.png",
+  "SC-01": "sc01.png",
+  "Mini UPS": "mini-ups.png",
 };
 
 function getProductImagePath(productName: string): string | undefined {
@@ -1502,6 +1529,635 @@ const products: Product[] = [
     warranty: { duration: 12, unit: "months" },
     isActive: true,
   },
+
+  // ── Virtual Server ─────────────────────────────────────────────────────────
+  {
+    id: "vs-basic",
+    brand: "Microsoft",
+    name: "Basic Server Plan",
+    category: "Virtual Server",
+    description: " ~ 4 GB RAM\n"+
+                 " ~ 2 CPU Cores\n"+
+                 " ~ 60GB SSD Disk Space\n"+
+                 " ~ 100Mbps Unmetered Bandwidth\n"+
+                 " ~ Once per 4 weeks backup\n"+
+                 " ~ 1 Dedicated IP\n"+
+                 " ~ Windows Server 2025/2022/2019/2016\n"+
+                 " ~ No Setup Fee",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 13800, amount: 13800, currency: "PHP" },
+    withADMS: false,
+    warranty: { duration: 0, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "vs-basic-plus",
+    brand: "Microsoft",
+    name: "Basic Plus Server Plan",
+    category: "Virtual Server",
+    description: " ~ 6 GB RAM\n"+
+                 " ~ 3 CPU Cores\n"+
+                 " ~ 100GB SSD Disk Space\n"+
+                 " ~ 100Mbps Unmetered Bandwidth\n"+
+                 " ~ Once per 4 weeks backup\n"+
+                 " ~ 1 Dedicated IP\n"+
+                 " ~ Windows Server 2025/2022/2019/2016\n"+
+                 " ~ No Setup Fee",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 22700, amount: 22700, currency: "PHP" },
+    withADMS: false,
+    warranty: { duration: 0, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "vs-pro",
+    brand: "Microsoft",
+    name: "Pro Server Plan",
+    category: "Virtual Server",
+    description: " ~ 12 GB RAM\n"+
+                 " ~ 6 CPU Cores\n"+
+                 " ~ 180GB SSD Disk Space\n"+
+                 " ~ 1Gbps Unmetered Bandwidth\n"+
+                 " ~ Once per 4 weeks backup\n"+
+                 " ~ 1 Dedicated IP\n"+
+                 " ~ Windows Server 2025/2022/2019/2016\n"+
+                 " ~ No Setup Fee",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 47800, amount: 47800, currency: "PHP" },
+    withADMS: false,
+    warranty: { duration: 0, unit: "months" },
+    isActive: true,
+  },
+    {
+    id: "vs-business",
+    brand: "Microsoft",
+    name: "Business Server Plan",
+    category: "Virtual Server",
+    description: " ~ 18 GB RAM\n"+
+                 " ~ 8 CPU Cores\n"+
+                 " ~ 240GB SSD Disk Space\n"+
+                 " ~ 1Gbps Unmetered Bandwidth\n"+
+                 " ~ Once per 2 weeks backup\n"+
+                 " ~ 1 Dedicated IP\n"+
+                 " ~ Windows Server 2025/2022/2019/2016\n"+
+                 " ~ No Setup Fee",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 73700, amount: 73700, currency: "PHP" },
+    withADMS: false,
+    warranty: { duration: 0, unit: "months" },
+    isActive: true,
+  },
+
+  // ── Smart Locks ────────────────────────────────────────────────────────────
+  {
+    id: "sl-a-01",
+    brand: "LOOCK",
+    name: "A-01",
+    category: "Smart Locks",
+    description: " ~ Password Unlock\n"+
+                 " ~ RFID Card Unlock\n"+
+                 " ~ Fingerprint Unlock\n"+
+                 " ~ Emergency USB Power Port\n"+
+                 " ~ TUYA APP Control\n"+
+                 " ~ Bluetooth\n"+
+                 " ~ Temporary Password\n"+
+                 " ~ Mechanical Key Unlock\n"+
+                 " ~ Lifetime Technical Support\n"+
+                 " ~ High-Quality Material: Aluminum Alloy\n"+
+                 "   Material and Tempered Glass Panel\n"+
+                 " ~ Dimension: 156MM*65MM",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 10900, amount: 5499, currency: "PHP" },
+    withADMS: false,
+    dimension: "WxHxDmm",
+    warranty: { duration: 12, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "sl-a-12",
+    brand: "LOOCK",
+    name: "A-12",
+    category: "Smart Locks",
+    description: " ~ Password Unlock\n"+
+                 " ~ RFID Card Unlock\n"+
+                 " ~ Fingerprint Unlock\n"+
+                 " ~ Emergency USB Power Port\n"+
+                 " ~ TTLOCK APP Control\n"+
+                 " ~ Temporary Password\n"+
+                 " ~ Mechanical Key Unlock\n"+
+                 " ~ Lifetime Technical Support\n"+
+                 " ~ High-Quality Material: Aluminum Alloy",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 11900, amount: 5999, currency: "PHP" },
+    withADMS: false,
+    dimension: "WxHxDmm",
+    warranty: { duration: 12, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "sl-b-03",
+    brand: "LOOCK",
+    name: "B-03",
+    category: "Smart Locks",
+    description: " ~ Password Unlock\n"+
+                 " ~ RFID Card Unlock\n"+
+                 " ~ Fingerprint Unlock\n"+
+                 " ~ Emergency USB Power Port\n"+
+                 " ~ TUYA APP Control\n"+
+                 " ~ Temporary Password\n"+
+                 " ~ Mechanical Key Unlock\n"+
+                 " ~ Lifetime Technical Support\n"+
+                 " ~ High-Quality Material: Aluminum Alloy\n"+
+                 " ~ Dimension: 171MM*29MM",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 9900, amount: 4499, currency: "PHP" },
+    withADMS: false,
+    dimension: "WxHxDmm",
+    warranty: { duration: 12, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "sl-b-11",
+    brand: "LOOCK",
+    name: "B-11",
+    category: "Smart Locks",
+    description: " ~ Password Unlock\n"+
+                 " ~ RFID Card Unlock\n"+
+                 " ~ Fingerprint Unlock\n"+
+                 " ~ Emergency USB Power Port\n"+
+                 " ~ Built-in Doorbell\n"+
+                 " ~ Mechanical Key Unlock\n"+
+                 " ~ Lifetime Technical Support\n"+
+                 " ~ High-Quality Material: Steel\n"+
+                 " ~ Working Voltage: 4AA Batteries\n"+
+                 " ~ Dimension: 364MM*75MM",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 8900, amount: 3999, currency: "PHP" },
+    withADMS: false,
+    dimension: "WxHxDmm",
+    warranty: { duration: 12, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "sl-f-11",
+    brand: "LOOCK",
+    name: "F-11",
+    category: "Smart Locks",
+    description: " ~ Password Unlock\n"+
+                 " ~ RFID Card Unlock\n"+
+                 " ~ Fingerprint Unlock\n"+
+                 " ~ 3D Facial Recognition\n"+
+                 " ~ iCSee Home App\n"+
+                 " ~ Emergency USB Power Port\n"+
+                 " ~ Built-in Doorbell\n"+
+                 " ~ Mechanical Key Unlock\n"+
+                 " ~ Active Intercom\n"+
+                 " ~ Active Monitoring\n"+
+                 " ~ Phone Remote Control\n"+
+                 " ~ Splash Waterproof\n"+
+                 " ~ Lifetime Technical Support\n"+
+                 " ~ High-Quality Material: Aluminum Alloy\n"+
+                 " ~ Dimension: 423MM*73MM",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 18900, amount: 9499, currency: "PHP" },
+    withADMS: false,
+    dimension: "WxHxDmm",
+    warranty: { duration: 12, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "sl-f-14",
+    brand: "LOOCK",
+    name: "F-14",
+    category: "Smart Locks",
+    description: " ~ Password Unlock\n"+
+                 " ~ RFID Card Unlock\n"+
+                 " ~ Fingerprint Unlock\n"+
+                 " ~ 3D Facial Recognition\n"+
+                 " ~ Palm Vein Unlock\n"+
+                 " ~ iCSee Home App\n"+
+                 " ~ Emergency USB Power Port\n"+
+                 " ~ Built-in Doorbell\n"+
+                 " ~ Mechanical Key Unlock\n"+
+                 " ~ Active Intercom\n"+
+                 " ~ Active Monitoring\n"+
+                 " ~ TTLOCK APP Control\n"+
+                 " ~ Temporary Password\n"+
+                 " ~ Lifetime Technical Support\n"+
+                 " ~ High-Quality Material: Aluminum Alloy\n"+
+                 " ~ Dimension: 416MM*74MM",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 23900, amount: 11999, currency: "PHP" },
+    withADMS: false,
+    dimension: "WxHxDmm",
+    warranty: { duration: 12, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "sl-f-21",
+    brand: "LOOCK",
+    name: "F-21",
+    category: "Smart Locks",
+    description: " ~ Password Unlock\n"+
+                 " ~ RFID Card Unlock\n"+
+                 " ~ Fingerprint Unlock\n"+
+                 " ~ 3D Facial Recognition\n"+
+                 " ~ Palm Vein Unlock\n"+
+                 " ~ Emergency USB Power Port\n"+
+                 " ~ Built-in Doorbell\n"+
+                 " ~ Mechanical Key Unlock\n"+
+                 " ~ Active Intercom\n"+
+                 " ~ Active Monitoring\n"+
+                 " ~ TTLOCK APP Control\n"+
+                 " ~ Temporary Password\n"+
+                 " ~ Lifetime Technical Support\n"+
+                 " ~ High-Quality Material: Aluminum Alloy\n"+
+                 " ~ Working Voltage: Lithium Battery\n"+
+                 " ~ Dimension: 430MM*70MM",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 23900, amount: 9499, currency: "PHP" },
+    withADMS: false,
+    dimension: "WxHxDmm",
+    warranty: { duration: 12, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "sl-g-01",
+    brand: "LOOCK",
+    name: "G-01",
+    category: "Smart Locks",
+    description: " ~ Password Unlock\n"+
+                 " ~ RFID Card Unlock\n"+
+                 " ~ Fingerprint Unlock\n"+
+                 " ~ 3D Facial Recognition\n"+
+                 " ~ Emergency USB Power Port\n"+
+                 " ~ Mechanical Key Unlock\n"+
+                 " ~ DADALOCK APP Control\n"+
+                 " ~ Temporary Password\n"+
+                 " ~ Lifetime Technical Support\n"+
+                 " ~ High-Quality Material: Acrylic Panel\n"+
+                 " ~ Dimension: 190MM*70MM",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 13900, amount: 6999, currency: "PHP" },
+    withADMS: false,
+    dimension: "WxHxDmm",
+    warranty: { duration: 12, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "sl-g-11",
+    brand: "LOOCK",
+    name: "G-11",
+    category: "Smart Locks",
+    description: " ~ Password Unlock\n"+
+                 " ~ RFID Card Unlock\n"+
+                 " ~ Fingerprint Unlock\n"+
+                 " ~ 3D Facial Recognition\n"+
+                 " ~ Emergency USB Power Port\n"+
+                 " ~ DADALOCK APP Control\n"+
+                 " ~ Temporary Password\n"+
+                 " ~ Lifetime Technical Support\n"+
+                 " ~ High-Quality Material: Acrylic Panel\n"+
+                 " ~ Dimension: 190MM*70MM",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 13900, amount: 6999, currency: "PHP" },
+    withADMS: false,
+    dimension: "WxHxDmm",
+    warranty: { duration: 12, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "sl-g-04",
+    brand: "LOOCK",
+    name: "G-04",
+    category: "Smart Locks",
+    description: " ~ Password Unlock\n"+
+                 " ~ RFID Card Unlock\n"+
+                 " ~ Fingerprint Unlock\n"+
+                 " ~ Emergency USB Power Port\n"+
+                 " ~ Mechanical Key Unlock\n"+
+                 " ~ TTLOCK APP Control\n"+
+                 " ~ TUYA APP Control\n"+
+                 " ~ Temporary Password\n"+
+                 " ~ Waterproof\n"+
+                 " ~ Lifetime Technical Support\n"+
+                 " ~ High-Quality Material: Aluminum Alloy\n"+
+                 " ~ Dimension: 175MM*55MM",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 13900, amount: 6999, currency: "PHP" },
+    withADMS: false,
+    dimension: "WxHxDmm",
+    warranty: { duration: 12, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "sl-g-06b",
+    brand: "LOOCK",
+    name: "G-06B",
+    category: "Smart Locks",
+    description: " ~ Password Unlock\n"+
+                 " ~ RFID Card Unlock\n"+
+                 " ~ Fingerprint Unlock\n"+
+                 " ~ Emergency USB Power Port\n"+
+                 " ~ Mechanical Key Unlock\n"+
+                 " ~ TTLOCK APP Control\n"+
+                 " ~ Temporary Password\n"+
+                 " ~ Waterproof\n"+
+                 " ~ Lifetime Technical Support\n"+
+                 " ~ High-Quality Material: Aluminum Alloy\n"+
+                 " ~ Dimension: 350MM*36MM",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 14900, amount: 7499, currency: "PHP" },
+    withADMS: false,
+    dimension: "WxHxDmm",
+    warranty: { duration: 12, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "sl-g-16",
+    brand: "LOOCK",
+    name: "G-16",
+    category: "Smart Locks",
+    description: " ~ Password Unlock\n"+
+                 " ~ RFID Card Unlock\n"+
+                 " ~ Fingerprint Unlock\n"+
+                 " ~ Emergency USB Power Port\n"+
+                 " ~ Mechanical Key Unlock\n"+
+                 " ~ TTLOCK APP Control\n"+
+                 " ~ Temporary Password\n"+
+                 " ~ Waterproof\n"+
+                 " ~ Lifetime Technical Support\n"+
+                 " ~ High-Quality Material: Aluminum Alloy\n"+
+                 " ~ Dimension: 350MM*36MM",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 15900, amount: 7999, currency: "PHP" },
+    withADMS: false,
+    dimension: "WxHxDmm",
+    warranty: { duration: 12, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "sl-g-24b",
+    brand: "LOOCK",
+    name: "G-24B",
+    category: "Smart Locks",
+    description: " ~ Password Unlock\n"+
+                 " ~ RFID Card Unlock\n"+
+                 " ~ Fingerprint Unlock\n"+
+                 " ~ 3D Facial Recognition\n"+
+                 " ~ Built-in Doorbell\n"+
+                 " ~ Emergency USB Power Port\n"+
+                 " ~ Mechanical Key Unlock\n"+
+                 " ~ TUYA APP Control\n"+
+                 " ~ Temporary Password\n"+
+                 " ~ Waterproof\n"+
+                 " ~ Lifetime Technical Support\n"+
+                 " ~ High-Quality Material: Aluminum Alloy\n"+
+                 " ~ Dimension: 175MM*55MM",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 16900, amount: 8499, currency: "PHP" },
+    withADMS: false,
+    dimension: "WxHxDmm",
+    warranty: { duration: 12, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "sl-g-24c",
+    brand: "LOOCK",
+    name: "G-24C",
+    category: "Smart Locks",
+    description: " ~ Password Unlock\n"+
+                 " ~ RFID Card Unlock\n"+
+                 " ~ Fingerprint Unlock\n"+
+                 " ~ Built-in Doorbell\n"+
+                 " ~ Emergency USB Power Port\n"+
+                 " ~ Mechanical Key Unlock\n"+
+                 " ~ TUYA APP Control\n"+
+                 " ~ Temporary Password\n"+
+                 " ~ Waterproof\n"+
+                 " ~ Lifetime Technical Support\n"+
+                 " ~ High-Quality Material: Aluminum Alloy\n"+
+                 " ~ Dimension: 175MM*55MM",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 16900, amount: 9500, currency: "PHP" },
+    withADMS: false,
+    dimension: "WxHxDmm",
+    warranty: { duration: 12, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "sl-g-28",
+    brand: "LOOCK",
+    name: "G-28",
+    category: "Smart Locks",
+    description: " ~ Password Unlock\n"+
+                 " ~ RFID Card Unlock\n"+
+                 " ~ Fingerprint Unlock\n"+
+                 " ~ Emergency USB Power Port\n"+
+                 " ~ Mechanical Key Unlock\n"+
+                 " ~ TUYA APP Control\n"+
+                 " ~ Temporary Password\n"+
+                 " ~ Waterproof\n"+
+                 " ~ Lifetime Technical Support\n"+
+                 " ~ High-Quality Material: Aluminum Alloy",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 6900, amount: 3499, currency: "PHP" },
+    withADMS: false,
+    dimension: "WxHxDmm",
+    warranty: { duration: 12, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "sl-s-12",
+    brand: "LOOCK",
+    name: "S-12",
+    category: "Smart Locks",
+    description: " ~ Password Unlock\n"+
+                 " ~ RFID Card Unlock\n"+
+                 " ~ Fingerprint Unlock\n"+
+                 " ~ Emergency USB Power Port\n"+
+                 " ~ Mechanical Key Unlock\n"+
+                 " ~ TTLOCK APP Control\n"+
+                 " ~ Temporary Password\n"+
+                 " ~ Lifetime Technical Support\n"+
+                 " ~ High-Quality Material: 304 stainless steel\n"+
+                 " ~ Dimension: 308MM*77MM",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 10900, amount: 5499, currency: "PHP" },
+    withADMS: false,
+    dimension: "WxHxDmm",
+    warranty: { duration: 12, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "sl-s-11",
+    brand: "LOOCK",
+    name: "S-11",
+    category: "Smart Locks",
+    description: " ~ Password Unlock\n"+
+                 " ~ RFID Card Unlock\n"+
+                 " ~ Emergency USB Power Port\n"+
+                 " ~ Mechanical Key Unlock\n"+
+                 " ~ TTLOCK APP Control\n"+
+                 " ~ Temporary Password\n"+
+                 " ~ Lifetime Technical Support\n"+
+                 " ~ High-Quality Material: 304 stainless steel\n"+
+                 " ~ Dimension: 308MM*77MM",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 10900, amount: 5499, currency: "PHP" },
+    withADMS: false,
+    dimension: "WxHxDmm",
+    warranty: { duration: 12, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "sl-sb-45",
+    brand: "LOOCK",
+    name: "SB-45",
+    category: "Smart Locks",
+    description: " ~ Password Unlock\n"+
+                 " ~ Fingerprint Unlock\n"+
+                 " ~ Emergency USB Power Port\n"+
+                 " ~ TUYA APP Control\n"+
+                 " ~ Temporary Password\n"+
+                 " ~ Mechanical Key Unlock\n"+
+                 " ~ COD Free Delivery Within NCR\n"+
+                 " ~ Dimension: 450MM*320MM*380MM",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 17900, amount: 8999, currency: "PHP" },
+    withADMS: false,
+    dimension: "WxHxDmm",
+    warranty: { duration: 12, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "sl-sc-01",
+    brand: "LOOCK",
+    name: "SC-01",
+    category: "Smart Locks",
+    description: " ~ Password Unlock\n"+
+                 " ~ RFID Card Unlock\n"+
+                 " ~ Emergency USB Power Port\n"+
+                 " ~ TTLOCK APP Control\n"+
+                 " ~ Temporary Password\n"+
+                 " ~ Lifetime Technical Support\n"+
+                 " ~ High-Quality Material: Aluminum Alloy\n"+
+                 " ~ Working Voltage: 4AA Batteries\n"+
+                 " ~ Dimension: 350MM*36MM",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 17900, amount: 3499, currency: "PHP" },
+    withADMS: false,
+    dimension: "WxHxDmm",
+    warranty: { duration: 12, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "sl-card-encoder",
+    brand: "LOOCK",
+    name: "Card Encoder",
+    category: "Smart Locks",
+    description: "Card Encoder",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 3000, amount: 3000, currency: "PHP" },
+    withADMS: false,
+    dimension: "WxHxDmm",
+    warranty: { duration: 12, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "sl-ttlock-gateway",
+    brand: "LOOCK",
+    name: "TTLock Gateway",
+    category: "Smart Locks",
+    description: "TTLock Gateway",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 1000, amount: 1000, currency: "PHP" },
+    withADMS: false,
+    dimension: "WxHxDmm",
+    warranty: { duration: 12, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "sl-power-saver",
+    brand: "LOOCK",
+    name: "Power Saver",
+    category: "Smart Locks",
+    description: "Power Saver",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 600, amount: 600, currency: "PHP" },
+    withADMS: false,
+    dimension: "WxHxDmm",
+    warranty: { duration: 12, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "sl-rfid-bracelet",
+    brand: "LOOCK",
+    name: "RFID Bracelet",
+    category: "Smart Locks",
+    description: "RFID Bracelet",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 100, amount: 100, currency: "PHP" },
+    withADMS: false,
+    dimension: "WxHxDmm",
+    warranty: { duration: 0, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "sl-customizable-hotel-card",
+    brand: "LOOCK",
+    name: "Customizable Hotel Card",
+    category: "Smart Locks",
+    description: "Customizable Hotel Card",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 50, amount: 50, currency: "PHP" },
+    withADMS: false,
+    dimension: "WxHxDmm",
+    warranty: { duration: 0, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "sl-rfid-card",
+    brand: "LOOCK",
+    name: "RFID Card",
+    category: "Smart Locks",
+    description: "RFID Card",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 50, amount: 50, currency: "PHP" },
+    withADMS: false,
+    dimension: "WxHxDmm",
+    warranty: { duration: 0, unit: "months" },
+    isActive: true,
+  },
 ];
 
 // Services data
@@ -1837,6 +2493,10 @@ function switchCategory(category: string): void {
     } else if (tabCategory === "cctv" && category === "CCTV") {
       tab.classList.add("active");
     } else if (tabCategory === "utime" && category === "UTIME") {
+      tab.classList.add("active");
+    } else if (tabCategory === "virtual-server" && category === "Virtual Server") {
+      tab.classList.add("active");
+    } else if (tabCategory === "smart-locks" && category === "Smart Locks") {
       tab.classList.add("active");
     } else {
       tab.classList.remove("active");
@@ -2602,7 +3262,7 @@ function collectQuotationData(): QuotationData | null {
     customNotes: getCustomNotes().length > 0 ? getCustomNotes() : undefined,
     longDateFormat: longDateFormatEl.checked,
     onSiteOrientation: Array.from(selectedItems.values()).some((item) => item.product.id === "orientation"),
-    optionalAccessories: (optionalAccessoriesEl.value as "none" | "biometrics" | "door-access") || "none",
+    optionalAccessories: (optionalAccessoriesEl.value as "none" | "biometrics" | "door-access" | "smart-lock") || "none",
   };
 }
 
@@ -2888,37 +3548,45 @@ function pvWarrantyToText(months: number): string {
   return `${word} (${months}) months`;
 }
 
-function buildOptionalAccessoriesPreview(type: "biometrics" | "door-access", sixColumnMode?: boolean, showPesoSign?: boolean): string {
+function buildOptionalAccessoriesPreview(type: "biometrics" | "door-access" | "smart-lock", sixColumnMode?: boolean, showPesoSign?: boolean): string {
   const curr = showPesoSign ? "₱" : "";
   const fmt = (n: number) => `${curr}${n.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   const bioAccessories = [
-    { model: "TMD95E", description: "Temperature Detection Module", qty: 1, unit: "pc", price: 9500 },
-    { model: "", description: "Proximity Card 125 khz (Thin)", qty: 1, unit: "pc", price: 80 },
-    { model: "", description: "5v Mini Ups", qty: 1, unit: "pc", price: 2500 },
-    { model: "", description: "12v Mini Ups", qty: 1, unit: "pc", price: 3500 },
+    { model: "TMD95E", description: "Temperature Detection Module", qty: 1, unit: "pc", price: 9500, icon: "tmd95e.png" },
+    { model: "", description: "Proximity Card 125 khz (Thin)", qty: 1, unit: "pc", price: 80, icon: "proximity-card.png" },
+    { model: "", description: "5v Mini Ups", qty: 1, unit: "pc", price: 2500, icon: "mini-ups.png" },
+    { model: "", description: "12v Mini Ups", qty: 1, unit: "pc", price: 3500, icon: "mini-ups.png" },
   ];
   const doorAccessories = [
-    { model: "", description: "Small Push Button", qty: 1, unit: "pc", price: 150 },
-    { model: "", description: "Slim Push Button", qty: 1, unit: "pc", price: 800 },
-    { model: "TMD01", description: "Temperature Detection Module for FA210", qty: 1, unit: "pc", price: 9500 },
-    { model: "", description: "LCD Intercom", qty: 1, unit: "set", price: 12500 },
-    { model: "", description: "Proximity Card 125 khz (Thin)", qty: 1, unit: "pc", price: 80 },
-    { model: "", description: "U-bracket (for frameless Door)", qty: 1, unit: "pc", price: 1200 },
-    { model: "", description: "Dropbolt (DC 12V fail-safe)", qty: 1, unit: "Sets", price: 8200 },
-    { model: "Aluminum U-Bracket**", description: "Aluminum U-Bracket**", qty: 1, unit: "pc", price: 1500 },
-    { model: "", description: "Dropbolt", qty: 1, unit: "pc", price: 6500 },
-    { model: "RPS", description: "12Vdc 5A Regulated Power Supply with backup battery", qty: 1, unit: "pc", price: 4500 },
-    { model: "FR1200", description: "Biometrics Scanner with Card Reader, Slave Device for F22", qty: 1, unit: "pc", price: 8500 },
-    { model: "K1", description: "Touch Free Push to Exit", qty: 1, unit: "pc", price: 1200 },
-    { model: "WTTTX KIT2", description: "Wireless Receiver to Exit with Remote Control, 12V/24VDC", qty: 1, unit: "pc", price: 1500 },
-    { model: "", description: "Emergency Key Switch", qty: 1, unit: "pc", price: 1500 },
-    { model: "", description: "Door Buzzer", qty: 1, unit: "pc", price: 350 },
+    { model: "", description: "Small Push Button", qty: 1, unit: "pc", price: 150, icon: "small-push-button.png" },
+    { model: "", description: "Slim Push Button", qty: 1, unit: "pc", price: 800, icon: "slim-push-button.png" },
+    { model: "TMD01", description: "Temperature Detection Module for FA210", qty: 1, unit: "pc", price: 9500, icon: "tmd01.png" },
+    { model: "", description: "LCD Intercom", qty: 1, unit: "set", price: 12500, icon: "intercom.png" },
+    { model: "", description: "Proximity Card 125 khz (Thin)", qty: 1, unit: "pc", price: 80, icon: "proximity-card.png" },
+    { model: "", description: "U-bracket (for frameless Door)", qty: 1, unit: "pc", price: 1200, icon: "u-bracket.png" },
+    { model: "", description: "Dropbolt (DC 12V fail-safe)", qty: 1, unit: "Sets", price: 8200, icon: "dropboltxx.png" },
+    { model: "Aluminum U-Bracket**", description: "Aluminum U-Bracket**", qty: 1, unit: "pc", price: 1500, icon: "al-u-bracket.png" },
+    { model: "", description: "Dropbolt", qty: 1, unit: "pc", price: 6500, icon: "drop-bolt.png" },
+    { model: "RPS", description: "12Vdc 5A Regulated Power Supply with backup battery", qty: 1, unit: "pc", price: 4500, icon: "rps.png" },
+    { model: "FR1200", description: "Biometrics Scanner with Card Reader, Slave Device for F22", qty: 1, unit: "pc", price: 8500, icon: "fr1200.png" },
+    { model: "K1", description: "Touch Free Push to Exit", qty: 1, unit: "pc", price: 1200, icon: "k1.png" },
+    { model: "WTTTX KIT2", description: "Wireless Receiver to Exit with Remote Control, 12V/24VDC", qty: 1, unit: "pc", price: 1500, icon: "wireless-remote.png" },
+    { model: "", description: "Emergency Key Switch", qty: 1, unit: "pc", price: 1500, icon: "emergency-key-switch.png" },
+    { model: "", description: "Door Buzzer", qty: 1, unit: "pc", price: 350, icon: "door-buzzer.png" },
     { model: "", description: "Wireless Door Bell", qty: 1, unit: "pc", price: 1500 },
-    { model: "BATTERY", description: "Lead-Acid Battery 12v, 7.2Ah", qty: 1, unit: "pc", price: 2500 },
+    { model: "BATTERY", description: "Lead-Acid Battery 12v, 7.2Ah", qty: 1, unit: "pc", price: 2500, icon: "battery.png" },
+  ];
+  const smartLockAccessories = [
+    { model: "", description: "Card Encoder", qty: 1, unit: "pc", price: 3000, icon: "cardencoder.png" },
+    { model: "", description: "Customizable Hotel Card", qty: 1, unit: "pc", price: 50, icon: "cuztomizablehotelcard.png" },
+    { model: "", description: "RFID Bracelet", qty: 1, unit: "pc", price: 100, icon: "rfidbracelet.png" },
+    { model: "", description: "RFID Card Loock", qty: 1, unit: "pc", price: 50, icon: "rfidcardloock.png" },
+    { model: "", description: "TTLock Gateway", qty: 1, unit: "pc", price: 1000, icon: "ttlockgateway.png" },
+    { model: "", description: "Power Saver", qty: 1, unit: "pc", price: 600, icon: "powersaver.png" },
   ];
 
-  const items = type === "biometrics" ? bioAccessories : doorAccessories;
+  const items = type === "biometrics" ? bioAccessories : type === "smart-lock" ? smartLockAccessories : doorAccessories;
   let t = `<p class="pv-group-name">OPTIONAL ACCESSORIES</p>`;
   t += `<table class="pv-product-table"><thead><tr>`;
   t += `<th style="width:17%">Model</th><th style="width:${sixColumnMode ? 45 : 32}%">Item Description</th>`;
@@ -2928,7 +3596,8 @@ function buildOptionalAccessoriesPreview(type: "biometrics" | "door-access", six
 
   items.forEach((item) => {
     const total = item.price * item.qty;
-    t += `<tr><td>${esc(item.model)}</td><td class="td-desc">${esc(item.description)}</td>`;
+    const imgHtml = item.icon ? `<img class="pv-icon" src="../../src/assets/icons/${item.icon}">` : "";
+    t += `<tr><td>${imgHtml}${esc(item.model)}</td><td class="td-desc">${esc(item.description)}</td>`;
     t += `<td>${item.qty}</td><td>${esc(item.unit)}</td><td>${fmt(item.price)}</td>`;
     if (!sixColumnMode) t += `<td>${fmt(item.price)}</td>`;
     t += `<td><b>${fmt(total)}</b></td></tr>`;
@@ -3044,7 +3713,9 @@ function applyTabState(snapshot: TabSnapshot): void {
       (tabCategory === "biometrics" && currentCategory === "Biometrics") ||
       (tabCategory === "door-access" && currentCategory === "Door Access") ||
       (tabCategory === "cctv" && currentCategory === "CCTV") ||
-      (tabCategory === "utime" && currentCategory === "UTIME");
+      (tabCategory === "utime" && currentCategory === "UTIME") ||
+      (tabCategory === "virtual-server" && currentCategory === "Virtual Server") ||
+      (tabCategory === "smart-locks" && currentCategory === "Smart Locks");
     tab.classList.toggle("active", isActive);
   });
 
@@ -3688,6 +4359,10 @@ productTabs.forEach((tab) => {
       switchCategory("CCTV");
     } else if (category === "utime") {
       switchCategory("UTIME");
+    } else if (category === "virtual-server") {
+      switchCategory("Virtual Server");
+    } else if (category === "smart-locks") {
+      switchCategory("Smart Locks");
     }
   });
 });

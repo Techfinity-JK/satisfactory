@@ -790,7 +790,8 @@ section:hover { border-color: var(--border-strong); }
   transition: all 0.15s;
   white-space: nowrap;
 }
-.product-tab:hover { border-color: var(--accent-color); color: var(--accent-color); background: var(--accent-dim); }
+.product-tab:hover:not(:disabled) { border-color: var(--accent-color); color: var(--accent-color); background: var(--accent-dim); }
+.product-tab:disabled { opacity: 0.35; cursor: not-allowed; }
 .product-tab.active {
   background: var(--accent-color); color: #fff;
   border-color: var(--accent-color);
