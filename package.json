@@ -1,6 +1,6 @@
 {
   "name": "quotation-generator",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Quotation generator for biometric products",
   "main": "dist/main/main.js",
   "scripts": {
@@ -8,15 +8,15 @@
     "build": "tsc && npm run copy-assets",
     "start": "npm run build && electron .",
     "dev": "npm run build && electron .",
-    "package": "npm run build && set CSC_IDENTITY_AUTO_DISCOVERY=false && electron-builder --win portable",
-    "package:installer": "npm run build && set CSC_IDENTITY_AUTO_DISCOVERY=false && electron-builder --win nsis"
+    "package": "npm run build && set CSC_IDENTITY_AUTO_DISCOVERY=false && electron-builder --win nsis",
+    "package:portable": "npm run build && set CSC_IDENTITY_AUTO_DISCOVERY=false && electron-builder --win portable"
   },
   "keywords": ["electron", "quotation", "docx"],
   "author": "",
   "license": "ISC",
   "build": {
     "appId": "com.techfinity.quotation-generator",
-    "productName": "Lraxious' Quotation Generator v1.0",
+    "productName": "Lraxious' Quotation Generator v1.1",
     "directories": {
       "output": "release"
     },
@@ -34,7 +34,7 @@
     "win": {
       "target": [
         {
-          "target": "portable",
+          "target": "nsis",
           "arch": ["x64"]
         }
       ]
