@@ -8,7 +8,8 @@
     "build": "tsc && npm run copy-assets",
     "start": "npm run build && electron .",
     "dev": "npm run build && electron .",
-    "package": "npm run build && set CSC_IDENTITY_AUTO_DISCOVERY=false && electron-builder --win portable"
+    "package": "npm run build && set CSC_IDENTITY_AUTO_DISCOVERY=false && electron-builder --win portable",
+    "package:installer": "npm run build && set CSC_IDENTITY_AUTO_DISCOVERY=false && electron-builder --win nsis"
   },
   "keywords": ["electron", "quotation", "docx"],
   "author": "",
@@ -37,6 +38,14 @@
           "arch": ["x64"]
         }
       ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Quotation Generator",
+      "artifactName": "QuotationGenerator-Setup-${version}.exe"
     },
     "portable": {
       "artifactName": "QuotationGenerator-portable.exe"

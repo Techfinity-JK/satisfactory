@@ -1049,7 +1049,7 @@ const products: Product[] = [
     download: { lan: false, usb: false, wifi: false },
     price: { fakeAmount: 4300, amount: 4300, currency: "PHP" },
     withADMS: false,
-    warranty: { duration: 12, unit: "months" },
+    warranty: { duration: 6, unit: "months" },
     isActive: true,
   },
   {
@@ -4337,6 +4337,62 @@ longDateFormatEl.checked = localStorage.getItem("longDateFormat") === "true";
 longDateFormatEl.addEventListener("change", () => {
   localStorage.setItem("longDateFormat", String(longDateFormatEl.checked));
 });
+
+// Populate version label from package.json via main process
+window.electronAPI.getAppVersion().then((v) => {
+  const el = document.getElementById("currentVersionLabel");
+  if (el) el.textContent = v;
+});
+
+// Check for Updates
+(function initUpdateChecker(): void {
+  const checkUpdateBtn = document.getElementById("checkUpdateBtn") as HTMLButtonElement;
+  const checkUpdateBtnLabel = document.getElementById("checkUpdateBtnLabel") as HTMLSpanElement;
+  const updateResult = document.getElementById("updateResult") as HTMLDivElement;
+  const updateStatusBadge = document.getElementById("updateStatusBadge") as HTMLSpanElement;
+
+  checkUpdateBtn.addEventListener("click", async () => {
+    checkUpdateBtn.disabled = true;
+    checkUpdateBtnLabel.textContent = "Checking…";
+    updateResult.className = "update-result hidden";
+    updateResult.innerHTML = "";
+    updateStatusBadge.className = "update-badge hidden";
+
+    try {
+      const result = await window.electronAPI.checkForUpdates();
+
+      if (!result.success) {
+        updateResult.className = "update-result error";
+        updateResult.textContent = `Error: ${result.error}`;
+      } else if (result.isNewer) {
+        updateStatusBadge.className = "update-badge update-available";
+        updateStatusBadge.textContent = "Update Available";
+        updateResult.className = "update-result info";
+        updateResult.innerHTML =
+          `New version <strong>v${result.latestVersion}</strong> is available! ` +
+          `You are on <strong>v${result.currentVersion}</strong>.<br>` +
+          `<a id="releaseLink">Download from GitHub</a>`;
+        const releaseLink = document.getElementById("releaseLink");
+        if (releaseLink && result.releaseUrl) {
+          releaseLink.addEventListener("click", () => {
+            window.electronAPI.openExternalUrl(result.releaseUrl!);
+          });
+        }
+      } else {
+        updateStatusBadge.className = "update-badge up-to-date";
+        updateStatusBadge.textContent = "Up to Date";
+        updateResult.className = "update-result success";
+        updateResult.textContent = `You're on the latest version (v${result.currentVersion}).`;
+      }
+    } catch {
+      updateResult.className = "update-result error";
+      updateResult.textContent = "Could not reach update server.";
+    }
+
+    checkUpdateBtnLabel.textContent = "Check for Updates";
+    checkUpdateBtn.disabled = false;
+  });
+})();
 
 // Service card click — add instance like products
 const serviceCards = document.querySelectorAll(".service-card");

@@ -1,6 +1,12 @@
-import { app, BrowserWindow, ipcMain, dialog } from "electron";
+import { app, BrowserWindow, ipcMain, dialog, shell } from "electron";
 import * as path from "path";
+import * as https from "https";
 import { generateQuotation } from "./quotationGenerator";
+
+// ── Update check config ────────────────────────────────────────────────────
+const GITHUB_OWNER = "Techfinity-JK";
+const GITHUB_REPO  = "satisfactory";
+const CURRENT_VERSION = app.getVersion(); // reads "version" from package.json
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -45,6 +51,48 @@ app.on("window-all-closed", () => {
 });
 
 // IPC Handlers
+ipcMain.handle("check-for-updates", async () => {
+  return new Promise((resolve) => {
+    const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/releases/latest`;
+    const options = {
+      headers: { "User-Agent": "satisfactory-app" },
+    };
+    https.get(url, options, (res) => {
+      let body = "";
+      res.on("data", (chunk) => (body += chunk));
+      res.on("end", () => {
+        try {
+          if (res.statusCode === 404) {
+            resolve({ success: false, error: "No releases found on GitHub." });
+            return;
+          }
+          const json = JSON.parse(body);
+          const latestTag: string = (json.tag_name || "").replace(/^v/, "");
+          const releaseUrl: string = json.html_url || "";
+          const isNewer = latestTag !== "" && latestTag !== CURRENT_VERSION;
+          resolve({
+            success: true,
+            currentVersion: CURRENT_VERSION,
+            latestVersion: latestTag,
+            isNewer,
+            releaseUrl,
+          });
+        } catch {
+          resolve({ success: false, error: "Failed to parse update response." });
+        }
+      });
+    }).on("error", (err) => {
+      resolve({ success: false, error: err.message });
+    });
+  });
+});
+
+ipcMain.handle("open-external-url", (_event, url: string) => {
+  shell.openExternal(url);
+});
+
+ipcMain.handle("get-app-version", () => CURRENT_VERSION);
+
 ipcMain.handle("generate-quotation", async (_event, data) => {
   try {
     const { filePath } = await dialog.showSaveDialog({
