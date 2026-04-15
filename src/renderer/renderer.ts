@@ -193,6 +193,7 @@ const productIconMap: { [key: string]: string } = {
   "XFACE100": "xface100.png",
   "UFACE800": "uface800.png",
   "SPEEDFACE V3L": "speedfacev3l.png",
+  "SPEEDFACE V5L": "speedfacev5l.png",
   // Door Access
   "M06": "m06.png",
   "X6": "x6.png",
@@ -712,7 +713,38 @@ const products: Product[] = [
     isActive: true,
     isDeprecated: true,
   },
-  
+  {
+    id: "zk-speedfacev5l",
+    brand: "ZKTECO",
+    name: "SPEEDFACE V5L",
+    category: "Biometrics",
+    description: " Hardware: LCD 5-inch touch screen\n"+
+                 " Operating System: Linux\n"+
+                 " CPU: Quad-core A17 1.8GHz\n"+
+                 " Memory: 2G RAM / 16G ROM\n"+
+                 " Camera: 2MP dual lens\n"+
+                 " Communication: TCP / IP, Wi-Fi (optional) RS232, RS485 for external\n"+
+                 " reader Wiegand Input/Output\n"+
+                 " Accessory: Door lock, door sensor, alarm, exit button and auxiliary input\n"+
+                 " Audio: Loudspeaker\n"+
+                 " Capacity Users: 10,000\n"+
+                 " Face Template: 10,000\n"+
+                 " Fingerprint: 10,000 \n"+
+                 " RFID: 10,000 \n"+
+                 " Log: 100,000\n"+
+                 " Operating Voltage 12V 3A\n"+
+                 " Temperature -10°C ~ 45°C\n"+
+                 " Humidity 10% ~ 90%\n"+
+                 " Size:203×92×21.5mm (Length×Width×Thickness)",
+    capacity: { fingerprint: 3000, card: 3000, face: 3000, transaction: 200000 },
+    download: { lan: true, usb: false, wifi: true },
+    price: { fakeAmount: 36000, amount: 25000, currency: "PHP" },
+    withADMS: true,
+    dimension: "185x59x20mm",
+    warranty: { duration: 12, unit: "months" },
+    isActive: true,
+  },
+
   // Door Access Products
   {
     id: "g-m06",
@@ -1020,6 +1052,37 @@ const products: Product[] = [
     withADMS: true,
     dimension: "",
     warranty: { duration: 36, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "zk-speedfacev5l",
+    brand: "ZKTECO",
+    name: "SPEEDFACE V5L",
+    category: "Door Access",
+    description: " Hardware: LCD 5-inch touch screen\n"+
+                 " Operating System: Linux\n"+
+                 " CPU: Quad-core A17 1.8GHz\n"+
+                 " Memory: 2G RAM / 16G ROM\n"+
+                 " Camera: 2MP dual lens\n"+
+                 " Communication: TCP / IP, Wi-Fi (optional) RS232, RS485 for external\n"+
+                 " reader Wiegand Input/Output\n"+
+                 " Accessory: Door lock, door sensor, alarm, exit button and auxiliary input\n"+
+                 " Audio: Loudspeaker\n"+
+                 " Capacity Users: 10,000\n"+
+                 " Face Template: 10,000\n"+
+                 " Fingerprint: 10,000 \n"+
+                 " RFID: 10,000 \n"+
+                 " Log: 100,000\n"+
+                 " Operating Voltage 12V 3A\n"+
+                 " Temperature -10°C ~ 45°C\n"+
+                 " Humidity 10% ~ 90%\n"+
+                 " Size:203×92×21.5mm (Length×Width×Thickness)",
+    capacity: { fingerprint: 3000, card: 3000, face: 3000, transaction: 200000 },
+    download: { lan: true, usb: false, wifi: true },
+    price: { fakeAmount: 36000, amount: 36000, currency: "PHP" },
+    withADMS: true,
+    dimension: "185x59x20mm",
+    warranty: { duration: 12, unit: "months" },
     isActive: true,
   },
   {
@@ -2298,7 +2361,7 @@ const APP_TITLE_MESSAGES = [
 
 ];
 const randomMsg = APP_TITLE_MESSAGES[Math.floor(Math.random() * APP_TITLE_MESSAGES.length)];
-document.title = `Lraxious' Quotation Generator v1.1 - ${randomMsg}`;
+document.title = `Lraxious' Quotation Generator v1.2 - ${randomMsg}`;
 
 // Product detail popup
 const productDetailPopup = document.getElementById("productDetailPopup") as HTMLDivElement;
