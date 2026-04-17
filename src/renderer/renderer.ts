@@ -30,6 +30,7 @@ interface Product {
   };
   isActive: boolean;
   isDeprecated?: boolean;
+  uiName?: string;
 }
 
 interface SelectedItem {
@@ -1102,6 +1103,7 @@ const products: Product[] = [
     id: "g-al-280",
     brand: "GENERIC",
     name: "AL-280",
+    uiName: "Magnetic Lock",
     category: "Door Access",
     description: " 600Lbs Electronic Magnetic Lock\n"+
                  " Holding Force: 270kg\n"+
@@ -1119,6 +1121,7 @@ const products: Product[] = [
     id: "g-al-280pzpl",
     brand: "GENERIC",
     name: "AL-280PZ/PL",
+    uiName: "Z&L Bracket",
     category: "Door Access",
     description: " Z&L bracket for AL280",
     capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
@@ -1277,6 +1280,7 @@ const products: Product[] = [
     id: "zk-rps",
     brand: "ZKTECO",
     name: "RPS w/ BB",
+    uiName: "RPS with Backup Battery",
     category: "Door Access",
     description: " 12Vdc 5A Regulated Power Supply (with backup battery)",
     capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
@@ -1318,6 +1322,7 @@ const products: Product[] = [
     id: "g-k1",
     brand: "GENERIC",
     name: "K1",
+    uiName: "Touch Free Exit",
     category: "Door Access",
     description: " Touch Free Push to Exit",
     capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
@@ -2361,7 +2366,7 @@ const APP_TITLE_MESSAGES = [
 
 ];
 const randomMsg = APP_TITLE_MESSAGES[Math.floor(Math.random() * APP_TITLE_MESSAGES.length)];
-document.title = `Lraxious' Quotation Generator v1.2 - ${randomMsg}`;
+document.title = `Lraxious' Quotation Generator v1.4 - ${randomMsg}`;
 
 // Product detail popup
 const productDetailPopup = document.getElementById("productDetailPopup") as HTMLDivElement;
@@ -2385,7 +2390,7 @@ function showProductDetailPopup(product: Product): void {
     pdpIcon.classList.add("hidden");
   }
   pdpBrand.textContent = product.brand;
-  pdpName.textContent = product.name;
+  pdpName.textContent = product.uiName ?? product.name;
   pdpFakePrice.textContent = `PHP ${product.price.fakeAmount.toLocaleString()}`;
   pdpPrice.textContent = `PHP ${product.price.amount.toLocaleString()}`;
   pdpDesc.textContent = product.description ?? "";
@@ -2496,7 +2501,7 @@ function renderProducts(): void {
   const activeProducts = products.filter((p) => {
     if (!p.isActive || p.category !== currentCategory) return false;
     if (!searchTerm) return true;
-    return p.name.toLowerCase().includes(searchTerm) || p.brand.toLowerCase().includes(searchTerm);
+    return p.name.toLowerCase().includes(searchTerm) || p.brand.toLowerCase().includes(searchTerm) || (p.uiName?.toLowerCase().includes(searchTerm) ?? false);
   });
 
   activeProducts.forEach((product) => {
@@ -2523,7 +2528,7 @@ function renderProducts(): void {
       <div class="product-card-top">
         <div class="product-card-info">
           <div class="brand">${product.brand}</div>
-          <div class="name">${product.name}</div>
+          <div class="name">${product.uiName ?? product.name}</div>
         </div>
         ${iconHtml}
       </div>
@@ -2748,15 +2753,15 @@ function createProductRow(item: SelectedItem, productId: string, groupId: string
 
   row.innerHTML = `
     <td class="drag-handle" title="Drag to reorder">${dragHandleSvg}</td>
-    <td class="item-icon-cell">${(() => { const icon = productIconMap[item.product.name]; return icon ? `<img class="item-icon" src="../../src/assets/icons/${icon}" alt="${item.product.name}">` : item.product.brand; })()}</td>
-    <td>${item.product.name}</td>
+    <td class="item-icon-cell">${(() => { const icon = productIconMap[item.product.name]; return icon ? `<img class="item-icon" src="../../src/assets/icons/${icon}" alt="${item.product.uiName ?? item.product.name}">` : item.product.brand; })()}</td>
+    <td>${item.product.uiName ?? item.product.name}</td>
     <td>
       <input type="number" class="price-input" value="${unitPrice}" min="0" data-product-id="${productId}">
     </td>
     <td>
       <div class="qty-control">
         <button class="qty-btn qty-minus" data-product-id="${productId}">−</button>
-        <span class="qty-value" data-product-id="${productId}">${item.quantity}</span>
+        <input type="number" class="qty-value" data-product-id="${productId}" value="${item.quantity}" min="1">
         <button class="qty-btn qty-plus" data-product-id="${productId}">+</button>
       </div>
     </td>
@@ -2932,6 +2937,19 @@ function renderSelectedItems(): void {
       const item = selectedItems.get(productId);
       if (item) {
         item.quantity++;
+        renderSelectedItems();
+      }
+    });
+  });
+
+  document.querySelectorAll<HTMLInputElement>(".qty-value").forEach((input) => {
+    input.addEventListener("focus", () => input.select());
+    input.addEventListener("change", () => {
+      const productId = input.dataset.productId!;
+      const item = selectedItems.get(productId);
+      if (item) {
+        const val = parseInt(input.value, 10);
+        item.quantity = val >= 1 ? val : 1;
         renderSelectedItems();
       }
     });
@@ -3540,6 +3558,14 @@ function buildPreviewHTML(data: QuotationData): string {
         html += `<p><span class="pv-highlight">${noteNum}. ${esc(note.toUpperCase())}</span></p>`;
       });
     }
+    html += `</div>`;
+  } else if (data.customNotes && data.customNotes.length > 0) {
+    // Brochure mode — still show custom notes
+    html += `<div class="pv-notes">`;
+    html += `<p><span class="pv-highlight">NOTES:</span></p>`;
+    data.customNotes.forEach((note, i) => {
+      html += `<p><span class="pv-highlight">${i + 1}. ${esc(note.toUpperCase())}</span></p>`;
+    });
     html += `</div>`;
   }
 

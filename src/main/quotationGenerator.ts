@@ -628,6 +628,35 @@ function createProductSections(items: QuotationItem[], groups?: QuotationGroup[]
     }
     // Blank line after NOTES before Conforme
     sections.push(new Paragraph({ children: [] }));
+  } else if (customNotes && customNotes.length > 0) {
+    // Brochure mode — still show custom notes
+    sections.push(
+      new Paragraph({
+        children: [
+          new TextRun({ text: "NOTES:", font: FONT_FAMILY, bold: true, size: FONT_SIZE, highlight: "yellow" }),
+        ],
+        alignment: AlignmentType.LEFT,
+        spacing: { after: 50 },
+      })
+    );
+    for (let i = 0; i < customNotes.length; i++) {
+      sections.push(
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: `${i + 1}. ${customNotes[i].toUpperCase()}`,
+              font: FONT_FAMILY,
+              bold: true,
+              size: FONT_SIZE,
+              highlight: "yellow",
+            }),
+          ],
+          alignment: AlignmentType.LEFT,
+          spacing: { after: i === customNotes.length - 1 ? 200 : 50 },
+        })
+      );
+    }
+    sections.push(new Paragraph({ children: [] }));
   }
 
   return sections;

@@ -1083,10 +1083,14 @@ tr.drag-over-bottom { border-bottom: 2px solid var(--accent-color); }
 }
 .qty-btn:hover { background: var(--accent-color); color: #fff; }
 .qty-value {
-  min-width: 28px; text-align: center; font-size: 12px;
+  min-width: 28px; width: 42px; text-align: center; font-size: 12px;
   color: var(--text-primary); background: var(--bg-input);
   height: 26px; line-height: 26px;
+  border: none; outline: none;
+  -moz-appearance: textfield;
 }
+.qty-value::-webkit-inner-spin-button,
+.qty-value::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 
 /* Remove button */
 .btn-remove {
