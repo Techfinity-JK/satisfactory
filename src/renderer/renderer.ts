@@ -2366,7 +2366,7 @@ const APP_TITLE_MESSAGES = [
 
 ];
 const randomMsg = APP_TITLE_MESSAGES[Math.floor(Math.random() * APP_TITLE_MESSAGES.length)];
-document.title = `Lraxious' Quotation Generator v1.4 - ${randomMsg}`;
+document.title = `Lraxious' Quotation Generator v1.5 - ${randomMsg}`;
 
 // Product detail popup
 const productDetailPopup = document.getElementById("productDetailPopup") as HTMLDivElement;
@@ -3520,14 +3520,19 @@ function buildPreviewHTML(data: QuotationData): string {
     if (data.vatInclusive) vatAmount = Math.ceil(subtotal * 0.12 * 100) / 100;
     const totalInvestment = subtotal + vatAmount;
 
-    html += `<p class="pv-totals">EQUIPMENT PRICE = ${fmt(totalEquipmentCost)}</p>`;
-    if (discountAmount > 0) {
-      html += `<p class="pv-totals">LESS DISCOUNT = ${fmt(discountAmount)}</p>`;
-      html += `<p class="pv-totals">TOTAL EQUIPMENT COST = ${fmt(totalAfterDiscount)}</p>`;
+    const isSimple = discountAmount === 0 && installationAmount === 0 && vatAmount === 0;
+    const onlyBiometrics = allItems.every((i) => i.category === "Biometrics");
+    if (!isSimple) {
+      html += `<p class="pv-totals">EQUIPMENT PRICE = ${fmt(totalEquipmentCost)}</p>`;
+      if (discountAmount > 0) {
+        html += `<p class="pv-totals">LESS DISCOUNT = ${fmt(discountAmount)}</p>`;
+        html += `<p class="pv-totals">TOTAL EQUIPMENT COST = ${fmt(totalAfterDiscount)}</p>`;
+      }
+      if (installationAmount > 0) html += `<p class="pv-totals">INSTALLATION COST = ${fmt(installationAmount)}</p>`;
+      if (vatAmount > 0) html += `<p class="pv-totals">PLUS 12% VAT = ${fmt(vatAmount)}</p>`;
     }
-    if (installationAmount > 0) html += `<p class="pv-totals">INSTALLATION COST = ${fmt(installationAmount)}</p>`;
-    if (vatAmount > 0) html += `<p class="pv-totals">PLUS 12% VAT = ${fmt(vatAmount)}</p>`;
-    html += `<p class="pv-totals"><span class="pv-highlight" style="text-decoration:underline">TOTAL INVESTMENT COST = ${fmt(totalInvestment)}</span></p>`;
+    const totalLabel = isSimple ? "TOTAL EQUIPMENT PRICE" : (onlyBiometrics ? "TOTAL EQUIPMENT COST" : "TOTAL INVESTMENT COST");
+    html += `<p class="pv-totals"><span class="pv-highlight" style="text-decoration:underline">${totalLabel} = ${fmt(totalInvestment)}</span></p>`;
 
     // 7. Notes
     const hasDoorAccess = allItems.some((i) => i.category === "Door Access");
@@ -3575,14 +3580,15 @@ function buildPreviewHTML(data: QuotationData): string {
   }
 
   // 9. Remarks & Conforme
+  const onlyBiometricsRemarks = allItems.every((i) => i.category === "Biometrics");
   html += `<div class="pv-remarks-row">
-    <div class="pv-remarks-box">
+    ${onlyBiometricsRemarks ? `<div class="pv-remarks-box"></div>` : `<div class="pv-remarks-box">
       <div class="pv-label">REMARKS</div>
       <div class="pv-remarks-bordered">Prices of labor and material costs such as supply/installation conduit, coaxial cable, power cable, connectors, metal plates and any other hardware necessary to complete the system installation is not part of the package</div>
-    </div>
+    </div>`}
     <div class="pv-conforme-box">
       <div class="pv-label">CONFORME</div>
-      <div style="margin-top:10px">
+      <div style="margin-top:80px">
         <div class="pv-sig-line"></div>
         <div class="pv-sig-caption">Signature Over Printed Name/Date</div>
       </div>

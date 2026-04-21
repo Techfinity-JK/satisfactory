@@ -213,7 +213,7 @@ export async function generateQuotation(
 
           // Remarks & Conforme
           new Paragraph({ children: [] }),
-          ...createRemarksSection(),
+          ...createRemarksSection(data.items.every((i) => i.category === "Biometrics") && (!data.groups || data.groups.every((g) => g.items.every((i) => i.category === "Biometrics")))),
 
           // Terms and Conditions
           ...createTermsAndConditions(data.vatInclusive, data.installationCost, getMaxWarrantyMonths(data)),
@@ -418,51 +418,57 @@ function createProductSections(items: QuotationItem[], groups?: QuotationGroup[]
 
     const totalAfterDiscount = totalEquipmentCost - discountAmount;
 
-    // Group 1: EQUIPMENT PRICE [+ LESS DISCOUNT + TOTAL EQUIPMENT COST] — soft line breaks, no space between
-    const priceGroupChildren: TextRun[] = [
-      new TextRun({
-        text: `EQUIPMENT PRICE = ${curr}${totalEquipmentCost.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-        font: FONT_FAMILY,
-        bold: true,
-        size: FONT_SIZE,
-      }),
-    ];
-    if (discountAmount > 0) {
-      priceGroupChildren.push(new TextRun({ break: 1 }));
-      priceGroupChildren.push(
+    // Calculate VAT early to determine if this is a simple purchase
+    let vatAmount = 0;
+    if (vatInclusive) {
+      const subtotalForVat = totalAfterDiscount + installationAmount;
+      vatAmount = Math.ceil(subtotalForVat * 0.12 * 100) / 100;
+    }
+    const isSimple = discountAmount === 0 && installationAmount === 0 && vatAmount === 0;
+
+    // Group 1: EQUIPMENT PRICE [+ LESS DISCOUNT + TOTAL EQUIPMENT COST] — skip when simple
+    if (!isSimple) {
+      const priceGroupChildren: TextRun[] = [
         new TextRun({
-          text: `LESS DISCOUNT = ${curr}${discountAmount.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+          text: `EQUIPMENT PRICE = ${curr}${totalEquipmentCost.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
           font: FONT_FAMILY,
           bold: true,
           size: FONT_SIZE,
-        })
-      );
-      priceGroupChildren.push(new TextRun({ break: 1 }));
-      priceGroupChildren.push(
-        new TextRun({
-          text: `TOTAL EQUIPMENT COST = ${curr}${totalAfterDiscount.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-          font: FONT_FAMILY,
-          bold: true,
-          size: FONT_SIZE,
+        }),
+      ];
+      if (discountAmount > 0) {
+        priceGroupChildren.push(new TextRun({ break: 1 }));
+        priceGroupChildren.push(
+          new TextRun({
+            text: `LESS DISCOUNT = ${curr}${discountAmount.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+            font: FONT_FAMILY,
+            bold: true,
+            size: FONT_SIZE,
+          })
+        );
+        priceGroupChildren.push(new TextRun({ break: 1 }));
+        priceGroupChildren.push(
+          new TextRun({
+            text: `TOTAL EQUIPMENT COST = ${curr}${totalAfterDiscount.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+            font: FONT_FAMILY,
+            bold: true,
+            size: FONT_SIZE,
+          })
+        );
+      }
+      sections.push(
+        new Paragraph({
+          children: priceGroupChildren,
+          alignment: AlignmentType.RIGHT,
+          spacing: { before: 300, after: 100 },
         })
       );
     }
-    sections.push(
-      new Paragraph({
-        children: priceGroupChildren,
-        alignment: AlignmentType.RIGHT,
-        spacing: { before: 300, after: 100 },
-      })
-    );
 
     // Calculate subtotal before VAT
     const subtotal = totalAfterDiscount + installationAmount;
 
     // Group 2: INSTALLATION COST + PLUS 12% VAT — soft line breaks, no space between
-    let vatAmount = 0;
-    if (vatInclusive) {
-      vatAmount = Math.ceil(subtotal * 0.12 * 100) / 100;
-    }
     if (installationAmount > 0 || vatAmount > 0) {
       const extraGroupChildren: TextRun[] = [];
       if (installationAmount > 0) {
@@ -495,13 +501,16 @@ function createProductSections(items: QuotationItem[], groups?: QuotationGroup[]
       );
     }
 
-    // TOTAL INVESTMENT COST (bold, underlined, highlighted)
+    // TOTAL label (bold, underlined, highlighted)
     const totalInvestment = subtotal + vatAmount;
+    const onlyBiometrics = items.every((i) => i.category === "Biometrics") &&
+      (!groups || groups.every((g) => g.items.every((i) => i.category === "Biometrics")));
+    const totalLabel = isSimple ? "TOTAL EQUIPMENT PRICE" : (onlyBiometrics ? "TOTAL EQUIPMENT COST" : "TOTAL INVESTMENT COST");
     sections.push(
       new Paragraph({
         children: [
           new TextRun({
-            text: `TOTAL INVESTMENT COST = ${curr}${totalInvestment.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+            text: `${totalLabel} = ${curr}${totalInvestment.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
             font: FONT_FAMILY,
             bold: true,
             underline: {},
@@ -1662,7 +1671,7 @@ function createOptionalAccessoriesSection(
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-function createRemarksSection(): (Paragraph | Table)[] {
+function createRemarksSection(onlyBiometrics = false): (Paragraph | Table)[] {
   const remarksSpacing = { line: 259, lineRule: LineRuleType.AUTO };
   const noBorder = { style: BorderStyle.NONE, size: 0, color: "FFFFFF" };
   const noBorders = { top: noBorder, bottom: noBorder, left: noBorder, right: noBorder };
@@ -1834,7 +1843,9 @@ function createRemarksSection(): (Paragraph | Table)[] {
               width: { size: 4899, type: WidthType.DXA },
               borders: noBorders,
               verticalAlign: VerticalAlign.CENTER,
-              children: [leftTable, new Paragraph({ children: [] })],
+              children: onlyBiometrics
+                ? [new Paragraph({ children: [] })]
+                : [leftTable, new Paragraph({ children: [] })],
             }),
             new TableCell({
               width: { size: 300, type: WidthType.DXA },
