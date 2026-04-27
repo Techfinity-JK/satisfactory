@@ -763,7 +763,8 @@ function createGroupedTable(items: QuotationItem[], sixColumnMode?: boolean, sho
 
     // Add image if path exists
     if (item.imagePath) {
-      const absoluteImagePath = getAssetPath("icons", path.basename(item.imagePath));
+      const relIconPath = item.imagePath.replace(/^src\/assets\/icons\//, "");
+      const absoluteImagePath = getAssetPath("icons", relIconPath);
       if (fs.existsSync(absoluteImagePath)) {
         const imgBuf = fs.readFileSync(absoluteImagePath);
         const dims = getImageDimensions(imgBuf);
