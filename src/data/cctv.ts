@@ -411,20 +411,220 @@ const cctvProducts: Product[] = [
 
 
   // IPCAM
-
+  // ENTRY DOME
   {
-    id: "dahua-a-33",
+    id: "dahua-ip-1",
     brand: "Dahua",
-    name: "DH-HAC-HFW1239TN-A-LED",
+    name: "DH-IPC-HDW1230T1-S5",
     category: "CCTV",
-    description: "2M Full-color Starlight HDCVI Bullet Camera",
-    specifications: { pixel_mp: 2, lens_mm: 3.6, ir_m: 20, material: "IP67" },
-    price: { fakeAmount: 2580, amount: 2580, currency: "PHP" },
+    description: "2mp (30fps) 3.6mm 30m IRLED H.264/H.265 ROI SMART IP67 dome",
+    specifications: { pixel_mp: 2, lens_mm: 3.6, ir_m: 30, material: "metal/plastic" },
+    price: { fakeAmount: 3090, amount: 3090, currency: "PHP" },
+    withADMS: false,
+    warranty: { duration: 24, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "dahua-ip-2",
+    brand: "Dahua",
+    name: "DH-IPC-HDW1431T1-A-S4",
+    category: "CCTV",
+    description: "4 MP Entry IR Fixed-focal Eyeball Network Camera",
+    specifications: { pixel_mp: 4, lens_mm: 3.6, ir_m: 30, material: "metal/plastic" },
+    price: { fakeAmount: 4350, amount: 4350, currency: "PHP" },
     withADMS: false,
     warranty: { duration: 24, unit: "months" },
     isActive: true,
   },
 
+  // LITE DOME
 
+  {
+    id: "dahua-ip-3",
+    brand: "Dahua",
+    name: "DH-IPC-HDW2231T-ZS-S2",
+    category: "CCTV",
+    description: "2mp,Motorized vari-focal 2.7-12mm lens, 40m IR distance, H.265, WDR, Sd card slot, IP67 dome camera",
+    specifications: { pixel_mp: 2, lens_mm: 2.7, ir_m: 40, material: "aluminum" },
+    price: { fakeAmount: 9150, amount: 9150, currency: "PHP" },
+    withADMS: false,
+    warranty: { duration: 24, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "dahua-ip-4",
+    brand: "Dahua",
+    name: "DH-IPC-HDBW2231R-ZS",
+    category: "CCTV",
+    description: "2mp, Motorized vari-focal 2.7-12mm lens, 30m IR distance, H.265, WDR, IP67 vandal proof dome IP camera",
+    specifications: { pixel_mp: 2, lens_mm: 2.7, ir_m: 30, material: "metal/plastic" },
+    price: { fakeAmount: 7800, amount: 7800, currency: "PHP" },
+    withADMS: false,
+    warranty: { duration: 24, unit: "months" },
+    isActive: true,
+  },
+
+  // FULL COLOR DOME
+  {
+    id: "dahua-ip-5",
+    brand: "Dahua",
+    name: "DH-IPC-HDW1239T1-LED-S5",
+    category: "CCTV",
+    description: "2mp, 2.8mm lens,15m IR distance, Full color, IP67 dome IP camera",
+    specifications: { pixel_mp: 2, lens_mm: 2.8, ir_m: 15, material: "metal/plastic" },
+    price: { fakeAmount: 3465, amount: 3465, currency: "PHP" },
+    withADMS: false,
+    warranty: { duration: 24, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "dahua-ip-6",
+    brand: "Dahua",
+    name: "DH-IPC-HDW1239T1P-LED-S5",
+    category: "CCTV",
+    description: "2mp, 2.8mm lens, 30m IR distance, Full color, IP67 dome IP camera",
+    specifications: { pixel_mp: 2, lens_mm: 2.8, ir_m: 30, material: "metal/plastic" },
+    price: { fakeAmount: 3615, amount: 3615, currency: "PHP" },
+    withADMS: false,
+    warranty: { duration: 24, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "dahua-ip-7",
+    brand: "Dahua",
+    name: "DH-IPC-HDW1239T-A-LED-S5",
+    category: "CCTV",
+    description: "2MP , 2.8mm,  30m, Built in Mic , Metal Case Camera",
+    specifications: { pixel_mp: 2, lens_mm: 2.8, ir_m: 30, material: "metal/plastic" },
+    price: { fakeAmount: 4995, amount: 4995, currency: "PHP" },
+    withADMS: false,
+    warranty: { duration: 24, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "dahua-ip-8",
+    brand: "Dahua",
+    name: "DH-IPC-HDW1439T-A-LED-S4",
+    category: "CCTV",
+    description: "4MP Full-color Fixed-focal Eyeball Network Camera",
+    specifications: { pixel_mp: 4, lens_mm: 2.8, ir_m: 15, material: "metal/plastic" },
+    price: { fakeAmount: 5445, amount: 5445, currency: "PHP" },
+    withADMS: false,
+    warranty: { duration: 24, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "dahua-ip-9",
+    brand: "Dahua",
+    name: "DH-IPC-HDW1439T1-A-LED-S4",
+    category: "CCTV",
+    description: "4MP Entry Full-color Fixed-focal Eyeball Network Camera)built in mic.",
+    specifications: { pixel_mp: 4, lens_mm: 2.8, ir_m: 15, material: "metal/plastic" },
+    price: { fakeAmount: 5310, amount: 5310, currency: "PHP" },
+    withADMS: false,
+    warranty: { duration: 24, unit: "months" },
+    isActive: true,
+  },
+
+  // WIZ SENSE
+
+  {
+    id: "dahua-ip-10",
+    brand: "Dahua",
+    name: "DH-IPC-HDW2449TM-S-IL",
+    category: "CCTV",
+    description: "4MP Smart Dual Light Fixed-focal Eyeball WizSense Network Camera",
+    specifications: { pixel_mp: 4, lens_mm: 0, ir_m: 15, material: "metal/plastic" },
+    price: { fakeAmount: 15907.50, amount: 15907.50, currency: "PHP" },
+    withADMS: false,
+    warranty: { duration: 24, unit: "months" },
+    isActive: true,
+  },
+
+  // PRO DOME
+
+  
+  {
+    id: "dahua-ip-11",
+    brand: "Dahua",
+    name: "DH-IPC-HDBW4231E-ASE",
+    category: "CCTV",
+    description: "Pro series - 2mp, 3.6mm lens, 40m IR distance, H.265, WDR, audio, alarm, sd card slot, PoE, IP67 vandal proof  dome IP camera",
+    specifications: { pixel_mp: 2, lens_mm: 3.6, ir_m: 40, material: "metal/plastic" },
+    price: { fakeAmount: 7635, amount: 7635, currency: "PHP" },
+    withADMS: false,
+    warranty: { duration: 24, unit: "months" },
+    isActive: true,
+  },
+
+  {
+    id: "dahua-ip-12",
+    brand: "Dahua",
+    name: "DH-IPC-HDW4231EM-ASE",
+    category: "CCTV",
+    description: "Pro series - 2mp, 3.6mm lens, 50m IR distance, H.265, WDR, audio, alarm, sd card slot, PoE, IP67 dome IP IP camera",
+    specifications: { pixel_mp: 2, lens_mm: 2.8, ir_m: 50, material: "metal" },
+    price: { fakeAmount: 7605, amount: 7605, currency: "PHP" },
+    withADMS: false,
+    warranty: { duration: 24, unit: "months" },
+    isActive: true,
+  },
+
+  // ENTRY BULLET
+
+  {
+    id: "dahua-ip-13",
+    brand: "Dahua",
+    name: "DH-IPC-HFW1230S1-S5",
+    category: "CCTV",
+    description: "2mp (30fps)  30m IR H.264/H.265 IP67 bullet",
+    specifications: { pixel_mp: 2, lens_mm: 0, ir_m: 30, material: "metal/plastic" },
+    price: { fakeAmount: 3090, amount: 3090, currency: "PHP" },
+    withADMS: false,
+    warranty: { duration: 24, unit: "months" },
+    isActive: true,
+  },
+
+  // LITE BULLET
+
+  {
+    id: "dahua-ip-14",
+    brand: "Dahua",
+    name: "DH-IPC-HFW1431S1-A-S4",
+    category: "CCTV",
+    description: "4MP Entry IR Fixed-focal Bullet Netwok Camera",
+    specifications: { pixel_mp: 4, lens_mm: 0, ir_m: 30, material: "metal/plastic" },
+    price: { fakeAmount: 4350, amount: 4350, currency: "PHP" },
+    withADMS: false,
+    warranty: { duration: 24, unit: "months" },
+    isActive: true,
+  },
+
+  // FULL COLOR BULLET
+
+  {
+    id: "dahua-ip-15",
+    brand: "Dahua",
+    name: "DH-IPC-HFW1239S1P-A-LED-S5",
+    category: "CCTV",
+    description: "2MP Lite Full-color Fixed-focal Bullet Netwok Camera",
+    specifications: { pixel_mp: 2, lens_mm: 3.6, ir_m: 30, material: "IP67" },
+    price: { fakeAmount: 4560, amount: 4560, currency: "PHP" },
+    withADMS: false,
+    warranty: { duration: 24, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "dahua-ip-16",
+    brand: "Dahua",
+    name: "DH-IPC-HFW1439M-A-LED-B",
+    category: "CCTV",
+    description: "4MP Lite Full-color Fixed-focal Bullet Network Camera",
+    specifications: { pixel_mp: 4, lens_mm: 3.6, ir_m: 40, material: "IP67" },
+    price: { fakeAmount: 5707.50, amount: 5707.50, currency: "PHP" },
+    withADMS: false,
+    warranty: { duration: 24, unit: "months" },
+    isActive: true,
+  },
 
 ];
