@@ -186,6 +186,7 @@ const productIconMap: { [key: string]: string } = {
   "BK100": "bk100.png",
   "MB10": "mb10.png",
   "FA110": "fa110.png",
+  "K40": "k40.png",
   "F22": "f22.png",
   "SF200": "sf200.png",
   "SF400": "sf400.png",
@@ -1648,13 +1649,17 @@ function buildPreviewHTML(data: QuotationData): string {
   const maxWarranty = allItems.reduce((max, i) => Math.max(max, i.warrantyMonths ?? 0), 0);
   const warrantyText = pvWarrantyToText(maxWarranty);
   const vatTermText = data.vatInclusive ? "VAT Inclusive" : "VAT Exclusive";
+  const hasDoorAccess = allItems.some((i) => i.category === "Door Access");
+  const paymentTermsText = hasDoorAccess
+    ? "Payment terms is Fifty Percent (50%) upon P.O. or signing of this CONFORME. Remaining balance shall be paid upon receive of items or after the installation."
+    : "Payment terms is One Hundred Percent (100%) upon P.O. or signing of this CONFORME.";
   html += `<div class="pv-terms-box">
     <div class="pv-terms-title">TERMS &amp; CONDITIONS:</div>
     <p>1.) Prices quoted above are <span class="pv-highlight">${vatTermText}</span>. Email or fax certification if your company is vat exempt and zero rated for billing preparation.</p>
     <p>2.) Prices are subject to change without prior notice. Validity for this quotation is 15 days from the date stated above.</p>
-    <p>3.) Payment terms is Fifty Percent (50%) upon P.O. or signing of this CONFORME. Remaining balance shall be paid upon receive of items or after the installation.</p>
+    <p>3.) ${paymentTermsText}</p>
     <p>4.) Payment will be accepted in COD, CASH, and Dated check or thru Bank Transfer payable to <b>TECHFINITY SECURITY DEVICE TRADING</b>.</p>
-    <p>5.) FREE DELIVERY for purchases above Php10,000 within Metro Manila.</p>
+    <p>5.) FREE DELIVERY for purchases above Php15,000 within Metro Manila.</p>
     <p>6.) Cancelled orders are subject to a cancellation charge of Fifty Percent (50%).</p>
     <p>7.) Up to ${esc(warrantyText)} limited warranty in service and parts will be given for main equipment from date of purchase/delivery/installation. Accessories such as power supply, adaptor, magnetic lock, exit button have six (6) months warranty. The warranty covers the parts cause of factory defect not including upgrades and relocation. Unauthorized repair will void its warranty. Warranty claims is strictly carry in basis, client must send the item to our office for repair. For those with installation, we will do the onsite checking and troubleshooting for free within metro manila, for outside metro manila client will pay for the mobilization/demobilization cost.</p>
     <p>8.) Should client will require service unit while defective device is under repair; client must pay a service unit fee but depends on the availability of the service unit.</p>

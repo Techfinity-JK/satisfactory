@@ -86,6 +86,27 @@ const baseProducts: Product[] = [
     isActive: true,
   },
   {
+    id: "zk-k40",
+    brand: "ZKTECO",
+    name: "K40",
+    category: "Biometrics",
+    description: " ~ 1000 Fingerprint capacity\n"+
+                 " ~ 80,000 transaction logs capacity\n"+
+                 " ~ network connectivity\n"+
+                 " ~ USB flash disk download\n"+
+                 " ~ employee self service-query\n"+
+                 " ~ built-in backup battery\n"+
+                 " ~ Dimension: 185x140x30\n"+
+                 " ~ with ADMS",
+    capacity: { fingerprint: 1000, card: 0, face: 0, transaction: 80000 },
+    download: { lan: true, usb: true, wifi: false },
+    price: { fakeAmount: 13900, amount: 10500, currency: "PHP" },
+    withADMS: true,
+    dimension: "185x140x30mm",
+    warranty: { duration: 36, unit: "months" },
+    isActive: true,
+  },
+  {
     id: "gt-fa1000",
     brand: "GRANDING",
     name: "FA1000",
@@ -383,7 +404,7 @@ const baseProducts: Product[] = [
                  " ~ Automatic Switch Status",
     capacity: { fingerprint: 2000, card: 0, face: 1500, transaction: 100000 },
     download: { lan: true, usb: true, wifi: true },
-    price: { fakeAmount: 27000, amount: 18900, currency: "PHP" },
+    price: { fakeAmount: 27000, amount: 20900, currency: "PHP" },
     withADMS: true,
     dimension: "",
     warranty: { duration: 36, unit: "months" },
@@ -546,6 +567,27 @@ const baseProducts: Product[] = [
     withADMS: false,
     dimension: "106x104x36mm",
     warranty: { duration: 18, unit: "months" },
+    isActive: true,
+  },
+  {
+    id: "zk-k40",
+    brand: "ZKTECO",
+    name: "K40",
+    category: "Door Access",
+    description: " ~ 1,000 Fingerprint capacity\n"+
+                 " ~ 80,000 transaction logs capacity\n"+
+                 " ~ network connectivity\n"+
+                 " ~ USB flash disk download\n"+
+                 " ~ employee self service-query\n"+
+                 " ~ built-in backup battery\n"+
+                 " ~ Dimension: 185x140x30\n"+
+                 " ~ with ADMS",
+    capacity: { fingerprint: 1000, card: 0, face: 0, transaction: 80000 },
+    download: { lan: true, usb: true, wifi: false },
+    price: { fakeAmount: 15000, amount: 15000, currency: "PHP" },
+    withADMS: true,
+    dimension: "185x140x30mm",
+    warranty: { duration: 36, unit: "months" },
     isActive: true,
   },
   {
