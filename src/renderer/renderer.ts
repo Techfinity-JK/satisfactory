@@ -414,7 +414,7 @@ const APP_TITLE_MESSAGES = [
 
 ];
 const randomMsg = APP_TITLE_MESSAGES[Math.floor(Math.random() * APP_TITLE_MESSAGES.length)];
-document.title = `Lraxious' Quotation Generator v1.5 - ${randomMsg}`;
+document.title = `Lraxious' Quotation Generator v1.6 - ${randomMsg}`;
 
 // Product detail popup
 const productDetailPopup = document.getElementById("productDetailPopup") as HTMLDivElement;
