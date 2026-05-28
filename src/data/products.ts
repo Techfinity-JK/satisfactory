@@ -90,7 +90,7 @@ const baseProducts: Product[] = [
     brand: "ZKTECO",
     name: "K40",
     category: "Biometrics",
-    description: " ~ 1000 Fingerprint capacity\n"+
+    description: " ~ 1,000 Fingerprint capacity\n"+
                  " ~ 80,000 transaction logs capacity\n"+
                  " ~ network connectivity\n"+
                  " ~ USB flash disk download\n"+
@@ -214,7 +214,7 @@ const baseProducts: Product[] = [
                  " ~ Dimension: 205.20*74.19*33.30mm",
     capacity: { fingerprint: 1000, card: 1000, face: 1000, transaction: 50000 },
     download: { lan: true, usb: true, wifi: true },
-    price: { fakeAmount: 13000, amount: 10000, currency: "PHP" },
+    price: { fakeAmount: 15800, amount: 11000, currency: "PHP" },
     withADMS: true,
     dimension: "205.20*74.19*33.30mm",
     warranty: { duration: 18, unit: "months" },
@@ -655,7 +655,7 @@ const baseProducts: Product[] = [
                  " ~ Dimension: 205.20*74.19*33.30mm",
     capacity: { fingerprint: 1000, card: 1000, face: 1000, transaction: 50000 },
     download: { lan: true, usb: true, wifi: true },
-    price: { fakeAmount: 13000, amount: 13000, currency: "PHP" },
+    price: { fakeAmount: 22600, amount: 15800, currency: "PHP" },
     withADMS: true,
     dimension: "205.20*74.19*33.30mm",
     warranty: { duration: 18, unit: "months" },
