@@ -595,12 +595,15 @@ const baseProducts: Product[] = [
     brand: "ZKTECO",
     name: "F7C",
     category: "Door Access",
-    description: " ~ Placeholder description line 1\n"+
-                 " ~ Placeholder description line 2\n"+
-                 " ~ Placeholder description line 3",
-    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    description: " ~ 2,000 Fingerprint capacity\n"+
+                 " ~ 5,000 Card Capacity\n"+
+                 " ~ 100,000 transaction logs capacity\n"+
+                 " ~ Network Connectivity/ Wi-Fi \n"+
+                 " ~ Support Multiple Time Zone \n"+
+                 " ~ support magnetic contact",
+    capacity: { fingerprint: 2000, card: 5000, face: 0, transaction: 100000 },
     download: { lan: false, usb: false, wifi: false },
-    price: { fakeAmount: 0, amount: 0, currency: "PHP" },
+    price: { fakeAmount: 15700, amount: 15700, currency: "PHP" },
     withADMS: false,
     dimension: "",
     warranty: { duration: 12, unit: "months" },
