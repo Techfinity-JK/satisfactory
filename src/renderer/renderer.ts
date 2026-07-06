@@ -203,6 +203,7 @@ const productIconMap: { [key: string]: string } = {
   "SPEEDFACE V3L": "speedfacev3l.png",
   "SPEEDFACE V5L": "speedfacev5l.png",
   // Door Access
+  "F7C": "f7c.png",
   "M06": "m06.png",
   "X6": "x6.png",
   "Door Exit Metal Square": "door-exit-metal-square.jpg",

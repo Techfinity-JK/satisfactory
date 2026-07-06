@@ -591,6 +591,22 @@ const baseProducts: Product[] = [
     isActive: true,
   },
   {
+    id: "zk-f7c",
+    brand: "ZKTECO",
+    name: "F7C",
+    category: "Door Access",
+    description: " ~ Placeholder description line 1\n"+
+                 " ~ Placeholder description line 2\n"+
+                 " ~ Placeholder description line 3",
+    capacity: { fingerprint: 0, card: 0, face: 0, transaction: 0 },
+    download: { lan: false, usb: false, wifi: false },
+    price: { fakeAmount: 0, amount: 0, currency: "PHP" },
+    withADMS: false,
+    dimension: "",
+    warranty: { duration: 12, unit: "months" },
+    isActive: true,
+  },
+  {
     id: "gt-fa1000",
     brand: "GRANDING",
     name: "FA1000",
